@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+
+jobs:
+  lint-backend:
+    name: 🐍 Backend Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+          pip install -r requirements.txt
+
+      - name: Ruff check
+        run: ruff check paper_agent/backend/
+
+      - name: Ruff format check
+        run: ruff format --check paper_agent/backend/
+
+  test-backend:
+    name: 🧪 Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint-backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio httpx
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest paper_agent/tests/ -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+  lint-frontend:
+    name: 💻 Frontend Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: paper_agent/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: paper_agent/frontend
+
+      - name: ESLint
+        run: npx eslint src/ --max-warnings=50
+        working-directory: paper_agent/frontend
+
+  build-frontend:
+    name: 📦 Frontend Build
+    runs-on: ubuntu-latest
+    needs: lint-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: paper_agent/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: paper_agent/frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: paper_agent/frontend
+
+  docker-build:
+    name: 🐳 Docker Build Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: paper-agent-backend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./paper_agent/frontend
+          file: ./paper_agent/frontend/Dockerfile
+          push: false
+          tags: paper-agent-frontend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

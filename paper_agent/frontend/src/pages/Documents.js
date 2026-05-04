@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -24,12 +25,36 @@ import {
   Download as DownloadIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
+  CompareArrows as CompareIcon,
+  Science as ScienceIcon,
 } from '@mui/icons-material';
 import { documentsAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { Checkbox } from '@mui/material';
 
 const Documents = () => {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  const handleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleCompare = () => {
+    if (selectedIds.length < 2) return;
+    navigate('/comparison', { state: { selectedIds } });
+  };
+  
+  const handleDistill = () => {
+    if (selectedIds.length < 2) return;
+    navigate('/discovery', { state: { selectedIds } });
+  };
+
   const [uploadDialog, setUploadDialog] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [metadata, setMetadata] = useState({
@@ -76,7 +101,7 @@ const Documents = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('确定要删除这个文献吗？')) {
+    if (window.confirm(t('documents.confirmDelete'))) {
       try {
         await documentsAPI.delete(id);
         fetchDocuments();
@@ -89,66 +114,108 @@ const Documents = () => {
   const getStatusChip = (status) => {
     switch (status) {
       case 0:
-        return <Chip label="待处理" color="default" size="small" />;
+        return <Chip label={t('documents.processingStatus.pending')} color="default" size="small" />;
       case 1:
-        return <Chip label="处理中" color="warning" size="small" />;
+        return <Chip label={t('documents.processingStatus.processing')} color="warning" size="small" />;
       case 2:
-        return <Chip label="已完成" color="success" size="small" />;
+        return <Chip label={t('documents.processingStatus.completed')} color="success" size="small" />;
       case 3:
-        return <Chip label="失败" color="error" size="small" />;
+        return <Chip label={t('documents.processingStatus.failed')} color="error" size="small" />;
       default:
-        return <Chip label="未知" size="small" />;
+        return <Chip label={t('documents.processingStatus.unknown')} size="small" />;
     }
   };
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        文献管理
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          {t('documents.title')}
+        </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <Button
-          variant="contained"
-          startIcon={<UploadIcon />}
-          onClick={() => setUploadDialog(true)}
-        >
-          上传文献
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {selectedIds.length >= 2 && (
+            <>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<CompareIcon />}
+                onClick={handleCompare}
+                sx={{ fontWeight: 'bold' }}
+              >
+                Compare ({selectedIds.length})
+              </Button>
+              <Button
+                variant="contained"
+                color="info"
+                startIcon={<ScienceIcon />}
+                onClick={handleDistill}
+                sx={{ fontWeight: 'bold' }}
+              >
+                Distill
+              </Button>
+            </>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<UploadIcon />}
+            onClick={() => setUploadDialog(true)}
+            sx={{ fontWeight: 'bold', ml: 1 }}
+          >
+            {t('documents.upload')}
+          </Button>
+        </Box>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
         <Table>
-          <TableHead>
+          <TableHead sx={{ bgcolor: 'grey.50' }}>
             <TableRow>
-              <TableCell>文件名</TableCell>
-              <TableCell>标题</TableCell>
-              <TableCell>作者</TableCell>
-              <TableCell>年份</TableCell>
-              <TableCell>状态</TableCell>
-              <TableCell>上传时间</TableCell>
-              <TableCell>操作</TableCell>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selectedIds.length > 0 && selectedIds.length < documents.length}
+                  checked={documents.length > 0 && selectedIds.length === documents.length}
+                  onChange={() => {
+                    if (selectedIds.length === documents.length) setSelectedIds([]);
+                    else setSelectedIds(documents.map(d => d.id));
+                  }}
+                />
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.filename')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.titleField')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.authors')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.year')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.status')}</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>{t('documents.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {documents.map((doc) => (
-              <TableRow key={doc.id}>
-                <TableCell>{doc.filename}</TableCell>
-                <TableCell>{doc.title || '未命名'}</TableCell>
-                <TableCell>{doc.authors?.join(', ') || '未知'}</TableCell>
-                <TableCell>{doc.year || '未知'}</TableCell>
-                <TableCell>{getStatusChip(doc.processed)}</TableCell>
-                <TableCell>
-                  {new Date(doc.upload_date).toLocaleString('zh-CN')}
+              <TableRow 
+                key={doc.id} 
+                hover 
+                selected={selectedIds.includes(doc.id)}
+                onClick={() => handleSelect(doc.id)}
+                sx={{ cursor: 'pointer' }}
+              >
+                <TableCell padding="checkbox">
+                  <Checkbox checked={selectedIds.includes(doc.id)} />
                 </TableCell>
-                <TableCell>
+                <TableCell>{doc.filename}</TableCell>
+                <TableCell sx={{ fontWeight: 'medium' }}>{doc.title || t('documents.noName')}</TableCell>
+                <TableCell>{doc.authors?.slice(0, 2).join(', ')}{doc.authors?.length > 2 ? '...' : ''}</TableCell>
+                <TableCell>{doc.year || '-'}</TableCell>
+                <TableCell>{getStatusChip(doc.processed)}</TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <IconButton
+                    size="small"
                     color="primary"
-                    onClick={() => window.open(`/documents/${doc.id}`, '_blank')}
+                    onClick={() => navigate(`/documents/${doc.id}`)}
                   >
                     <ViewIcon />
                   </IconButton>
                   <IconButton
+                    size="small"
                     color="primary"
                     onClick={() => {
                       const link = document.createElement('a');
@@ -160,6 +227,7 @@ const Documents = () => {
                     <DownloadIcon />
                   </IconButton>
                   <IconButton
+                    size="small"
                     color="error"
                     onClick={() => handleDelete(doc.id)}
                   >
@@ -174,7 +242,7 @@ const Documents = () => {
 
       {/* Upload Dialog */}
       <Dialog open={uploadDialog} onClose={() => setUploadDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>上传文献</DialogTitle>
+        <DialogTitle>{t('documents.uploadTitle')}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <input
@@ -187,7 +255,7 @@ const Documents = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="标题"
+                  label={t('documents.titleField')}
                   value={metadata.title}
                   onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
                 />
@@ -195,7 +263,8 @@ const Documents = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="作者（用逗号分隔）"
+                  label={t('documents.authors')}
+                  helperText={t('documents.authorsSeparator')}
                   value={metadata.authors}
                   onChange={(e) => setMetadata({ ...metadata, authors: e.target.value })}
                 />
@@ -203,7 +272,7 @@ const Documents = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="年份"
+                  label={t('documents.year')}
                   type="number"
                   value={metadata.year}
                   onChange={(e) => setMetadata({ ...metadata, year: e.target.value })}
@@ -212,7 +281,8 @@ const Documents = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="关键词（用逗号分隔）"
+                  label={t('documents.keywords')}
+                  helperText={t('documents.keywordsSeparator')}
                   value={metadata.keywords}
                   onChange={(e) => setMetadata({ ...metadata, keywords: e.target.value })}
                 />
@@ -221,9 +291,9 @@ const Documents = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setUploadDialog(false)}>取消</Button>
+          <Button onClick={() => setUploadDialog(false)}>{t('documents.cancel')}</Button>
           <Button onClick={handleUpload} variant="contained" disabled={!uploadFile}>
-            上传
+            {t('documents.upload')}
           </Button>
         </DialogActions>
       </Dialog>

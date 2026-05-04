@@ -1,372 +1,539 @@
-# 📚 Paper Agent - 智能论文助手
+<!--
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  Paper Agent — Bilingual README (zh-CN / en)                       │
+  │  Maintain both language versions side-by-side for easy reading.    │
+  └──────────────────────────────────────────────────────────────────────┘
+-->
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.68.0%2B-green)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-17.0.2%2B-blue)](https://reactjs.org/)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/KingdeGuo/paper-agent/main/.github/logo.svg" alt="Paper Agent" width="120" />
 
-一个基于大语言模型的智能论文助手，帮助研究人员高效地搜索、分析和理解学术论文。通过多种AI模型支持和流式响应技术，提供沉浸式的学术研究体验。
+  <h1>📄 Paper Agent</h1>
 
-## 🎯 解决的核心痛点
+  <p><strong>AI 驱动的智能文献管理系统</strong> · <strong>AI-Powered Literature Management System</strong></p>
 
-学术研究中面临的挑战：
-- 🔍 **信息过载**：面对海量论文，难以快速找到关键信息
-- 📊 **理解困难**：复杂论文难以快速掌握核心要点
-- ⏱️ **效率低下**：传统阅读方式耗时耗力
-- 🤖 **缺乏智能分析**：缺少AI辅助的深度分析工具
-- 🌐 **模型局限性**：单一模型无法满足多样化需求
+  <p>
+    <a href="#-项目简介--introduction">简介 / Introduction</a> •
+    <a href="#-核心功能--features">功能 / Features</a> •
+    <a href="#-快速开始--quick-start">快速开始 / Quick Start</a> •
+    <a href="#-tech-stack">技术栈 / Tech Stack</a> •
+    <a href="#-architecture">架构 / Architecture</a> •
+    <a href="#-开发指南--development">开发 / Development</a> •
+    <a href="#-部署--deployment">部署 / Deployment</a> •
+    <a href="#-roadmap">路线图 / Roadmap</a> •
+    <a href="#-contributing">贡献 / Contributing</a> •
+    <a href="#%EF%B8%8F-license">许可 / License</a>
+  </p>
 
-Paper Agent 通过以下方式解决这些痛点：
-- 智能论文搜索和推荐系统
-- 多模型支持的论文分析和总结
-- 流式响应和思考模式展示AI推理过程
-- 可视化界面提升用户体验
-- 灵活的部署方式适应不同环境需求
+  <p>
+    <img src="https://img.shields.io/github/last-commit/KingdeGuo/paper-agent" alt="Last Commit" />
+    <img src="https://img.shields.io/github/license/KingdeGuo/paper-agent" alt="License" />
+    <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python" />
+    <img src="https://img.shields.io/badge/node-18%2B-green" alt="Node" />
+    <img src="https://img.shields.io/badge/react-18-blue" alt="React" />
+  </p>
+</div>
 
-## 🏗️ 系统架构
+---
 
-```mermaid
-graph TD
-    A[React 前端] <-- HTTP/REST API --> B[FastAPI 后端]
-    B <--> C[SQLite 数据库]
-    B <--> D[Chroma 向量数据库]
-    B <--> E[LLM 服务]
-    
-    E --> E1[OpenAI API]
-    E --> E2[Qwen API]
-    E --> E3[DeepSeek API]
-    E --> E4[Anthropic API]
-    E --> E5[Ollama API]
-    E --> E6[HuggingFace Transformers]
-    
-    subgraph "后端服务层"
-        B
-    end
-    
-    subgraph "数据存储层"
-        C
-        D
-    end
-    
-    subgraph "AI 能力层"
-        E
-        E1
-        E2
-        E3
-        E4
-        E5
-        E6
-    end
-    
-    subgraph "客户端"
-        A
-    end
-    
-    style A fill:#4CAF50,stroke:#388E3C
-    style B fill:#2196F3,stroke:#0D47A1
-    style C fill:#FF9800,stroke:#E65100
-    style D fill:#FF9800,stroke:#E65100
-    style E fill:#9C27B0,stroke:#4A148C
-    style E1 fill:#f4f4f4,stroke:#999
-    style E2 fill:#f4f4f4,stroke:#999
-    style E3 fill:#f4f4f4,stroke:#999
-    style E4 fill:#f4f4f4,stroke:#999
-    style E5 fill:#f4f4f4,stroke:#999
-    style E6 fill:#f4f4f4,stroke:#999
-```
+<details open>
+<summary><strong>🇨🇳 中文</strong></summary>
 
-### 架构说明
+## 📖 项目简介
 
-1. **客户端层**：
-   - 基于 React 构建的现代化前端界面
-   - 提供直观的用户交互体验
-   - 支持流式响应和思考模式展示
+**Paper Agent** 是一款基于 **RAG（检索增强生成）** 技术的智能文献管理系统。它能够帮助你：
 
-2. **服务层**：
-   - 基于 FastAPI 构建的高性能后端服务
-   - 提供 RESTful API 接口
-   - 实现业务逻辑处理和模块协调
+- **上传** PDF 文献并自动解析元数据
+- **语义搜索** 你的论文库，快速定位相关内容
+- **AI 摘要** 自动生成文献摘要（支持流式输出与思考过程可视化）
+- **智能问答** 基于文献内容进行交互式问答
+- **多语言** 界面支持中文 / 英文一键切换
 
-3. **数据存储层**：
-   - SQLite：存储文档元数据和处理状态
-   - ChromaDB：存储文档向量化表示，支持语义搜索
+> 💡 **适用场景**：学术研究者、研究生、科研团队、知识工作者。
 
-4. **AI能力层**：
-   - 抽象的 LLM 服务层，支持多种模型提供商
-   - 统一接口适配不同模型的 API
-   - 支持流式响应和同步响应模式
+---
 
-### 核心工作流程
+## ✨ 核心功能
 
-```mermaid
-sequenceDiagram
-    participant U as 用户
-    participant F as 前端
-    participant B as 后端
-    participant V as 向量数据库
-    participant L as LLM服务
-    
-    U->>F: 上传论文PDF
-    F->>B: 发送文件上传请求
-    B->>B: 处理PDF并提取文本
-    B->>V: 向量化文本并存储
-    B->>F: 返回上传成功状态
-    
-    U->>F: 请求论文摘要
-    F->>B: 发送摘要请求
-    B->>V: 检索相关文档片段
-    B->>L: 调用LLM生成摘要
-    L->>B: 返回生成结果
-    B->>F: 返回摘要内容
-    
-    U->>F: 提出问题
-    F->>B: 发送问题请求
-    B->>V: 语义搜索相关片段
-    B->>L: 调用LLM回答问题
-    L-->>B: 流式返回结果
-    B-->>F: 流式转发结果
-    F-->>U: 流式展示回答过程
-```
+| 功能 | 说明 |
+|------|------|
+| 📤 **PDF 上传** | 拖拽或选择上传，自动提取标题、作者、摘要等元数据 |
+| 🔍 **语义搜索** | 基于向量嵌入的全文搜索，支持关键词 + 语义混合检索 |
+| 📝 **AI 摘要** | 调用 LLM 生成结构化摘要，支持详细 / 简洁 / 要点三种风格 |
+| 💬 **交互式问答** | 针对单篇论文进行深度问答，展示思考链过程 |
+| 🧠 **思考模式** | 可视化 AI 的推理过程，提升结果的可信度与可解释性 |
+| 🎨 **响应式 UI** | 基于 MUI 构建，桌面 / 平板 / 移动全适配 |
+| 🌐 **国际化** | 内置中文与英文界面，可扩展至更多语言 |
 
-## 🚀 当前支持的模型
+---
 
-Paper Agent 支持多种主流大语言模型，满足不同场景需求：
+## 🚀 快速开始
 
-### ☁️ 云端模型
-| 模型提供商 | 模型系列 | 特点 |
-|------------|----------|------|
-| **OpenAI** | GPT-3.5, GPT-4 | 通用性强，理解能力优秀 |
-| **Qwen** | 通义千问系列 | 中文理解能力出色 |
-| **DeepSeek** | DeepSeek系列 | 高性价比，代码理解能力强 |
-| **Anthropic** | Claude系列 | 逻辑推理能力强，安全性高 |
+### 前置条件
 
-### 🖥️ 本地模型
-| 模型提供商 | 模型系列 | 特点 |
-|------------|----------|------|
-| **Ollama** | Llama系列 | 本地部署，隐私安全 |
-| **HuggingFace** | 多种开源模型 | 灵活定制，完全控制 |
+- Python **3.10+**
+- Node.js **18+**
+- （可选）Docker & Docker Compose
 
-## 🛠️ 多种部署方式
+### 1. 克隆仓库
 
-Paper Agent 提供多种部署方式，适应不同用户需求：
-
-### 🐍 使用uv（推荐）
 ```bash
-# 安装uv（如果尚未安装）
-pip install uv
-
-# 克隆项目
-git clone https://github.com/yourusername/paper-agent.git
+git clone https://github.com/KingdeGuo/paper-agent.git
 cd paper-agent
-
-# 创建虚拟环境并安装依赖
-uv venv
-source .venv/bin/activate  # Linux/Mac
-# 或 .venv\Scripts\activate  # Windows
-
-uv pip install -r requirements.txt
-
-# 运行后端
-cd backend
-python main.py
-
-# 运行前端（新终端窗口）
-cd frontend
-npm install
-npm start
 ```
 
-### 🐳 Docker部署（生产环境推荐）
+### 2. 配置
+
 ```bash
-# 构建镜像
-docker-compose build
+# 复制示例配置文件
+cp paper_agent/config/config.yaml.example paper_agent/config/config.yaml
 
-# 启动服务
-docker-compose up -d
-
-# 访问应用
-# 前端: http://localhost:3000
-# 后端API: http://localhost:8000
+# 编辑 config.yaml，填入你的 LLM API Key 等参数
+vim paper_agent/config/config.yaml
 ```
 
-### 🐍 传统虚拟环境方式
-```bash
-# 克隆项目
-git clone https://github.com/yourusername/paper-agent.git
-cd paper-agent
+### 3. 后端启动
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# 或 venv\Scripts\activate  # Windows
+```bash
+# 创建虚拟环境（推荐）
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 # 安装依赖
 pip install -r requirements.txt
 
-# 运行后端
-cd backend
-python main.py
+# 启动后端服务
+uvicorn paper_agent.backend.main:app --reload --port 8000
+```
 
-# 运行前端（新终端窗口）
-cd frontend
+后端 API 文档：<http://localhost:8000/docs>
+
+### 4. 前端启动
+
+```bash
+cd paper_agent/frontend
 npm install
 npm start
 ```
 
-## 📁 项目结构
-
-```
-paper_agent/
-├── backend/                 # FastAPI后端服务
-│   ├── api/                 # API路由
-│   │   └── routes/
-│   │       ├── documents.py # 文献管理API
-│   │       ├── search.py    # 搜索API
-│   │       └── summary.py   # 摘要生成API
-│   ├── config/              # 配置
-│   │   └── settings.py      # 配置管理
-│   ├── models/              # 数据模型
-│   │   └── document.py      # 文献模型
-│   ├── services/            # 业务逻辑
-│   │   ├── pdf_processor.py # PDF处理服务
-│   │   ├── vector_service.py # 向量数据库服务
-│   │   ├── llm_service.py   # 大语言模型服务
-│   │   └── database.py      # 数据库服务
-│   └── main.py              # FastAPI入口
-├── frontend/                # React前端
-│   ├── public/
-│   ├── src/
-│   │   ├── components/      # 组件
-│   │   ├── pages/          # 页面
-│   │   ├── services/       # API服务
-│   │   └── App.js          # 主应用
-├── paper_agent/            # 核心论文处理模块
-│   ├── __init__.py         # 包初始化
-│   ├── agent.py            # 主要接口类
-│   ├── search.py           # 搜索模块
-│   ├── analyzer.py         # 分析模块
-│   └── utils.py            # 工具模块
-├── config/
-│   └── config.yaml         # 配置文件
-├── data/
-│   ├── pdfs/              # PDF存储
-│   └── vector_db/         # 向量数据库
-├── tests/                 # 测试文件
-├── requirements.txt       # Python依赖
-└── README.md             # 项目说明
-```
-
-## ⚙️ 配置说明
-
-系统支持多种配置方式：
-
-### 环境变量配置
-```bash
-export OPENAI_API_KEY="your_openai_api_key"
-export QWEN_API_KEY="your_qwen_api_key"
-export DEEPSEEK_API_KEY="your_deepseek_api_key"
-export ANTHROPIC_API_KEY="your_anthropic_api_key"
-export LOG_LEVEL="INFO"
-```
-
-### 配置文件 (config/config.yaml)
-```yaml
-llm:
-  provider: "openai"  # 可选: "huggingface", "openai", "anthropic", "qwen", "deepseek", "ollama"
-  model: "gpt-3.5-turbo"
-  api_key: "your_openai_api_key"
-  qwen_api_key: "your_qwen_api_key"
-  qwen_model: "qwen-plus"
-  deepseek_api_key: "your_deepseek_api_key"
-  deepseek_model: "deepseek-chat"
-  ollama_model: "llama3"
-  ollama_base_url: "http://localhost:11434/v1"
-  anthropic_api_key: "your_anthropic_api_key"
-  anthropic_model: "claude-3-haiku-20240307"
-  temperature: 0.7
-  max_tokens: 1000
-
-embedding:
-  model: "all-MiniLM-L6-v2"
-  dimension: 384
-
-vector_db:
-  provider: "chromadb"
-  path: "./data/vector_db"
-
-server:
-  host: "0.0.0.0"
-  port: 8000
-```
-
-## 🌟 核心特性
-
-### 🤯 思考模式
-展示AI的完整推理过程，包括：
-- 问题分析阶段
-- 信息检索过程
-- 答案构建步骤
-- 可视化进度展示
-
-### 🌊 流式响应
-- 实时文本输出效果
-- 更自然的交互体验
-- 减少用户等待焦虑
-
-### 🧠 多模型支持
-- 前端模型选择器
-- 动态切换模型提供商
-- 统一API接口设计
-
-### 🎨 现代化界面
-- 响应式设计
-- 直观的操作流程
-- 美观的视觉效果
-
-## 📈 未来扩展计划
-
-| 版本 | 功能 | 状态 |
-|------|------|------|
-| v1.0 | 基础架构和核心功能 | ✅ 已完成 |
-| v1.1 | 多模型支持和思考模式 | ✅ 已完成 |
-| v1.2 | 高级搜索和推荐系统 | 🔄 开发中 |
-| v1.3 | 论文对比和可视化分析 | 📅 计划中 |
-| v1.4 | 协作功能和知识图谱 | 📅 计划中 |
-| v1.5 | 移动端适配和PWA支持 | 📅 计划中 |
-
-### 🔮 长期规划
-- 🤝 **多语言支持**：支持更多语言的论文处理
-- 🧬 **学术领域定制**：针对不同学科领域的优化模型
-- 📊 **数据可视化**：论文引用关系图谱和趋势分析
-- 🤖 **智能助手**：语音交互和更自然的对话体验
-- 🔗 **插件系统**：支持第三方工具集成
-
-## 🤝 贡献指南
-
-我们欢迎任何形式的贡献！
-
-### 开发环境设置
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-### 开发规范
-- 遵循现有代码风格
-- 添加适当的测试用例
-- 更新相关文档
-- 保持提交信息清晰明了
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 🙏 致谢
-
-- 感谢所有开源项目提供的支持
-- 感谢社区贡献者的宝贵意见和建议
+前端页面：<http://localhost:3000>
 
 ---
 
-<p align="center">Made with ❤️ for researchers worldwide</p>
+## 🛠 技术栈
+
+| 层次 | 技术 |
+|------|------|
+| **前端框架** | React 18 + React Router 6 |
+| **UI 组件库** | Material UI (MUI) 5 |
+| **国际化** | react-i18next + i18next-browser-languagedetector |
+| **后端框架** | FastAPI (Python) |
+| **数据库** | SQLite + SQLAlchemy (异步) |
+| **向量数据库** | ChromaDB |
+| **嵌入模型** | Sentence-Transformers (all-MiniLM-L6-v2) |
+| **LLM 服务** | OpenAI / Anthropic / 本地模型（可配置） |
+| **PDF 解析** | PyPDF |
+| **容器化** | Docker & Docker Compose (Nginx + Uvicorn) |
+
+---
+
+## 🏗 架构
+
+```
+┌──────────┐     ┌───────────────┐     ┌────────────────┐
+│  Browser  │────▶│  React SPA    │────▶│  FastAPI API   │
+│ (用户界面) │     │  (前端 3000)   │     │  (后端 8000)    │
+└──────────┘     └───────────────┘     └────┬───────────┘
+                                            │
+                    ┌───────────────────────┼───────────────────────┐
+                    │                       │                       │
+                    ▼                       ▼                       ▼
+            ┌──────────────┐       ┌──────────────┐       ┌──────────────┐
+            │  SQLite DB    │       │  ChromaDB    │       │  LLM API     │
+            │  (元数据)      │       │  (向量存储)    │       │  (GPT/Claude) │
+            └──────────────┘       └──────────────┘       └──────────────┘
+```
+
+### 数据流
+
+1. **上传** → PDF 解析 → 文本分块 → 生成向量嵌入 → 存入 ChromaDB
+2. **搜索** → 查询文本 → 嵌入 → 向量相似度检索 → 返回 Top-K 结果
+3. **摘要** → 提取全文 → 构建 Prompt → LLM 生成 → 流式返回 & 存储
+4. **问答** → 检索相关段落 → 构建上下文 Prompt → LLM 推理 → 流式返回
+
+---
+
+## 💻 开发指南
+
+### 项目结构
+
+```
+paper-agent/
+├── pyproject.toml                 # Python 项目元数据 & 依赖
+├── requirements.txt               # pip 依赖清单
+├── docker-compose.yml             # Docker 编排
+├── Dockerfile                     # 后端 Dockerfile
+├── paper_agent/
+│   ├── backend/
+│   │   ├── main.py                # FastAPI 入口 & 生命周期
+│   │   ├── api/routes/            # API 路由 (documents, search, summary)
+│   │   ├── config/settings.py     # Pydantic Settings 配置管理
+│   │   ├── models/document.py     # SQLAlchemy + Pydantic 模型
+│   │   ├── services/              # 业务逻辑层
+│   │   │   ├── database.py        # 数据库操作
+│   │   │   ├── pdf_processor.py   # PDF 解析
+│   │   │   ├── vector_service.py  # 向量检索
+│   │   │   └── llm_service.py     # LLM 调用
+│   │   └── utils/                 # 工具函数
+│   ├── config/
+│   │   ├── config.yaml            # 运行时配置（已忽略）
+│   │   └── config.yaml.example    # 配置模板
+│   ├── data/                      # 运行时数据（已忽略）
+│   ├── frontend/
+│   │   ├── public/                # 静态资源
+│   │   ├── src/
+│   │   │   ├── components/        # 通用组件 (Header, ThinkingMode...)
+│   │   │   ├── pages/             # 页面 (Dashboard, Documents, Search...)
+│   │   │   ├── services/api.js    # API 客户端
+│   │   │   └── i18n/              # 国际化配置 & 翻译文件
+│   │   ├── Dockerfile             # 前端 Dockerfile
+│   │   └── nginx.conf             # Nginx 配置（生产部署）
+│   └── tests/                     # 单元测试
+└── .gitignore
+```
+
+### 常用命令
+
+```bash
+# 后端开发
+cd paper-agent
+uvicorn paper_agent.backend.main:app --reload --port 8000
+
+# 前端开发
+cd paper_agent/frontend
+npm start
+
+# 运行测试
+cd paper-agent
+python -m pytest paper_agent/tests -v
+
+# 代码格式化
+pip install ruff
+ruff check --fix paper_agent/
+
+# 构建前端
+cd paper_agent/frontend
+npm run build
+```
+
+---
+
+## 🐳 部署
+
+### Docker Compose（推荐）
+
+```bash
+# 构建 & 启动
+docker compose up -d --build
+
+# 查看日志
+docker compose logs -f
+
+# 停止
+docker compose down
+```
+
+- 后端：<http://localhost:8000> | API 文档：<http://localhost:8000/docs>
+- 前端：<http://localhost:3000>
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `CONFIG_PATH` | `./config.yaml` | 配置文件路径 |
+| `REACT_APP_API_URL` | `http://localhost:8000` | 后端 API 地址（前端容器用） |
+
+---
+
+## 🗺 路线图
+
+- [x] **v1.0** — 基础 PDF 上传、语义搜索、AI 摘要
+- [x] **v1.1** — 交互式问答、流式输出、思考模式、国际化
+- [ ] **v2.0** — 多用户认证、文献库管理、引用导出
+- [ ] **v2.1** — 知识图谱可视化、论文关联推荐
+- [ ] **v2.2** — 本地 LLM 集成（Ollama / llama.cpp）、离线模式
+
+---
+
+## 🤝 贡献
+
+欢迎贡献！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解详细的开发流程。
+
+贡献方式：
+
+- 🐛 提交 [Issue](https://github.com/KingdeGuo/paper-agent/issues) 报告 Bug
+- 💡 提交 [Issue](https://github.com/KingdeGuo/paper-agent/issues) 建议新功能
+- 🔧 提交 Pull Request 改进代码或文档
+
+---
+
+## ❤️ 支持 & 联系
+
+如果这个项目对你有帮助，欢迎给一颗 ⭐️ Star！
+
+- GitHub Issues：<https://github.com/KingdeGuo/paper-agent/issues>
+- 项目主页：<https://github.com/KingdeGuo/paper-agent>
+
+---
+
+## ⚖️ License
+
+[MIT](./LICENSE) © 2024 Paper Agent Team
+
+</details>
+
+---
+
+<details>
+<summary><strong>🇬🇧 English</strong></summary>
+
+## 📖 Introduction
+
+**Paper Agent** is an intelligent literature management system powered by **RAG (Retrieval-Augmented Generation)**. It helps you:
+
+- **Upload** PDF papers with automatic metadata extraction
+- **Semantic search** across your paper library for fast content discovery
+- **AI Summaries** generate structured summaries (streaming with thinking process visualization)
+- **Interactive Q&A** — ask questions about your papers and get contextual answers
+- **Multi-language UI** — switch between Chinese and English with one click
+
+> 💡 **Use cases**: Academic researchers, graduate students, research teams, knowledge workers.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 📤 **PDF Upload** | Drag-and-drop upload with auto-extraction of title, authors, abstract |
+| 🔍 **Semantic Search** | Vector-based full-text search with hybrid keyword + semantic matching |
+| 📝 **AI Summarization** | LLM-generated summaries in detailed / concise / bullet styles |
+| 💬 **Interactive Q&A** | Deep Q&A on individual papers with chain-of-thought display |
+| 🧠 **Thinking Mode** | Visualize AI reasoning steps for transparency and trust |
+| 🎨 **Responsive UI** | Built with MUI — works on desktop, tablet, and mobile |
+| 🌐 **i18n** | Built-in Chinese & English, extensible to more languages |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python **3.10+**
+- Node.js **18+**
+- (Optional) Docker & Docker Compose
+
+### 1. Clone
+
+```bash
+git clone https://github.com/KingdeGuo/paper-agent.git
+cd paper-agent
+```
+
+### 2. Configure
+
+```bash
+cp paper_agent/config/config.yaml.example paper_agent/config/config.yaml
+# Edit config.yaml — set your LLM API key and other parameters
+```
+
+### 3. Start Backend
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt
+uvicorn paper_agent.backend.main:app --reload --port 8000
+```
+
+API docs: <http://localhost:8000/docs>
+
+### 4. Start Frontend
+
+```bash
+cd paper_agent/frontend
+npm install
+npm start
+```
+
+Frontend: <http://localhost:3000>
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 18 + React Router 6 |
+| **UI** | Material UI (MUI) 5 |
+| **i18n** | react-i18next + i18next-browser-languagedetector |
+| **Backend** | FastAPI (Python) |
+| **Database** | SQLite + SQLAlchemy (async) |
+| **Vector DB** | ChromaDB |
+| **Embeddings** | Sentence-Transformers (all-MiniLM-L6-v2) |
+| **LLM** | OpenAI / Anthropic / Local (configurable) |
+| **PDF** | PyPDF |
+| **Container** | Docker & Docker Compose (Nginx + Uvicorn) |
+
+---
+
+## 🏗 Architecture
+
+```
+┌──────────┐     ┌───────────────┐     ┌────────────────┐
+│  Browser  │────▶│  React SPA    │────▶│  FastAPI API   │
+│ (User UI) │     │  (Frontend)   │     │  (Backend)     │
+└──────────┘     └───────────────┘     └────┬───────────┘
+                                            │
+                    ┌───────────────────────┼───────────────────────┐
+                    │                       │                       │
+                    ▼                       ▼                       ▼
+            ┌──────────────┐       ┌──────────────┐       ┌──────────────┐
+            │  SQLite DB    │       │  ChromaDB    │       │  LLM API     │
+            │  (Metadata)   │       │  (Vectors)    │       │  (GPT/Claude) │
+            └──────────────┘       └──────────────┘       └──────────────┘
+```
+
+### Data Flow
+
+1. **Upload** → PDF parse → Text chunking → Embedding → ChromaDB
+2. **Search** → Query → Embedding → Vector similarity → Top-K results
+3. **Summarize** → Full text → Prompt → LLM → Stream & persist
+4. **Q&A** → Retrieve relevant chunks → Context prompt → LLM → Stream
+
+---
+
+## 💻 Development
+
+### Project Structure
+
+```
+paper-agent/
+├── pyproject.toml                 # Python project metadata
+├── requirements.txt               # pip dependencies
+├── docker-compose.yml             # Docker orchestration
+├── Dockerfile                     # Backend Dockerfile
+├── paper_agent/
+│   ├── backend/
+│   │   ├── main.py                # FastAPI entry point
+│   │   ├── api/routes/            # API routes
+│   │   ├── config/settings.py     # Pydantic Settings
+│   │   ├── models/document.py     # DB & API models
+│   │   ├── services/
+│   │   │   ├── database.py        # DB service
+│   │   │   ├── pdf_processor.py   # PDF processing
+│   │   │   ├── vector_service.py  # Vector search
+│   │   │   └── llm_service.py     # LLM integration
+│   │   └── utils/
+│   ├── config/
+│   │   ├── config.yaml.example    # Config template
+│   ├── data/
+│   ├── frontend/
+│   │   ├── public/
+│   │   ├── src/
+│   │   │   ├── components/        # Shared components
+│   │   │   ├── pages/             # Page components
+│   │   │   ├── services/api.js    # API client
+│   │   │   └── i18n/              # i18n config & locales
+│   │   ├── Dockerfile
+│   │   └── nginx.conf
+│   └── tests/
+└── .gitignore
+```
+
+### Common Commands
+
+```bash
+# Backend dev
+uvicorn paper_agent.backend.main:app --reload --port 8000
+
+# Frontend dev
+cd paper_agent/frontend && npm start
+
+# Run tests
+python -m pytest paper_agent/tests -v
+
+# Lint
+pip install ruff
+ruff check --fix paper_agent/
+
+# Build frontend
+cd paper_agent/frontend && npm run build
+```
+
+---
+
+## 🐳 Deployment
+
+### Docker Compose
+
+```bash
+# Build & start
+docker compose up -d --build
+
+# Logs
+docker compose logs -f
+
+# Stop
+docker compose down
+```
+
+- Backend: <http://localhost:8000> | API docs: <http://localhost:8000/docs>
+- Frontend: <http://localhost:3000>
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CONFIG_PATH` | `./config.yaml` | Config file path |
+| `REACT_APP_API_URL` | `http://localhost:8000` | Backend API URL |
+
+---
+
+## 🗺 Roadmap
+
+- [x] **v1.0** — PDF upload, semantic search, AI summary
+- [x] **v1.1** — Interactive Q&A, streaming, thinking mode, i18n
+- [ ] **v2.0** — Multi-user auth, library management, citation export
+- [ ] **v2.1** — Knowledge graph visualization, paper recommendations
+- [ ] **v2.2** — Local LLM (Ollama / llama.cpp), offline mode
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+How to contribute:
+
+- 🐛 Submit [Issues](https://github.com/KingdeGuo/paper-agent/issues) for bugs
+- 💡 Suggest features via [Issues](https://github.com/KingdeGuo/paper-agent/issues)
+- 🔧 Open Pull Requests to improve code or docs
+
+---
+
+## ❤️ Support
+
+If you find this project helpful, please give it a ⭐️ Star!
+
+- GitHub Issues: <https://github.com/KingdeGuo/paper-agent/issues>
+- Project Home: <https://github.com/KingdeGuo/paper-agent>
+
+---
+
+## ⚖️ License
+
+[MIT](./LICENSE) © 2024 Paper Agent Team
+
+</details>

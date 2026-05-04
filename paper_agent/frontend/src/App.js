@@ -1,50 +1,72 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n/i18n';
 
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Search from './pages/Search';
 import DocumentDetail from './pages/DocumentDetail';
+import Knowledge from './pages/Knowledge';
+import Comparison from './pages/Comparison';
+import Notebooks from './pages/Notebooks';
+import Discovery from './pages/Discovery';
+import Zotero from './pages/Zotero';
+import Drafting from './pages/Drafting';
+import Login from './pages/Login';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#2563eb', // More modern blue
     },
     secondary: {
-      main: '#dc004e',
+      main: '#7c3aed', // Purple for AI features
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f8fafc',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
 });
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Box sx={{ flexGrow: 1 }}>
-          <Header />
-          <Box sx={{ p: 3 }}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/documents/:id" element={<DocumentDetail />} />
-              <Route path="/search" element={<Search />} />
-            </Routes>
-          </Box>
-        </Box>
-      </Router>
-    </ThemeProvider>
+    <I18nextProvider i18n={i18n}>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              <Header />
+              <Box sx={{ p: 3, flexGrow: 1 }}>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+                  <Route path="/documents/:id" element={<ProtectedRoute><DocumentDetail /></ProtectedRoute>} />
+                  <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+                  <Route path="/knowledge" element={<ProtectedRoute><Knowledge /></ProtectedRoute>} />
+                  <Route path="/comparison" element={<ProtectedRoute><Comparison /></ProtectedRoute>} />
+                  <Route path="/notebooks" element={<ProtectedRoute><Notebooks /></ProtectedRoute>} />
+                  <Route path="/discovery" element={<ProtectedRoute><Discovery /></ProtectedRoute>} />
+                  <Route path="/zotero" element={<ProtectedRoute><Zotero /></ProtectedRoute>} />
+                  <Route path="/drafting" element={<ProtectedRoute><Drafting /></ProtectedRoute>} />
+                </Routes>
+              </Box>
+            </Box>
+          </Router>
+        </ThemeProvider>
+      </AuthProvider>
+    </I18nextProvider>
   );
 }
 

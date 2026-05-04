@@ -1,0 +1,140 @@
+# Paper Agent Backend Worker (Task Processor)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paper-agent-worker
+  namespace: paper-agent
+spec:
+  replicas: 2  # Multiple workers for task processing
+  selector:
+    matchLabels:
+      app: paper-agent-worker
+  template:
+    metadata:
+      labels:
+        app: paper-agent-worker
+    spec:
+      containers:
+        - name: worker
+          image: paper-agent-backend:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "backend.services.worker"]
+          ports:
+            - containerPort: 8001
+              name: health
+          env:
+            - name: CLUSTER__ENABLE_CLUSTERING
+              value: "true"
+            - name: CLUSTER__NODE_ROLE
+              value: "worker"
+            - name: CLUSTER__DATABASE__TYPE
+              value: "postgresql"
+            - name: CLUSTER__DATABASE__HOST
+              value: "postgres"
+            - name: CLUSTER__DATABASE__PORT
+              value: "5432"
+            - name: CLUSTER__DATABASE__NAME
+              value: "paper_agent"
+            - name: CLUSTER__DATABASE__USER
+              value: "paper_agent"
+            - name: CLUSTER__DATABASE__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paper-agent-secrets
+                  key: postgres-password
+            - name: CLUSTER__REDIS__ENABLED
+              value: "true"
+            - name: CLUSTER__REDIS__HOST
+              value: "redis"
+            - name: CLUSTER__REDIS__PORT
+              value: "6379"
+            - name: CLUSTER__STORAGE__ENABLED
+              value: "true"
+            - name: CLUSTER__STORAGE__PROVIDER
+              value: "minio"
+            - name: CLUSTER__STORAGE__ENDPOINT
+              value: "http://minio:9000"
+            - name: CLUSTER__STORAGE__ACCESS_KEY
+              value: "minioadmin"
+            - name: CLUSTER__STORAGE__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paper-agent-secrets
+                  key: minio-password
+            - name: CLUSTER__TASK_QUEUE__TYPE
+              value: "redis"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paper-agent-frontend
+  namespace: paper-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: paper-agent-frontend
+  template:
+    metadata:
+      labels:
+        app: paper-agent-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: paper-agent-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_URL
+              value: "http://paper-agent-api:8000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paper-agent-frontend
+  namespace: paper-agent
+spec:
+  selector:
+    app: paper-agent-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

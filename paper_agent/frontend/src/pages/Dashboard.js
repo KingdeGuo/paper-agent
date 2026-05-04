@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Grid,
   Paper,
@@ -23,6 +24,7 @@ import {
 import { systemAPI, searchAPI } from '../services/api';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,7 @@ const Dashboard = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        仪表板
+        {t('dashboard.title')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -95,7 +97,7 @@ const Dashboard = () => {
                 <DocumentIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
-                    总文献数
+                    {t('dashboard.totalDocuments')}
                   </Typography>
                   <Typography variant="h4">
                     {stats?.documents?.total || 0}
@@ -113,7 +115,7 @@ const Dashboard = () => {
                 <CheckIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
-                    已处理
+                    {t('dashboard.processed')}
                   </Typography>
                   <Typography variant="h4">
                     {stats?.documents?.completed || 0}
@@ -131,7 +133,7 @@ const Dashboard = () => {
                 <PendingIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
-                    处理中
+                    {t('dashboard.processing')}
                   </Typography>
                   <Typography variant="h4">
                     {stats?.documents?.processing || 0}
@@ -149,7 +151,7 @@ const Dashboard = () => {
                 <SearchIcon sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
-                    向量块
+                    {t('dashboard.vectorChunks')}
                   </Typography>
                   <Typography variant="h4">
                     {stats?.vector_db?.total_chunks || 0}
@@ -164,11 +166,11 @@ const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              处理状态
+              {t('dashboard.processingStatus')}
             </Typography>
             <Box sx={{ mt: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">已完成</Typography>
+                <Typography variant="body2">{t('dashboard.completed')}</Typography>
                 <Typography variant="body2">
                   {stats?.documents?.completed || 0} / {stats?.documents?.total || 0}
                 </Typography>
@@ -184,12 +186,12 @@ const Dashboard = () => {
               />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">处理中</Typography>
+                <Typography variant="body2">{t('dashboard.processing')}</Typography>
                 <Typography variant="body2">{stats?.documents?.processing || 0}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">失败</Typography>
+                <Typography variant="body2">{t('dashboard.failed')}</Typography>
                 <Typography variant="body2">{stats?.documents?.failed || 0}</Typography>
               </Box>
             </Box>
@@ -200,17 +202,17 @@ const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              系统信息
+              {t('dashboard.systemInfo')}
             </Typography>
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" gutterBottom>
-                <strong>嵌入模型:</strong> {stats?.system?.embedding_model || 'N/A'}
+                <strong>{t('dashboard.embeddingModel')}:</strong> {stats?.system?.embedding_model || 'N/A'}
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <strong>LLM提供商:</strong> {stats?.system?.llm_provider || 'N/A'}
+                <strong>{t('dashboard.llmProvider')}:</strong> {stats?.system?.llm_provider || 'N/A'}
               </Typography>
               <Typography variant="body2" gutterBottom>
-                <strong>LLM模型:</strong> {stats?.system?.llm_model || 'N/A'}
+                <strong>{t('dashboard.llmModel')}:</strong> {stats?.system?.llm_model || 'N/A'}
               </Typography>
             </Box>
           </Paper>
@@ -221,7 +223,7 @@ const Dashboard = () => {
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               <TrendingIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              热门文献
+              {t('dashboard.trendingDocuments')}
             </Typography>
             <List>
               {trending.map((item, index) => (
@@ -231,14 +233,14 @@ const Dashboard = () => {
                     secondary={
                       <Box>
                         <Typography variant="body2" color="textSecondary">
-                          作者: {item.document.authors?.join(', ') || '未知'}
+                          <strong>{t('dashboard.authors')}:</strong> {item.document.authors?.join(', ') || t('dashboard.unknown')}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          年份: {item.document.year || '未知'}
+                          <strong>{t('dashboard.year')}:</strong> {item.document.year || t('dashboard.unknown')}
                         </Typography>
                         <Box sx={{ mt: 1 }}>
                           <Chip
-                            label={item.document.processed === 2 ? '已处理' : '处理中'}
+                            label={item.document.processed === 2 ? t('dashboard.completed') : t('dashboard.processing')}
                             color={getStatusColor(item.document.processed)}
                             size="small"
                           />

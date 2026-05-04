@@ -1,0 +1,7 @@
+# Paper Agent Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: paper-agent
+  labels:
+    name: paper-agent

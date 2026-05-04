@@ -1,287 +1,279 @@
-import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import StreamingResponse
-import json
-import asyncio
+"""
+Summary & Q&A routes: generate, stream, and fetch summaries and answers.
+"""
 
-from backend.models.document import SummaryRequest, SummaryResponse
-from backend.services.database import DatabaseService
-from backend.services.pdf_processor import PDFProcessor
-from backend.services.llm_service import LLMService
+import os
+import sys
+import logging
+from typing import Optional
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi.responses import StreamingResponse
+
+try:
+    from paper_agent.backend.models.document import SummaryRequest, SummaryResponse
+    from paper_agent.backend.services.database import DatabaseService
+except ImportError:
+    try:
+        from backend.models.document import SummaryRequest, SummaryResponse
+        from backend.services.database import DatabaseService
+    except ImportError:
+        SummaryRequest = SummaryResponse = None
+        DatabaseService = None
+
+try:
+    from paper_agent.backend.services.pdf_processor import PDFProcessor
+    from paper_agent.backend.services.llm_service import LLMService
+except ImportError:
+    try:
+        from backend.services.pdf_processor import PDFProcessor
+        from backend.services.llm_service import LLMService
+    except ImportError:
+        PDFProcessor = LLMService = None
+
+# Use service registry to avoid circular imports
+try:
+    from paper_agent.backend.services.registry import get_db, get_pdf_processor, get_llm_service
+except ImportError:
+    try:
+        from backend.services.registry import get_db, get_pdf_processor, get_llm_service
+    except ImportError:
+        get_db = get_pdf_processor = get_llm_service = lambda: None
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Initialize services
-db_service = DatabaseService()
-pdf_processor = PDFProcessor()
 
-def get_llm_service(provider: str = None) -> LLMService:
-    """Get LLM service with specified provider or default from settings."""
-    from backend.config.settings import settings
-    
-    if provider:
-        # Temporarily override provider
-        original_provider = settings.llm.provider
-        settings.llm.provider = provider
-        try:
-            service = LLMService()
-            return service
-        finally:
-            # Restore original provider
-            settings.llm.provider = original_provider
-    else:
-        return LLMService()
+async def generate_summary_task(
+    document_id: str,
+    max_length: int,
+    style: str,
+    db_service: Optional[DatabaseService] = None,
+    pdf_processor: Optional[PDFProcessor] = None,
+    llm_service: Optional[LLMService] = None,
+):
+    """Background task to generate a summary for a document."""
+    db = db_service or DatabaseService()
+    pdf = pdf_processor or PDFProcessor()
+    llm = llm_service or LLMService()
 
-async def generate_summary_task(document_id: str, max_length: int, style: str, provider: str = None):
-    """Background task to generate summary."""
     try:
-        llm_service = get_llm_service(provider)
-        
-        # Get document
-        document = await db_service.get_document(document_id)
+        document = await db.get_document(document_id)
         if not document:
             logger.error(f"Document {document_id} not found")
             return
-        
-        # Extract text
-        text = pdf_processor.extract_text(document.file_path)
+
+        text = pdf.extract_text(document.file_path)
         if not text:
             logger.error(f"Failed to extract text from {document_id}")
             return
-        
-        # Generate summary
-        summary = await llm_service.generate_summary(text, max_length, style)
-        
-        # Update document with summary
-        await db_service.update_document(
-            document_id,
-            {"summary": summary}
-        )
-        
+
+        summary = await llm.generate_summary(text, max_length, style)
+
+        from backend.models.document import DocumentUpdate
+        await db.update_document(document_id, DocumentUpdate(summary=summary))
+
         logger.info(f"Successfully generated summary for document {document_id}")
-        
+
     except Exception as e:
-        logger.error(f"Error generating summary for document {document_id}: {str(e)}")
+        logger.error(f"Error generating summary for document {document_id}: {e}")
+
 
 @router.post("/generate", response_model=SummaryResponse)
 async def generate_summary(
     request: SummaryRequest,
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    db_service: DatabaseService = Depends(get_db),
+    pdf_processor: PDFProcessor = Depends(get_pdf_processor),
+    llm_service: LLMService = Depends(get_llm_service),
 ):
-    """Generate summary for document."""
+    """Generate a summary for a document. Returns immediately; processes in background."""
     try:
-        # Get LLM service with specified provider
-        provider = getattr(request, 'model', None)
-        llm_service = get_llm_service(provider)
-        
-        # Get document
         document = await db_service.get_document(request.document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Extract text if not already done
-        text = getattr(document, 'text', None)
-        if not text:
-            text = pdf_processor.extract_text(document.file_path)
-            if text:
-                # Update document with extracted text
-                await db_service.update_document(request.document_id, {"text": text})
-        
-        if not text:
-            raise HTTPException(status_code=400, detail="Failed to extract text from document")
-        
-        # For immediate response, return existing summary or generate new one
-        existing_summary = getattr(document, 'summary', None)
-        if existing_summary:
+
+        # If summary already exists, return it immediately
+        if document.summary:
             return SummaryResponse(
                 document_id=request.document_id,
-                summary=existing_summary,
-                style=request.style
+                summary=document.summary,
+                length=len(document.summary),
+                style=request.style,
             )
-        
-        # Generate summary in background and return a placeholder
+
+        text = pdf_processor.extract_text(document.file_path)
+        if not text:
+            raise HTTPException(status_code=400, detail="Failed to extract text from document")
+
+        # Generate summary in background
         background_tasks.add_task(
-            generate_summary_task, 
-            request.document_id, 
-            request.max_length, 
+            generate_summary_task,
+            request.document_id,
+            request.max_length,
             request.style,
-            provider
+            db_service,
+            pdf_processor,
+            llm_service,
         )
-        
+
         return SummaryResponse(
             document_id=request.document_id,
             summary="Summary generation started. Please check back later.",
-            style=request.style
+            style=request.style,
         )
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error generating summary: {str(e)}")
+        logger.error(f"Error generating summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/generate-streaming")
-async def generate_streaming_summary(request: dict):
-    """Generate streaming summary for document with thinking process."""
+async def generate_streaming_summary(
+    request: SummaryRequest,
+    db_service: DatabaseService = Depends(get_db),
+    pdf_processor: PDFProcessor = Depends(get_pdf_processor),
+    llm_service: LLMService = Depends(get_llm_service),
+):
+    """Generate a streaming summary with thinking process."""
     try:
-        # Get LLM service with specified provider
-        provider = request.get('model')
-        llm_service = get_llm_service(provider)
-        
-        document_id = request.get("document_id")
-        max_length = request.get("max_length", 300)
-        style = request.get("style", "academic")
-        
-        # Get document
-        document = await db_service.get_document(document_id)
+        document = await db_service.get_document(request.document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Extract text if not already done
-        text = getattr(document, 'text', None)
-        if not text:
-            text = pdf_processor.extract_text(document.file_path)
-        
+
+        text = pdf_processor.extract_text(document.file_path)
         if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
-        
-        # Create prompt with thinking process
-        prompt = f"""Think step by step and show your thinking process. Then provide a {style} summary of the following document:
 
-Document:
-{text[:3000]}...
-
-Summary (max {max_length} characters):"""
-        
-        # Return streaming response
-        return StreamingResponse(
-            stream_summary_response(prompt, max_length, llm_service),
-            media_type="text/plain"
+        prompt = (
+            f"Think step by step and show your thinking process. "
+            f"Then provide a {request.style} summary of the following document:\n\n"
+            f"Document:\n{text[:3000]}...\n\n"
+            f"Summary (max {request.max_length} characters):"
         )
-        
+
+        async def stream():
+            async for chunk in llm_service.generate_streaming_response(prompt, request.max_length):
+                yield chunk
+
+        return StreamingResponse(stream(), media_type="text/plain")
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error generating streaming summary: {str(e)}")
+        logger.error(f"Error generating streaming summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def stream_summary_response(prompt: str, max_length: int, llm_service: LLMService):
-    """Stream the summary response."""
-    try:
-        async for chunk in llm_service.generate_streaming_response(prompt, max_length):
-            yield chunk
-    except Exception as e:
-        yield f"Error: {str(e)}"
 
 @router.post("/question-streaming")
-async def answer_question_streaming(request: dict):
-    """Answer question with streaming response and thinking process."""
+async def answer_question_streaming(
+    document_id: str,
+    question: str,
+    db_service: DatabaseService = Depends(get_db),
+    pdf_processor: PDFProcessor = Depends(get_pdf_processor),
+    llm_service: LLMService = Depends(get_llm_service),
+):
+    """Answer a question with streaming response and thinking process."""
     try:
-        # Get LLM service with specified provider
-        provider = request.get('model')
-        llm_service = get_llm_service(provider)
-        
-        document_id = request.get("document_id")
-        question = request.get("question")
-        
         if not document_id or not question:
             raise HTTPException(status_code=400, detail="document_id and question are required")
-        
-        # Get document
+
         document = await db_service.get_document(document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Extract text if not already done
-        text = getattr(document, 'text', None)
-        if not text:
-            text = pdf_processor.extract_text(document.file_path)
-        
+
+        text = pdf_processor.extract_text(document.file_path)
         if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
-        
-        # Create prompt with thinking process
-        prompt = f"""First, think step by step and show your analysis process. Then answer the following question based on the document:
 
-Document:
-{text[:2000]}...
+        # Use standardized QA prompt with reasoning
+        from backend.services.llm_service import _build_qa_prompt
+        prompt = _build_qa_prompt(question, text)
 
-Question: {question}
+        async def stream():
+            async for chunk in llm_service.generate_streaming_response(prompt, 500):
+                yield chunk
 
-Answer:"""
-        
-        # Return streaming response
-        return StreamingResponse(
-            stream_summary_response(prompt, 500, llm_service),
-            media_type="text/plain"
-        )
-        
+        return StreamingResponse(stream(), media_type="text/plain")
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error answering question: {str(e)}")
+        logger.error(f"Error answering question: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/{document_id}", response_model=SummaryResponse)
-async def get_summary(document_id: str):
+async def get_summary(
+    document_id: str,
+    db_service: DatabaseService = Depends(get_db),
+):
     """Get existing summary for a document."""
     try:
         document = await db_service.get_document(document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
+
         if not document.summary:
-            raise HTTPException(status_code=404, detail="Summary not found")
-        
+            raise HTTPException(status_code=404, detail="Summary not found for this document")
+
         return SummaryResponse(
             document_id=document_id,
             summary=document.summary,
             length=len(document.summary),
-            style=getattr(document, 'summary_style', 'academic')
         )
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error getting summary: {str(e)}")
+        logger.error(f"Error getting summary: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/regenerate", response_model=SummaryResponse)
 async def regenerate_summary(
     request: SummaryRequest,
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    db_service: DatabaseService = Depends(get_db),
+    pdf_processor: PDFProcessor = Depends(get_pdf_processor),
+    llm_service: LLMService = Depends(get_llm_service),
 ):
-    """Regenerate summary for document."""
+    """Regenerate a summary for a document."""
     try:
-        # Get LLM service with specified provider
-        provider = getattr(request, 'model', None)
-        llm_service = get_llm_service(provider)
-        
-        # Get document
         document = await db_service.get_document(request.document_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
-        # Extract text if not already done
-        text = getattr(document, 'text', None)
-        if not text:
-            text = pdf_processor.extract_text(document.file_path)
-            if text:
-                # Update document with extracted text
-                await db_service.update_document(request.document_id, {"text": text})
-        
+
+        text = pdf_processor.extract_text(document.file_path)
         if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
-        
-        # Generate summary in background
+
         background_tasks.add_task(
-            generate_summary_task, 
-            request.document_id, 
-            request.max_length, 
+            generate_summary_task,
+            request.document_id,
+            request.max_length,
             request.style,
-            provider
+            db_service,
+            pdf_processor,
+            llm_service,
         )
-        
+
         return SummaryResponse(
             document_id=request.document_id,
             summary="Summary regeneration started. Please check back later.",
-            style=request.style
+            style=request.style,
         )
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error regenerating summary: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error regenerating summary: {e}")
+        raise HTTPException(status_code=500, detail=str(e))code=500, detail=str(e))

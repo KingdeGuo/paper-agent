@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Card,
@@ -14,25 +15,42 @@ import { summaryAPI } from '../services/api';
 import ThinkingProgress from './ThinkingProgress';
 
 const ThinkingMode = ({ documentId, documentTitle }) => {
-  const [thinkingProcess, setThinkingProcess] = useState('');
+  const { t } = useTranslation();
+  const [rawText, setRawText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
+
+  const parseReasoning = (text) => {
+    const thoughtMatch = text.match(/<thought>([\s\S]*?)<\/thought>/);
+    let thought = '';
+    let answer = text;
+
+    if (thoughtMatch) {
+      thought = thoughtMatch[1];
+      answer = text.replace(/<thought>[\s\S]*?<\/thought>/, '').trim();
+    } else if (text.includes('<thought>')) {
+      const parts = text.split('<thought>');
+      thought = parts[1];
+      answer = parts[0];
+    }
+
+    return { thought, answer };
+  };
 
   const handleGenerateThinkingSummary = async () => {
     if (!documentId) return;
     
     setIsThinking(true);
-    setThinkingProcess('');
+    setRawText('');
     
     try {
-      for await (const chunk of summaryAPI.generateStreaming(documentId, 500, 'detailed')) {
-        setThinkingProcess(prev => prev + chunk);
+      for await (const chunk of summaryAPI.generateStreaming(documentId, 1000, 'detailed')) {
+        setRawText(prev => prev + chunk);
       }
     } catch (error) {
       console.error('Error generating thinking summary:', error);
-      setThinkingProcess('Error generating thinking summary: ' + error.message);
+      setRawText('Error: ' + error.message);
     } finally {
       setIsThinking(false);
     }
@@ -42,129 +60,104 @@ const ThinkingMode = ({ documentId, documentTitle }) => {
     if (!documentId || !question.trim()) return;
     
     setIsAnswering(true);
-    setAnswer('');
+    setRawText('');
     
     try {
       for await (const chunk of summaryAPI.answerQuestionStreaming(documentId, question)) {
-        setAnswer(prev => prev + chunk);
+        setRawText(prev => prev + chunk);
       }
     } catch (error) {
       console.error('Error answering question:', error);
-      setAnswer('Error answering question: ' + error.message);
+      setRawText('Error: ' + error.message);
     } finally {
       setIsAnswering(false);
     }
   };
 
+  const { thought, answer } = parseReasoning(rawText);
+
   return (
     <Box>
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, borderRadius: 2, boxShadow: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">思考模式</Typography>
-            <Chip label="Beta" color="secondary" size="small" />
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                {t('documentDetail.thinkingMode')}
+              </Typography>
+              <Chip label="PRO" color="primary" size="small" sx={{ ml: 1, height: 20, fontSize: '0.65rem' }} />
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleGenerateThinkingSummary}
+              disabled={isThinking || isAnswering || !documentId}
+            >
+              {isThinking ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
+              {t('documentDetail.regenerateSummary')}
+            </Button>
           </Box>
           
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            启用思考模式可以查看AI模型的推理过程和分析思路，帮助您更好地理解模型是如何处理和分析文档内容的。
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            {t('documentDetail.thinkingModeDescription')}
           </Typography>
           
-          <Button
-            variant="contained"
-            onClick={handleGenerateThinkingSummary}
-            disabled={isThinking || !documentId}
-            sx={{ mb: 2 }}
-          >
-            {isThinking ? (
-              <>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                思考中...
-              </>
-            ) : (
-              '生成思考过程摘要'
-            )}
-          </Button>
-          
-          {isThinking && (
-            <ThinkingProgress thinkingText={thinkingProcess} />
+          {(isThinking || thought) && (
+            <Box sx={{ mb: 3 }}>
+              <ThinkingProgress thinkingText={thought} />
+            </Box>
           )}
           
-          {thinkingProcess && (
+          {answer && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                思考过程:
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center' }}>
+                <Divider sx={{ flexGrow: 1, mr: 2 }} />
+                {t('documentDetail.analysisResult')}
+                <Divider sx={{ flexGrow: 1, ml: 2 }} />
               </Typography>
-              <Card variant="outlined">
-                <CardContent>
-                  <pre style={{ 
-                    whiteSpace: 'pre-wrap', 
-                    wordBreak: 'break-word',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.6
-                  }}>
-                    {thinkingProcess}
-                  </pre>
-                </CardContent>
-              </Card>
+              <Paper variant="outlined" sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
+                  {answer}
+                </Typography>
+              </Paper>
             </Box>
           )}
         </CardContent>
       </Card>
       
-      <Card>
+      <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            交互式问答
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'medium' }}>
+            {t('documentDetail.interactiveQA')}
           </Typography>
           
           <TextField
             fullWidth
             multiline
             rows={3}
-            placeholder="向AI提问关于文档内容的问题..."
+            placeholder={t('documentDetail.askQuestion')}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            disabled={isThinking || isAnswering}
             sx={{ mb: 2 }}
           />
           
           <Button
             variant="contained"
+            fullWidth
             onClick={handleAskQuestion}
-            disabled={isAnswering || !question.trim() || !documentId}
+            disabled={isThinking || isAnswering || !question.trim() || !documentId}
+            sx={{ py: 1.5, fontWeight: 'bold' }}
           >
             {isAnswering ? (
               <>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                思考中...
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                {t('documentDetail.thinking')}
               </>
             ) : (
-              '提问'
+              t('documentDetail.submitQuestion')
             )}
           </Button>
-          
-          {isAnswering && (
-            <ThinkingProgress thinkingText={answer} />
-          )}
-          
-          {answer && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                AI 回答:
-              </Typography>
-              <Card variant="outlined">
-                <CardContent>
-                  <pre style={{ 
-                    whiteSpace: 'pre-wrap', 
-                    wordBreak: 'break-word',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.6
-                  }}>
-                    {answer}
-                  </pre>
-                </CardContent>
-              </Card>
-            </Box>
-          )}
         </CardContent>
       </Card>
     </Box>

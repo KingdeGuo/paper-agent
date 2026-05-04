@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
+// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -9,12 +10,76 @@ const api = axios.create({
   },
 });
 
-// 获取选中的模型
+// Add JWT token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Handle 401 responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Get selected model
 const getSelectedModel = () => {
   return localStorage.getItem('selectedModel') || 'openai';
 };
 
+// ---------------------------------------------------------------------------
+// Auth API
+// ---------------------------------------------------------------------------
+
+export const login = async (credentials) => {
+  const response = await api.post('/users/login', credentials);
+  return response.data;
+};
+
+export const register = async (userData) => {
+  const response = await api.post('/users/register', userData);
+  return response.data;
+};
+
+export const getMe = async () => {
+  const response = await api.get('/users/me');
+  return response.data;
+};
+
+export const updateMe = async (data) => {
+  const response = await api.put('/users/me', data);
+  return response.data;
+};
+
+export const createApiKey = async (data) => {
+  const response = await api.post('/users/api-keys', data);
+  return response.data;
+};
+
+export const listApiKeys = async () => {
+  const response = await api.get('/users/api-keys');
+  return response.data;
+};
+
+export const deleteApiKey = async (keyId) => {
+  const response = await api.delete(`/users/api-keys/${keyId}`);
+  return response.data;
+};
+
+// ---------------------------------------------------------------------------
 // Documents API
+// ---------------------------------------------------------------------------
+
 export const documentsAPI = {
   upload: async (file, metadata = {}) => {
     const formData = new FormData();
@@ -71,7 +136,10 @@ export const documentsAPI = {
   },
 };
 
+// ---------------------------------------------------------------------------
 // Search API
+// ---------------------------------------------------------------------------
+
 export const searchAPI = {
   search: async (query) => {
     const response = await api.post('/search', { ...query, model: getSelectedModel() });
@@ -114,7 +182,10 @@ export const searchAPI = {
   },
 };
 
+// ---------------------------------------------------------------------------
 // Summary API
+// ---------------------------------------------------------------------------
+
 export const summaryAPI = {
   generate: async (documentId, maxLength = 300, style = 'academic') => {
     const response = await api.post('/summary/generate', {
@@ -141,18 +212,6 @@ export const summaryAPI = {
     return response.data;
   },
 
-  batchGenerate: async (documentIds, maxLength = 300, style = 'academic') => {
-    const response = await api.post('/summary/batch', documentIds, {
-      params: { max_length: maxLength, style: style, model: getSelectedModel() },
-    });
-    return response.data;
-  },
-
-  getStyles: async () => {
-    const response = await api.get('/summary/styles');
-    return response.data;
-  },
-
   answerQuestion: async (documentId, question) => {
     const response = await api.post('/summary/question', {
       document_id: documentId,
@@ -161,13 +220,14 @@ export const summaryAPI = {
     });
     return response.data;
   },
-  
+
   // Streaming versions
   generateStreaming: async function* (documentId, maxLength = 300, style = 'academic') {
     const response = await fetch(`${API_BASE_URL}/summary/generate-streaming`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
       body: JSON.stringify({
         document_id: documentId,
@@ -202,6 +262,7 @@ export const summaryAPI = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
       body: JSON.stringify({
         document_id: documentId,
@@ -231,7 +292,102 @@ export const summaryAPI = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Knowledge Graph API
+// ---------------------------------------------------------------------------
+
+export const knowledgeAPI = {
+  getDocumentGraph: async (documentId, depth = 1) => {
+    const response = await api.get(`/knowledge/graph/${documentId}`, {
+      params: { depth },
+    });
+    return response.data;
+  },
+
+  getGlobalGraph: async (limit = 100) => {
+    const response = await api.get('/knowledge/graph/global', {
+      params: { limit },
+    });
+    return response.data;
+  },
+
+  getVisualization: async (documentId = null) => {
+    const params = documentId ? { document_id: documentId } : {};
+    const response = await api.get('/knowledge/graph/visualization', { params });
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/knowledge/graph/stats');
+    return response.data;
+  },
+
+  analyzeDocument: async (documentId) => {
+    const response = await api.post(`/knowledge/analyze/${documentId}`);
+    return response.data;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// arXiv API
+// ---------------------------------------------------------------------------
+
+export const arxivAPI = {
+  search: async (query, maxResults = 10) => {
+    const response = await api.get('/arxiv/search', {
+      params: { query, max_results: maxResults }
+    });
+    return response.data;
+  },
+
+  searchByAuthor: async (author, maxResults = 10) => {
+    const response = await api.get('/arxiv/author/' + author, {
+      params: { max_results: maxResults }
+    });
+    return response.data;
+  },
+
+  searchByTitle: async (title, maxResults = 5) => {
+    const response = await api.get('/arxiv/search', {
+      params: { query: `ti:"${title}"`, max_results: maxResults }
+    });
+    return response.data;
+  },
+
+  searchByCategory: async (category, maxResults = 20) => {
+    const response = await api.get('/arxiv/category/' + category, {
+      params: { max_results: maxResults }
+    });
+    return response.data;
+  },
+
+  getPaper: async (arxivId) => {
+    const response = await api.get('/arxiv/paper/' + arxivId);
+    return response.data;
+  },
+
+  getPdfUrl: async (arxivId) => {
+    const response = await api.get('/arxiv/pdf/' + arxivId);
+    return response.data;
+  },
+
+  getDailyPapers: async (category = 'cs.AI', maxResults = 50) => {
+    const response = await api.get('/arxiv/daily/' + category, {
+      params: { max_results: maxResults }
+    });
+    return response.data;
+  },
+
+  importPaper: async (arxivId) => {
+    const response = await api.post('/arxiv/import/' + arxivId);
+    return response.data;
+  }
+};
+
+// ---------------------------------------------------------------------------
 // System API
+// ---------------------------------------------------------------------------
+
 export const systemAPI = {
   getStats: async () => {
     const response = await api.get('/stats');
@@ -241,9 +397,7 @@ export const systemAPI = {
   healthCheck: async () => {
     const response = await api.get('/health');
     return response.data;
-  },
-  
-  // 获取支持的模型列表
+  },  
   getSupportedModels: async () => {
     return [
       { id: 'openai', name: 'OpenAI GPT' },

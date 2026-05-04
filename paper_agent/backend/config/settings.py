@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List
 import yaml
-from pydantic import BaseSettings, Field
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
 class LLMSettings(BaseSettings):
     provider: str = "huggingface"
@@ -51,31 +52,52 @@ class Settings(BaseSettings):
     server: ServerSettings = Field(default_factory=ServerSettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
 
-    class Config:
-        env_file = ".env"
-        env_nested_delimiter = "__"
+    model_config = {
+        "env_file": ".env",
+        "env_nested_delimiter": "__",
+    }
 
-def load_config(config_path: str = None) -> Settings:
+
+# ---------------------------------------------------------------------------
+# Import cluster settings (lazy to avoid circular imports)
+# ---------------------------------------------------------------------------
+
+try:
+    from backend.config.cluster_settings import ClusterSettings as _ClusterSettings
+    cluster_settings = _ClusterSettings()
+except ImportError:
+    # Fallback if cluster settings not available
+    class _ClusterSettings:
+        enable_clustering = False
+        node_id = "local-1"
+        node_role = "all"
+    cluster_settings = _ClusterSettings()
+
+def load_config(config_path: str | None = None) -> Settings:
     """Load configuration from YAML file and environment variables."""
     if config_path is None:
         config_path = Path(__file__).parent.parent.parent / "config" / "config.yaml"
-    
+
     settings = Settings()
-    
+
     if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config_data = yaml.safe_load(f)
-        
-        # Update settings with YAML config
-        if config_data:
-            for section, values in config_data.items():
-                if hasattr(settings, section):
-                    section_obj = getattr(settings, section)
+        with open(config_path, "r", encoding="utf-8") as f:
+            config_data: Dict[str, Any] = yaml.safe_load(f) or {}
+
+        # Walk nested sections since settings is a nested object
+        for section, values in config_data.items():
+            if hasattr(settings, section):
+                section_obj = getattr(settings, section)
+                if isinstance(section_obj, BaseSettings):
+                    section_obj = type(section_obj)(**values)
+                    setattr(settings, section, section_obj)
+                else:
                     for key, value in values.items():
                         if hasattr(section_obj, key):
                             setattr(section_obj, key, value)
-    
+
     return settings
+
 
 # Global settings instance
 settings = load_config()

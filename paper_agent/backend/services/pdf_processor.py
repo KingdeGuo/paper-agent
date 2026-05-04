@@ -1,15 +1,37 @@
 import os
+import sys
 import uuid
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 import PyPDF2
 import pdfplumber
 from PIL import Image
 import io
 
-from backend.config.settings import settings
-from backend.models.document import DocumentCreate
+try:
+    from paper_agent.backend.config.settings import settings
+    from paper_agent.backend.models.document import DocumentCreate
+except ImportError:
+    try:
+        from backend.config.settings import settings
+        from backend.models.document import DocumentCreate
+    except ImportError:
+        # Fallback - create minimal settings
+        class DummySettings:
+            class Storage:
+                pdf_path = "./data/pdfs"
+                max_file_size = "50MB"
+                allowed_extensions = [".pdf"]
+            storage = Storage()
+        settings = DummySettings()
+        DocumentCreate = None
 
 logger = logging.getLogger(__name__)
 

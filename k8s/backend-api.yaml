@@ -1,0 +1,116 @@
+# Paper Agent Backend API (Stateless)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paper-agent-api
+  namespace: paper-agent
+spec:
+  replicas: 3  # Multiple API replicas for load balancing
+  selector:
+    matchLabels:
+      app: paper-agent-api
+  template:
+    metadata:
+      labels:
+        app: paper-agent-api
+    spec:
+      containers:
+        - name: api
+          image: paper-agent-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: CLUSTER__ENABLE_CLUSTERING
+              value: "true"
+            - name: CLUSTER__NODE_ROLE
+              value: "api"
+            - name: CLUSTER__DATABASE__TYPE
+              value: "postgresql"
+            - name: CLUSTER__DATABASE__HOST
+              value: "postgres"
+            - name: CLUSTER__DATABASE__PORT
+              value: "5432"
+            - name: CLUSTER__DATABASE__NAME
+              value: "paper_agent"
+            - name: CLUSTER__DATABASE__USER
+              value: "paper_agent"
+            - name: CLUSTER__DATABASE__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paper-agent-secrets
+                  key: postgres-password
+            - name: CLUSTER__REDIS__ENABLED
+              value: "true"
+            - name: CLUSTER__REDIS__HOST
+              value: "redis"
+            - name: CLUSTER__REDIS__PORT
+              value: "6379"
+            - name: CLUSTER__STORAGE__ENABLED
+              value: "true"
+            - name: CLUSTER__STORAGE__PROVIDER
+              value: "minio"
+            - name: CLUSTER__STORAGE__ENDPOINT
+              value: "http://minio:9000"
+            - name: CLUSTER__STORAGE__ACCESS_KEY
+              value: "minioadmin"
+            - name: CLUSTER__STORAGE__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paper-agent-secrets
+                  key: minio-password
+            - name: CLUSTER__TASK_QUEUE__TYPE
+              value: "redis"
+          volumeMounts:
+            - name: vector-storage
+              mountPath: /app/data/vector_db
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: vector-storage
+          persistentVolumeClaim:
+            claimName: vector-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vector-pvc
+  namespace: paper-agent
+spec:
+  accessModes:
+    - ReadWriteMany  # Shared across API replicas
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paper-agent-api
+  namespace: paper-agent
+spec:
+  selector:
+    app: paper-agent-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+  type: ClusterIP
