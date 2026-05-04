@@ -1,20 +1,19 @@
-# =============================================================================
-# Paper Agent — Frontend Dockerfile (multi-stage)
-# =============================================================================
+# Frontend Dockerfile — multi-stage build with nginx
+
 # Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm ci --only=production
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY public/ public/
 COPY src/ src/
 
 RUN npm run build
 
-# Runtime stage (nginx)
+# Runtime stage
 FROM nginx:alpine
 
 COPY --from=builder /app/build /usr/share/nginx/html

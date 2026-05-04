@@ -8,7 +8,7 @@ version = "1.1.0"
 description = "AI-Powered Literature Management System — Upload, search, summarise & QA your academic papers."
 readme = "README.md"
 authors = [
-    { name = "Paper Agent Team", email = "paper.agent@example.com" },
+    { name = "Paper Agent Team", email = "kingdeguo01@gmail.com" },
 ]
 license = { text = "MIT" }
 requires-python = ">=3.10"

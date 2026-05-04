@@ -1,41 +1,66 @@
-# Contributor Covenant Code of Conduct / 贡献者公约
+# Contributor Covenant Code of Conduct
 
-## Our Pledge / 我们的承诺
+## Our Pledge
 
-In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
+We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-为了营造一个开放、友好的环境，我们作为贡献者和维护者承诺：无论年龄、体型、残疾、民族、性别认同、经验水平、教育背景、社会经济地位、国籍、外貌、种族、宗教或性取向，参与本项目及社区都将是一个无骚扰的体验。
+We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
-## Our Standards / 我们的标准
+## Our Standards
 
-### Positive behavior / 积极行为
+### Positive Behavior
 
-- Using welcoming and inclusive language / 使用欢迎和包容的语言
-- Being respectful of differing viewpoints and experiences / 尊重不同的观点和经历
-- Gracefully accepting constructive criticism / 优雅地接受建设性批评
-- Focusing on what is best for the community / 关注社区最佳利益
-- Showing empathy towards other community members / 对其他社区成员展现同理心
+- Demonstrating empathy and kindness toward other people
+- Being respectful of differing opinions, viewpoints, and experiences
+- Giving and gracefully accepting constructive feedback
+- Accepting responsibility and apologizing to those affected by our mistakes
+- Focusing on what is best for the overall community
 
-### Unacceptable behavior / 不可接受的行为
+### Unacceptable Behavior
 
-- The use of sexualized language or imagery and unwelcome sexual attention or advances / 使用性暗示语言或图像，不受欢迎的性关注
-- Trolling, insulting/derogatory comments, and personal or political attacks / 挑衅、侮辱性评论、人身或政治攻击
-- Public or private harassment / 公开或私下的骚扰
-- Publishing others' private information without explicit permission / 未经许可发布他人隐私信息
-- Other conduct which could reasonably be considered inappropriate in a professional setting / 其他在专业环境中不适当的行为
+- The use of sexualized language or imagery, and sexual attention or advances
+- Trolling, insulting or derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information without explicit permission
+- Other conduct which could reasonably be considered inappropriate in a professional setting
 
-## Enforcement / 执行
+## Enforcement Responsibilities
 
-Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
+Project maintainers are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
 
-项目维护者有责任明确可接受行为的标准，并对不可接受行为采取适当和公正的纠正措施。
+## Scope
 
-## Reporting / 报告
+This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances.
+## Enforcement
 
-如有任何虐待、骚扰或其他不可接受的行为，请联系项目团队。所有投诉都将被审查和调查，并根据情况做出必要和适当的回应。
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at:
 
-## Attribution / 归属
+- **Email**: kingdeguo01+conduct@gmail.com
+- **GitHub**: Open an issue with the `conduct` label (confidential)
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
+All complaints will be reviewed and investigated promptly and fairly. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
+
+## Enforcement Guidelines
+
+Project maintainers will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:
+
+### 1. Correction
+**Community Impact**: Use of inappropriate language or other behavior deemed unprofessional.
+**Consequence**: A private, written warning from maintainers, with clarity about the nature of the violation.
+
+### 2. Warning
+**Community Impact**: A violation through a single incident or series of actions.
+**Consequence**: A warning with consequences for continued behavior. No interaction with the people involved for a specified period of time.
+
+### 3. Temporary Ban
+**Community Impact**: A serious violation of community standards.
+**Consequence**: A temporary ban from any sort of interaction or public communication with the community.
+
+### 4. Permanent Ban
+**Community Impact**: Demonstrating a pattern of violation or harassment.
+**Consequence**: A permanent ban from any sort of public interaction within the community.
+
+## Attribution
+
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
