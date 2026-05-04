@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/k8s-native-blue.svg" alt="K8s Native"/>
   <img src="https://img.shields.io/badge/python-3.10%2B-green.svg" alt="Python 3.10+"/>
   <img src="https://img.shields.io/badge/react-18-blue.svg" alt="React 18"/>
+  <img src="https://img.shields.io/badge/MCP-enabled-purple.svg" alt="MCP Enabled"/>
 </p>
 
 <h1 align="center">📚 Paper Agent 2.0</h1>
@@ -17,6 +18,8 @@
   <a href="docs/user-guide.md">User Guide</a> •
   <a href="docs/api.md">API</a> •
   <a href="docs/architecture.md">Architecture</a> •
+  <a href="mcp/">MCP Integration</a> •
+  <a href="skills/">Skills</a> •
   <a href="./README_zh.md">中文</a>
 </p>
 
@@ -74,6 +77,33 @@ Paper Agent is an **open-source, enterprise-grade academic research platform** t
 | **Horizontal Scaling** | Multiple API replicas and worker nodes for large-scale processing |
 | **Audit Logging** | Full API audit trail for enterprise compliance |
 | **Rate Limiting** | Built-in protection against brute-force attacks |
+
+### 🤖 MCP Integration (AI-Native)
+| Capability | Description |
+|------------|-------------|
+| **13 MCP Tools** | Search, analyze, cite, and manage papers via any MCP-compatible AI assistant (Claude, Copilot, Cursor, etc.) |
+| **4 Research Prompts** | Pre-built templates for paper analysis, lit review, comparison, and idea generation |
+| **Resource Access** | AI can read paper summaries, abstracts, and annotations directly |
+| **Zero Configuration** | Plug-and-play with Claude Desktop, VS Code, Cursor, and Claude Code |
+
+### 📋 AI Research Skills
+| Skill | Description |
+|-------|-------------|
+| **Literature Review** | Generate structured related work sections with proper citations |
+| **Deep Paper Analysis** | Systematic methodology/contribution/limitation analysis |
+| **Research Gap Analysis** | Identify underexplored areas and generate novel hypotheses |
+| **Daily Briefing** | Automated morning research digest with reading priorities |
+| **Writing Assistant** | Academic writing with real-time citation support |
+| **Systematic Review** | PRISMA-compliant full systematic literature review |
+
+### 🎯 Smart Reading Goals
+| Capability | Description |
+|------------|-------------|
+| **Reading Targets** | Set weekly/monthly paper reading goals with progress tracking |
+| **Session Logging** | Track reading time, pages, and daily streaks |
+| **Smart Recommendations** | AI suggests next papers based on your reading history |
+| **Trend Analysis** | Spot emerging topics and keyword trends in your library |
+| **Reading Statistics** | Visualize your reading habits over time |
 
 ---
 
@@ -177,6 +207,8 @@ See the [Architecture Guide](docs/architecture.md) for a deep dive.
 | [Architecture Guide](docs/architecture.md) | System design and data flow |
 | [Configuration Guide](docs/configuration.md) | All config options and environment variables |
 | [Deployment Guide](docs/deployment.md) | Production deployment (Docker, K8s) |
+| [MCP Integration Guide](mcp/README.md) | Connect AI assistants to your research library |
+| [AI Research Skills](skills/) | Reusable workflows for common research tasks |
 | [Contributing Guide](CONTRIBUTING.md) | How to contribute code |
 
 ---

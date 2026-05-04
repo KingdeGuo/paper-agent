@@ -121,7 +121,9 @@ app.add_middleware(AuditMiddleware)
 try:
     from paper_agent.backend.api.routes import (
         documents, search, summary, users, knowledge, 
-        review, arxiv, notebooks, discovery, zotero, drafting, annotations, bibtex
+        review, arxiv, notebooks, discovery, zotero, drafting, 
+        annotations, bibtex, citations, reading, ask, collaboration, 
+        digest, overleaf, stats, search_saved, import_documents, recommendations
     )
     app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
     app.include_router(search.router, prefix="/api/search", tags=["search"])
@@ -136,7 +138,17 @@ try:
     app.include_router(drafting.router, prefix="/api/drafting", tags=["drafting"])
     app.include_router(annotations.router, prefix="/api/annotations", tags=["annotations"])
     app.include_router(bibtex.router, prefix="/api/bibtex", tags=["bibtex"])
-    logger.info("✓ 所有路由已加载（含Research Mentor + Annotations + BibTeX）")
+    app.include_router(citations.router, prefix="/api/citations", tags=["citations"])
+    app.include_router(reading.router, prefix="/api/reading", tags=["reading"])
+    app.include_router(ask.router, prefix="/api/ask", tags=["ask"])
+    app.include_router(collaboration.router, prefix="/api/collab", tags=["collaboration"])
+    app.include_router(digest.router, prefix="/api/digest", tags=["digest"])
+    app.include_router(overleaf.router, prefix="/api/overleaf", tags=["overleaf"])
+    app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
+    app.include_router(search_saved.router, prefix="/api/searches", tags=["searches"])
+    app.include_router(import_documents.router, prefix="/api/import", tags=["import"])
+    app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
+    logger.info("✓ 全部23个路由模块已加载（含MCP支持）")
 except Exception as e:
     logger.warning(f"部分路由加载失败: {e}")
 

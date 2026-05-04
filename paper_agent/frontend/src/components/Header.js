@@ -7,9 +7,16 @@ import SearchIcon from '@mui/icons-material/Search';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BookIcon from '@mui/icons-material/Book';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import ScienceIcon from '@mui/icons-material/Science';
+import SummaryIcon from '@mui/icons-material/Summarize';
 import LinkIcon from '@mui/icons-material/Link';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SecurityIcon from '@mui/icons-material/Security';
+import IntegrationIcon from '@mui/icons-material/IntegrationInstructions';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import TranslateIcon from '@mui/icons-material/Translate';
 
 const Header = () => {
@@ -59,11 +66,16 @@ const Header = () => {
         <Box sx={{ display: 'flex', flexGrow: 1, overflowX: 'auto', py: 0.5 }}>
           <NavButton path="/" icon={<DashboardIcon />} label={t('nav.dashboard') || 'Home'} />
           <NavButton path="/documents" icon={<DescriptionIcon />} label={t('nav.documents') || 'Docs'} />
+          <NavButton path="/reading" icon={<MenuBookIcon />} label="Reading" />
+          <NavButton path="/digest" icon={<SummaryIcon />} label="Digest" />
+          <NavButton path="/ask" icon={<SmartToyIcon />} label="Ask AI" />
           <NavButton path="/search" icon={<SearchIcon />} label={t('nav.search') || 'Search'} />
           <NavButton path="/knowledge" icon={<AccountTreeIcon />} label="KG" />
           <NavButton path="/discovery" icon={<ScienceIcon />} label="Discovery" />
           <NavButton path="/notebooks" icon={<BookIcon />} label="Notebook" />
           <NavButton path="/drafting" icon={<HistoryEduIcon />} label="Drafting" />
+          <NavButton path="/writing" icon={<IntegrationIcon />} label="Writing" />
+          <NavButton path="/citations" icon={<FormatQuoteIcon />} label="Citations" />
           <NavButton path="/zotero" icon={<LinkIcon />} label="Zotero" />
         </Box>
         
@@ -86,6 +98,12 @@ const Header = () => {
               <MenuItem value="ollama">Ollama</MenuItem>
             </Select>
           </FormControl>
+          <IconButton color="inherit" onClick={() => navigate('/settings')} size="small">
+            <SettingsIcon />
+          </IconButton>
+          <IconButton color="inherit" onClick={() => navigate('/admin')} size="small">
+            <SecurityIcon />
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>

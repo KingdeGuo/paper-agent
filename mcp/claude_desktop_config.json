@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "paper-agent": {
+      "description": "AI-powered academic research library — search, analyze, and manage your papers",
+      "command": "python",
+      "args": ["/ABSOLUTE/PATH/TO/paper-agent/mcp/server.py"],
+      "env": {
+        "PYTHONPATH": "/ABSOLUTE/PATH/TO/paper-agent"
+      }
+    }
+  }
+}

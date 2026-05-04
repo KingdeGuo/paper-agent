@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Paper Agent Importer",
+  "version": "1.0.0",
+  "description": "One-click import of academic papers into your Paper Agent library. Supports arXiv, PubMed, IEEE, Springer, and more.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Save to Paper Agent"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://arxiv.org/abs/*",
+        "*://arxiv.org/pdf/*",
+        "*://scholar.google.com/*",
+        "*://pubmed.ncbi.nlm.nih.gov/*",
+        "*://ieeexplore.ieee.org/*",
+        "*://link.springer.com/*",
+        "*://dl.acm.org/*",
+        "*://www.sciencedirect.com/*",
+        "*://www.biorxiv.org/*",
+        "*://www.medrxiv.org/*",
+        "*://openreview.net/*",
+        "*://papers.nips.cc/*",
+        "*://proceedings.mlr.press/*",
+        "*://www.jmlr.org/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "importer@paper-agent.io",
+      "strict_min_version": "109.0"
+    }
+  }
+}

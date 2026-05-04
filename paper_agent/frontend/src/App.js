@@ -17,6 +17,13 @@ import Notebooks from './pages/Notebooks';
 import Discovery from './pages/Discovery';
 import Zotero from './pages/Zotero';
 import Drafting from './pages/Drafting';
+import Citations from './pages/Citations';
+import ReadingList from './pages/ReadingList';
+import AskLibrary from './pages/AskLibrary';
+import ResearchDigest from './pages/ResearchDigest';
+import WritingIntegration from './pages/WritingIntegration';
+import Settings from './pages/Settings';
+import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import { SnackbarProvider } from './contexts/SnackbarContext';
@@ -62,6 +69,13 @@ function App() {
                   <Route path="/discovery" element={<ProtectedRoute><Discovery /></ProtectedRoute>} />
                   <Route path="/zotero" element={<ProtectedRoute><Zotero /></ProtectedRoute>} />
                   <Route path="/drafting" element={<ProtectedRoute><Drafting /></ProtectedRoute>} />
+                  <Route path="/citations" element={<ProtectedRoute><Citations /></ProtectedRoute>} />
+                  <Route path="/reading" element={<ProtectedRoute><ReadingList /></ProtectedRoute>} />
+                  <Route path="/ask" element={<ProtectedRoute><AskLibrary /></ProtectedRoute>} />
+                  <Route path="/digest" element={<ProtectedRoute><ResearchDigest /></ProtectedRoute>} />
+                  <Route path="/writing" element={<ProtectedRoute><WritingIntegration /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                 </Routes>
               </Box>
             </Box>

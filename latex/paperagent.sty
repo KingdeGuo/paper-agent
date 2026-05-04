@@ -1,0 +1,61 @@
+% Paper Agent LaTeX Package
+% Automatically sync citations from your Paper Agent library
+% 
+% Usage:
+%   1. Upload this file to your Overleaf project
+%   2. Add \usepackage{paperagent} to your preamble
+%   3. Use \pacite{key} to cite from your library
+%   4. Run \pabibliography to print references
+%
+% For full documentation: https://github.com/KingdeGuo/paper-agent
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{paperagent}[2024/01/01 Paper Agent citation integration]
+
+\RequirePackage{etoolbox}
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+
+% ─── Options ──────────────────────────────────────────────────
+\newif\if@pa@verbose
+\DeclareOption{verbose}{\@pa@verbosetrue}
+\DeclareOption{quiet}{\@pa@verbosefalse}
+\ExecuteOptions{quiet}
+\ProcessOptions\relax
+
+% ─── Commands ─────────────────────────────────────────────────
+\newcommand{\pabibliography}{%
+  \IfFileExists{references.bib}{%
+    \bibliography{references}%
+    \if@pa@verbose\typeout{Paper Agent: Using references.bib}\fi
+  }{%
+    \IfFileExists{\pa@bibfile}{%
+      \bibliography{\pa@bibfile}%
+    }{%
+      \PackageWarning{paperagent}{No references.bib found. Run `pa-export` first.}%
+      \begin{thebibliography}{99}
+        \bibitem{placeholder} Paper Agent: No bibliography file found.
+      \end{thebibliography}
+    }%
+  }%
+}
+
+\newcommand{\pacite}[1]{\cite{#1}}
+\newcommand{\paparencite}[1]{\parencite{#1}}
+\newcommand{\patextcite}[1]{\textcite{#1}}
+
+% ─── Environment for paper notes ──────────────────────────────
+\newenvironment{papernotes}{%
+  \section*{Research Notes}
+  \begin{itemize}
+}{%
+  \end{itemize}
+}
+
+% ─── Convenience for related work sections ────────────────────
+\newcommand{\pareview}[1]{%
+  \section*{Related Work}
+  \input{#1}
+}
+
+\endinput
