@@ -56,18 +56,29 @@ class VectorService:
         self.dimension = settings.embedding.dimension
 
         logger.info("Loading embedding model: %s …", self.model_name)
-        self.model: SentenceTransformer = SentenceTransformer(self.model_name)
+        self.model: Optional[SentenceTransformer] = None
+        self._model_loaded = False
+        try:
+            self.model = SentenceTransformer(self.model_name)
+            self._model_loaded = True
+        except Exception as e:
+            logger.warning(f"Embedding model '{self.model_name}' not available: {e}. Vector search disabled.")
+            self.model = None
 
-        self.client: chromadb.PersistentClient = chromadb.PersistentClient(
-            path=str(settings.vector_db.path),
-            settings=ChromaSettings(anonymized_telemetry=False),
-        )
-
-        self.collection = self.client.get_or_create_collection(
-            name="documents",
-            metadata={"hnsw:space": "cosine"},
-        )
-        logger.info("VectorService initialised (model=%s, dim=%d)", self.model_name, self.dimension)
+        try:
+            self.client: chromadb.PersistentClient = chromadb.PersistentClient(
+                path=str(settings.vector_db.path),
+                settings=ChromaSettings(anonymized_telemetry=False),
+            )
+            self.collection = self.client.get_or_create_collection(
+                name="documents",
+                metadata={"hnsw:space": "cosine"},
+            )
+            logger.info("VectorService initialised (model=%s, dim=%d)", self.model_name, self.dimension)
+        except Exception as e:
+            logger.warning(f"ChromaDB not available: {e}. Vector operations disabled.")
+            self.client = None
+            self.collection = None
 
     # ------------------------------------------------------------------
     # CRUD
@@ -77,6 +88,9 @@ class VectorService:
         self, chunk_id: str, text: str, metadata: Dict[str, Any]
     ) -> Optional[str]:
         """Add a single chunk to the vector DB."""
+        if not self._model_loaded or not self.client:
+            logger.warning("Vector DB not available, skipping add_chunk")
+            return None
         try:
             embedding = self.model.encode([text], show_progress_bar=False)
             self.collection.add(
@@ -94,7 +108,9 @@ class VectorService:
         self, document_id: str, text_chunks: List[str], metadata: Dict[str, Any]
     ) -> List[str]:
         """Add document chunks to the vector DB and return chunk IDs."""
-        if not text_chunks:
+        if not self._model_loaded or not self.client:
+            logger.warning("Vector DB not available, skipping add_document")
+            return []
             logger.warning("No text chunks provided for document %s", document_id)
             return []
 
@@ -131,7 +147,9 @@ class VectorService:
         filters: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Search for chunks similar to *query*, grouped by document."""
-        query_embedding = self.model.encode([query], show_progress_bar=False)
+        if not self._model_loaded or not self.client:
+            logger.warning("Vector DB not available, skipping search")
+            return []
 
         results = self.collection.query(
             query_embeddings=query_embedding.tolist(),

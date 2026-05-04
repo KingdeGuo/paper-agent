@@ -1,0 +1,85 @@
+# Auto-label rules for PRs
+
+# Backend
+paper_agent/backend/api/**/*:
+  - backend
+  - api
+
+paper_agent/backend/services/**/*:
+  - backend
+  - services
+
+paper_agent/backend/models/**/*:
+  - backend
+  - models
+
+# Frontend
+paper_agent/frontend/src/pages/**/*:
+  - frontend
+  - pages
+
+paper_agent/frontend/src/components/**/*:
+  - frontend
+  - components
+
+paper_agent/frontend/src/contexts/**/*:
+  - frontend
+  - contexts
+
+# Documentation
+docs/**/*:
+  - documentation
+  - docs
+
+*.md:
+  - documentation
+
+# Infrastructure
+Dockerfile:
+  - docker
+  - infrastructure
+
+docker-compose.yml:
+  - docker
+  - infrastructure
+
+k8s/**/*:
+  - kubernetes
+  - infrastructure
+
+.github/workflows/**/*:
+  - ci/cd
+  - infrastructure
+
+# Configuration
+requirements.txt:
+  - dependencies
+  - python
+
+pyproject.toml:
+  - dependencies
+  - python
+
+# MCP
+mcp/**/*:
+  - mcp
+  - integration
+
+# Skills
+skills/**/*:
+  - skills
+  - documentation
+
+# Tests
+paper_agent/tests/**/*:
+  - tests
+  - testing
+
+test_*:
+  - tests
+  - testing
+
+# Extension
+extension/**/*:
+  - extension
+  - browser

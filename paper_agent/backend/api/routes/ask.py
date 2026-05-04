@@ -9,6 +9,7 @@ from backend.services.registry import get_db, get_vector_service, get_llm_servic
 from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.vector_service import VectorService
 from backend.services.llm_service import LLMService
+from backend.services.memory_service import research_memory
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -86,12 +87,14 @@ async def ask_library(
 
         context = "\n\n---\n\n".join(context_parts)
 
+        memory_context = research_memory.build_context_prompt(query.question)
         system_prompt = (
             "You are a research assistant helping a scientist understand their paper library. "
             "Answer the question based ONLY on the provided document excerpts. "
             "Cite specific sources using [Source: Paper Title]. "
             "If the excerpts don't contain enough information, say so clearly. "
-            "Be precise, concise, and academically rigorous."
+            "Be precise, concise, and academically rigorous.\n\n"
+            f"{memory_context[:800]}"
         )
 
         user_prompt = f"Based on my document library, please answer:\n\n{query.question}\n\nRelevant excerpts from my papers:\n\n{context}"

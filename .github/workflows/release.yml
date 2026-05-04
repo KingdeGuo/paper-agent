@@ -1,12 +1,23 @@
+# Comprehensive Release Workflow
 name: Release
 
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v2.1.0)'
+        required: true
+      prerelease:
+        description: 'Is this a prerelease?'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  discussions: write
 
 jobs:
   release:
@@ -19,14 +30,47 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "# Paper Agent ${{ github.ref_name }}" > RELEASE_NOTES.md
-          echo "" >> RELEASE_NOTES.md
-          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --oneline --pretty=format:"- %s" >> RELEASE_NOTES.md
+          TAG="${{ github.event.inputs.version || github.ref_name }}"
+          cat > RELEASE_NOTES.md << 'EOF'
+          # Paper Agent $TAG
+
+          ## 🚀 What's New
+
+          EOF
+          # Generate changelog from commits
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            git log $PREV_TAG..HEAD --oneline --pretty=format:"- %s (%an)" >> RELEASE_NOTES.md
+          else
+            git log --oneline --pretty=format:"- %s (%an)" | head -50 >> RELEASE_NOTES.md
+          fi
+
+          cat >> RELEASE_NOTES.md << 'EOF'
+
+          ## 📦 Installation
+
+          ### Docker
+          ```bash
+          docker pull ghcr.io/kingdeguo/paper-agent:$TAG
+          ```
+
+          ### From Source
+          ```bash
+          git clone https://github.com/KingdeGuo/paper-agent.git
+          cd paper-agent
+          git checkout $TAG
+          ```
+
+          ## 📋 Changelog
+          See [CHANGELOG.md](https://github.com/KingdeGuo/paper-agent/blob/main/docs/changelog.md) for full details.
+          EOF
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md
           generate_release_notes: true
-          draft: false
-          prerelease: false
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+          files: |
+            RELEASE_NOTES.md

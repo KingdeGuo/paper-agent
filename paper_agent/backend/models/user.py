@@ -9,16 +9,28 @@ from datetime import datetime
 from typing import Optional, List, Dict
 import uuid
 
+import sys as _sys
+import logging as _logging
+_logger = _logging.getLogger(__name__)
+
+# Import Base from cluster_database - MUST succeed or we can't proceed
 try:
-    from paper_agent.backend.services.cluster_database import Base, Document
+    from paper_agent.backend.services.cluster_database import Base
 except ImportError:
     try:
-        from backend.services.cluster_database import Base, Document
+        from backend.services.cluster_database import Base
     except ImportError:
-        from sqlalchemy.orm import DeclarativeBase
-        class Base(DeclarativeBase):
-            pass
-        Document = None
+        # Last resort: check if already loaded
+        for _mod_name in list(_sys.modules.keys()):
+            if 'cluster_database' in _mod_name:
+                _mod = _sys.modules[_mod_name]
+                if hasattr(_mod, 'Base'):
+                    Base = _mod.Base
+                    break
+        else:
+            from sqlalchemy.orm import DeclarativeBase
+            Base = type('Base', (DeclarativeBase,), {})()
+            _logger.warning("Using fallback Base - table registration may be inconsistent")
 
 
 # ---------------------------------------------------------------------------
@@ -27,6 +39,7 @@ except ImportError:
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     username = Column(String(50), unique=True, nullable=False, index=True)

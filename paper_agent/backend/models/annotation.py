@@ -19,6 +19,7 @@ from backend.services.cluster_database import Base
 
 class Annotation(Base):
     __tablename__ = "annotations"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)
@@ -52,6 +53,7 @@ class Annotation(Base):
 
 class Note(Base):
     __tablename__ = "notes"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)

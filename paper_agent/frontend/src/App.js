@@ -1,7 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n/i18n';
@@ -22,36 +20,34 @@ import ReadingList from './pages/ReadingList';
 import AskLibrary from './pages/AskLibrary';
 import ResearchDigest from './pages/ResearchDigest';
 import WritingIntegration from './pages/WritingIntegration';
+import LiteratureTree from './pages/LiteratureTree';
+import ScholarInsights from './pages/ScholarInsights';
+import ResearchChat from './pages/ResearchChat';
+import ConferenceTrackerPage from './pages/ConferenceTrackerPage';
+import FlashcardReview from './pages/FlashcardReview';
+import ReadingAnalyticsPage from './pages/ReadingAnalyticsPage';
+import ResearchJournalPage from './pages/ResearchJournalPage';
+import ResearchOverview from './pages/ResearchOverview';
+import OnboardingWizard from './pages/OnboardingWizard';
+import GraphRAGPage from './pages/GraphRAGPage';
+import AgentConsole from './pages/AgentConsole';
+import FigureGallery from './pages/FigureGallery';
+import DownstreamTools from './pages/DownstreamTools';
+import ApiDocs from './pages/ApiDocs';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import { SnackbarProvider } from './contexts/SnackbarContext';
+import { ThemeProviderWrapper } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2563eb', // More modern blue
-    },
-    secondary: {
-      main: '#7c3aed', // Purple for AI features
-    },
-    background: {
-      default: '#f8fafc',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-  },
-});
 
 function App() {
   return (
     <I18nextProvider i18n={i18n}>
       <AuthProvider>
         <SnackbarProvider>
-        <ThemeProvider theme={theme}>
+        <ThemeProviderWrapper>
           <CssBaseline />
           <Router>
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -76,11 +72,27 @@ function App() {
                   <Route path="/writing" element={<ProtectedRoute><WritingIntegration /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                  <Route path="/literature-tree" element={<ProtectedRoute><LiteratureTree /></ProtectedRoute>} />
+                  <Route path="/insights/:id" element={<ProtectedRoute><ScholarInsights /></ProtectedRoute>} />
+                  <Route path="/insights" element={<ProtectedRoute><ScholarInsights /></ProtectedRoute>} />
+                  <Route path="/research-chat" element={<ProtectedRoute><ResearchChat /></ProtectedRoute>} />
+                  <Route path="/conferences" element={<ProtectedRoute><ConferenceTrackerPage /></ProtectedRoute>} />
+                  <Route path="/flashcards" element={<ProtectedRoute><FlashcardReview /></ProtectedRoute>} />
+                  <Route path="/analytics" element={<ProtectedRoute><ReadingAnalyticsPage /></ProtectedRoute>} />
+                  <Route path="/journal" element={<ProtectedRoute><ResearchJournalPage /></ProtectedRoute>} />
+                  <Route path="/onboarding" element={<ProtectedRoute><OnboardingWizard /></ProtectedRoute>} />
+                  <Route path="/overview" element={<ProtectedRoute><ResearchOverview /></ProtectedRoute>} />
+                  <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
+                  <Route path="/graphrag" element={<ProtectedRoute><GraphRAGPage /></ProtectedRoute>} />
+                  <Route path="/agents" element={<ProtectedRoute><AgentConsole /></ProtectedRoute>} />
+                  <Route path="/figures" element={<ProtectedRoute><FigureGallery /></ProtectedRoute>} />
+                  <Route path="/figures/:id" element={<ProtectedRoute><FigureGallery /></ProtectedRoute>} />
+                  <Route path="/research-tools" element={<ProtectedRoute><DownstreamTools /></ProtectedRoute>} />
                 </Routes>
               </Box>
             </Box>
           </Router>
-        </ThemeProvider>
+        </ThemeProviderWrapper>
         </SnackbarProvider>
       </AuthProvider>
     </I18nextProvider>

@@ -9,24 +9,33 @@ from datetime import datetime
 from typing import Optional, List, Dict
 import uuid
 
+import sys as _sys
+import logging as _logging
+_logger = _logging.getLogger(__name__)
+
 try:
     from paper_agent.backend.services.cluster_database import Base
 except ImportError:
     try:
         from backend.services.cluster_database import Base
     except ImportError:
-        from sqlalchemy.orm import DeclarativeBase
-        class Base(DeclarativeBase):
-            pass
-
-
-# ---------------------------------------------------------------------------
+        for _mod_name in list(_sys.modules.keys()):
+            if 'cluster_database' in _mod_name:
+                _mod = _sys.modules[_mod_name]
+                if hasattr(_mod, 'Base'):
+                    Base = _mod.Base
+                    break
+        else:
+            from sqlalchemy.orm import DeclarativeBase
+            Base = type('Base', (DeclarativeBase,), {})()
+            _logger.warning("Using fallback Base for notebook models")
 # Research Notebook & Discovery
 # ---------------------------------------------------------------------------
 
 class Notebook(Base):
     """A research notebook for a user."""
     __tablename__ = "notebooks"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     user_id = Column(String(36), index=True, nullable=False)
@@ -43,6 +52,7 @@ class Notebook(Base):
 class NotebookEntry(Base):
     """An entry in a research notebook."""
     __tablename__ = "notebook_entries"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     notebook_id = Column(String(36), index=True, nullable=False)
@@ -52,7 +62,7 @@ class NotebookEntry(Base):
     # New: Structured AI findings
     source_nodes = Column(JSON, default=list)  # References to specific parts of papers
     confidence_score = Column(Integer)  # For AI-generated insights
-    metadata = Column(JSON, default=dict)
+    doc_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -60,6 +70,7 @@ class NotebookEntry(Base):
 class ResearchThread(Base):
     """Persisted AI conversation focused on a research goal."""
     __tablename__ = "research_threads"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     user_id = Column(String(36), index=True, nullable=False)
@@ -79,6 +90,7 @@ class ResearchThread(Base):
 class ZoteroCredential(Base):
     """Zotero API credentials for a user."""
     __tablename__ = "zotero_credentials"
+    __table_args__ = {"extend_existing": True}
 
     user_id = Column(String(36), primary_key=True)
     zotero_user_id = Column(String(50), nullable=False)

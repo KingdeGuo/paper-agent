@@ -66,6 +66,7 @@ class Base(DeclarativeBase):
 
 class Document(Base):
     __tablename__ = "documents"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(String(36), primary_key=True)
     filename = Column(String(255), nullable=False)

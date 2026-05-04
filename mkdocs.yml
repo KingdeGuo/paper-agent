@@ -1,0 +1,186 @@
+# Paper Agent Documentation
+# Built with MkDocs Material Theme
+# https://squidfunk.github.io/mkdocs-material/
+
+site_name: Paper Agent
+site_description: AI Research Companion — Open-source, enterprise-grade academic literature management
+site_author: Paper Agent Team
+site_url: https://kingdeguo.github.io/paper-agent
+repo_name: KingdeGuo/paper-agent
+repo_url: https://github.com/KingdeGuo/paper-agent
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 Paper Agent Team
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.tabs.link
+    - content.code.copy
+    - content.code.annotate
+    - content.tooltips
+    - header.autohide
+    - announce.dismiss
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/book-open-variant
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+plugins:
+  - search:
+      lang:
+        - en
+        - zh
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+  - minify:
+      minify_html: true
+  - tags:
+      tags_file: tags.md
+  - social:
+      cards_layout_options:
+        background_color: "#3949ab"
+  - offline
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/KingdeGuo/paper-agent
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/paper-agent
+    - icon: fontawesome/solid/envelope
+      link: mailto:kingdeguo01@gmail.com
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation.
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+  generator: false
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: KingdeGuo
+      repo: paper-agent
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+    - Configuration: configuration.md
+    - Deployment: deployment.md
+  - User Guide:
+    - Overview: user-guide/index.md
+    - Document Management: user-guide/documents.md
+    - Smart Search: user-guide/search.md
+    - AI Summarization: user-guide/summarization.md
+    - Knowledge Graph: user-guide/knowledge-graph.md
+    - Reading & Annotations: user-guide/reading.md
+    - Discovery & Analysis: user-guide/discovery.md
+    - Writing & Citations: user-guide/writing.md
+    - Research Projects: user-guide/projects.md
+    - Team Workspaces: user-guide/workspaces.md
+    - Flashcards & Review: user-guide/flashcards.md
+  - API Reference:
+    - Overview: api/index.md
+    - Authentication: api/authentication.md
+    - Documents: api/documents.md
+    - Search: api/search.md
+    - Summaries: api/summaries.md
+    - Knowledge Graph: api/knowledge-graph.md
+    - Reading & Annotations: api/reading.md
+    - Discovery & Drafting: api/discovery.md
+    - Citations & BibTeX: api/citations.md
+    - Collaboration: api/collaboration.md
+    - Projects & Workspaces: api/projects.md
+    - Integrations: api/integrations.md
+    - System: api/system.md
+  - Architecture:
+    - Overview: architecture/index.md
+    - System Design: architecture/design.md
+    - Data Flow: architecture/data-flow.md
+    - Database Schema: architecture/database.md
+    - Security: architecture/security.md
+  - MCP Integration: mcp.md
+  - Research Skills: skills.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+  - FAQ: faq.md
+  - Roadmap: roadmap.md

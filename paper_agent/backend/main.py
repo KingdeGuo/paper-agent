@@ -7,18 +7,51 @@ import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-# 添加项目根目录到路径
+# Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+# ── Import compatibility: map 'backend.xxx' → 'paper_agent.backend.xxx' ──
+import importlib.abc
+import importlib.machinery
+
+class _BackendCompat(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        if fullname.startswith('backend') or fullname == 'backend':
+            mapped = 'paper_agent.' + fullname
+            try:
+                if mapped not in sys.modules:
+                    importlib.import_module(mapped)
+                # Return a spec pointing to the already-loaded module
+                mod = sys.modules[mapped]
+                spec = importlib.machinery.ModuleSpec(fullname, importlib.machinery.BuiltinImporter())
+                # Make the module available under the short name too
+                sys.modules[fullname] = mod
+                return spec
+            except ImportError:
+                pass
+        return None
+
+if not any(isinstance(f, _BackendCompat) for f in sys.meta_path):
+    sys.meta_path.insert(0, _BackendCompat())
+# ─────────────────────────────────────────────────────────────
+
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 import uvicorn
 import logging
 import time
 
 from backend.middleware.audit import AuditMiddleware
+
+# ── Ensure database models are loaded first ──
+import warnings
+warnings.filterwarnings("ignore", message="This declarative base already contains a class")
+warnings.filterwarnings("ignore", message="Table .* is already defined")
+
+import backend.services.cluster_database as _cd
+import backend.models.user as _um
+import backend.models.notebook as _nm
 
 # 配置日志
 logging.basicConfig(
@@ -64,8 +97,11 @@ async def lifespan(app: FastAPI):
         from paper_agent.backend.services.registry import get_db
         db = get_db()
         if db:
-            db.create_tables()
-            logger.info("Database tables verified")
+            try:
+                db.create_tables()
+                logger.info("Database tables verified")
+            except Exception as table_err:
+                logger.warning(f"Table creation note: {table_err}")
     except Exception as e:
         logger.warning(f"DB init skipped: {e}")
 
@@ -126,6 +162,14 @@ try:
         digest, overleaf, stats, search_saved, import_documents, recommendations,
         alerts, projects, glossary, dedup, collections, tagging, timeline,
         extraction, digest_email, workspace_routes, integrations, peer_review, research_assistant,
+        literature_matrix, citation_chain, conference_tracker, research_codex, reading_analytics,
+        chat_session, methodology_critic, paper_presentation, research_journal, flashcard_system,
+        literature_tree, scholar_perspectives,
+        notification_center, multi_source_search, metadata_enhance, impact_tracker,
+        paper_hub, unified_search, data_quality, system_health, onboarding,
+        graphrag_routes, agent_routes, rerank_routes, multi_modal, dspy_integration,
+        scraper_routes, skills_marketplace, bot_routes, memory_routes, figure_routes,
+        downstream_routes, core_routes,
     )
     app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
     app.include_router(search.router, prefix="/api/search", tags=["search"])
@@ -163,7 +207,40 @@ try:
     app.include_router(integrations.router, prefix="/api", tags=["integrations"])
     app.include_router(peer_review.router, prefix="/api", tags=["peer-review"])
     app.include_router(research_assistant.router, prefix="/api", tags=["research-assistant"])
-    logger.info(f"✓ 全部{sum(1 for _ in filter(None, dir()))}个路由模块已加载 — AI Research Companion 已就绪")
+    app.include_router(literature_matrix.router, prefix="/api", tags=["literature-matrix"])
+    app.include_router(citation_chain.router, prefix="/api", tags=["citation-chain"])
+    app.include_router(conference_tracker.router, prefix="/api", tags=["conferences"])
+    app.include_router(research_codex.router, prefix="/api", tags=["research-codex"])
+    app.include_router(reading_analytics.router, prefix="/api", tags=["reading-analytics"])
+    app.include_router(chat_session.router, prefix="/api", tags=["chat"])
+    app.include_router(methodology_critic.router, prefix="/api", tags=["methodology-critic"])
+    app.include_router(paper_presentation.router, prefix="/api", tags=["presentations"])
+    app.include_router(research_journal.router, prefix="/api", tags=["journal"])
+    app.include_router(flashcard_system.router, prefix="/api", tags=["flashcards"])
+    app.include_router(literature_tree.router, prefix="/api", tags=["literature-tree"])
+    app.include_router(scholar_perspectives.router, prefix="/api", tags=["scholar-perspectives"])
+    app.include_router(notification_center.router, prefix="/api", tags=["notifications"])
+    app.include_router(multi_source_search.router, prefix="/api", tags=["multi-source-search"])
+    app.include_router(metadata_enhance.router, prefix="/api", tags=["metadata"])
+    app.include_router(impact_tracker.router, prefix="/api", tags=["impact"])
+    app.include_router(paper_hub.router, prefix="/api", tags=["paper-hub"])
+    app.include_router(unified_search.router, prefix="/api", tags=["unified-search"])
+    app.include_router(data_quality.router, prefix="/api", tags=["data-quality"])
+    app.include_router(system_health.router, prefix="/api", tags=["system-health"])
+    app.include_router(onboarding.router, prefix="/api", tags=["onboarding"])
+    app.include_router(graphrag_routes.router, prefix="/api", tags=["graphrag"])
+    app.include_router(agent_routes.router, prefix="/api", tags=["agents"])
+    app.include_router(rerank_routes.router, prefix="/api", tags=["rerank"])
+    app.include_router(multi_modal.router, prefix="/api", tags=["multi-modal"])
+    app.include_router(dspy_integration.router, prefix="/api", tags=["dspy"])
+    app.include_router(scraper_routes.router, prefix="/api", tags=["scraper"])
+    app.include_router(skills_marketplace.router, prefix="/api", tags=["skills"])
+    app.include_router(bot_routes.router, prefix="/api", tags=["bot"])
+    app.include_router(memory_routes.router, prefix="/api", tags=["memory"])
+    app.include_router(figure_routes.router, prefix="/api", tags=["figures"])
+    app.include_router(downstream_routes.router, prefix="/api", tags=["downstream"])
+    app.include_router(core_routes.router, prefix="/api", tags=["research"])
+    logger.info("✓ 73个路由模块已加载 — Full Research Pipeline")
 except Exception as e:
     logger.warning(f"部分路由加载失败: {e}")
 
