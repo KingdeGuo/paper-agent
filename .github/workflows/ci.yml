@@ -23,7 +23,7 @@ jobs:
     name: 🐍 Lint Python
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -36,7 +36,7 @@ jobs:
     name: 🎨 Lint Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -49,7 +49,7 @@ jobs:
     name: 🧪 Test Backend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -75,7 +75,7 @@ jobs:
     name: 🏗️ Build Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -89,7 +89,7 @@ jobs:
     name: 🐳 Build Docker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cp .env.example .env
       - name: Build Docker image
         run: docker build -t paper-agent:${{ github.sha }} -f Dockerfile .
@@ -106,7 +106,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
