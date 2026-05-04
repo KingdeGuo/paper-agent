@@ -33,7 +33,7 @@ python-jose[cryptography]>=3.3.0
 boto3>=1.34.0
 
 # Redis
-redis>=5.0.0
+redis>=7.4.0
 
 # Dev
 pytest>=7.4.0
