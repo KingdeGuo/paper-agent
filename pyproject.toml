@@ -31,7 +31,7 @@ dependencies = [
     "pypdf>=3.17.0",
 
     # Validation & settings
-    "pydantic-settings>=2.1.0",
+    "pydantic-settings>=2.14.0",
 
     # HTTP client (for LLM API calls)
     "httpx>=0.26.0",
