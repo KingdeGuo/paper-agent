@@ -17,7 +17,7 @@ sentence-transformers>=2.2.2
 pypdf>=3.17.0
 
 # Validation & settings
-pydantic>=2.0.0
+pydantic>=2.13.3
 pydantic-settings>=2.1.0
 
 # HTTP client (for LLM API calls)
