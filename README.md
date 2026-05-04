@@ -9,7 +9,8 @@
 </p>
 
 <h1 align="center">📚 Paper Agent 2.0</h1>
-<h3 align="center">Your Digital Research Mentor — AI-Powered Academic Literature Management</h3>
+<h3 align="center">AI Research Companion — From Literature Management to Knowledge Creation</h3>
+<h4 align="center"><i>AI for Science, embodied. Open-source. Enterprise-ready. Team-native.</i></h4>
 
 <p align="center">
   <a href="#-features">Features</a> •
@@ -20,19 +21,38 @@
   <a href="docs/architecture.md">Architecture</a> •
   <a href="mcp/">MCP Integration</a> •
   <a href="skills/">Skills</a> •
+  <a href="paper_agent/frontend/public/bookmarklet.html">Bookmarklet</a> •
   <a href="./README_zh.md">中文</a>
 </p>
 
 ---
 
-## 🎯 What is Paper Agent?
+## 🎯 The Vision: AI Research Companion
 
-Paper Agent is an **open-source, enterprise-grade academic research platform** that transforms how researchers interact with literature. It goes far beyond simple PDF management — using **deep AI reasoning**, **semantic synthesis**, and **knowledge graph analysis** to help you:
+Paper Agent is more than a literature management tool. It is an **AI Research Companion** — a concrete embodiment of **AI for Science** — that accompanies researchers through the **entire research lifecycle**.
 
-- **Discover** hidden connections between papers
-- **Analyze** contradictions and research gaps
-- **Synthesize** literature reviews automatically
-- **Organize** your research with AI-powered notebooks
+```
+Discovery → Comprehension → Synthesis → Writing → Publication → Impact
+    ↑                                                        │
+    └─────────────────── AI Feedback Loop ────────────────────┘
+```
+
+**For Individual Researchers:** Your personal AI research assistant that reads with you, remembers what you've learned, connects ideas across papers, helps you write with proper citations, and never forgets a reference.
+
+**For Research Teams:** A shared workspace where PIs, postdocs, and students can collaboratively explore literature, annotate papers together, set team reading goals, and generate collective insights.
+
+**For the Scientific Community:** An open-source platform that embodies the principles of open science — transparent, extensible, built for and by researchers.
+
+### ✨ What Makes This Different?
+
+| Dimension | Traditional Tools | Paper Agent |
+|-----------|-----------------|-------------|
+| **Scope** | PDF management | Full research lifecycle companion |
+| **AI** | Basic search | Deep reasoning, synthesis, gap analysis |
+| **Team** | Siloed | Workspaces, shared annotations, team goals |
+| **Integration** | Desktop-only | MCP, DingTalk, Feishu, Slack, Webhook, Browser |
+| **Extensibility** | Closed | Open-source, 36 API modules, MCP tools, Skills |
+| **Data** | Vendor lock-in | Self-hosted, full ownership |
 
 ---
 
@@ -104,6 +124,118 @@ Paper Agent is an **open-source, enterprise-grade academic research platform** t
 | **Smart Recommendations** | AI suggests next papers based on your reading history |
 | **Trend Analysis** | Spot emerging topics and keyword trends in your library |
 | **Reading Statistics** | Visualize your reading habits over time |
+
+### 🔔 Smart Alerts
+| Capability | Description |
+|------------|-------------|
+| **Research Alerts** | Get notified when new papers match your saved search queries |
+| **Frequency Control** | Daily/weekly alert schedule |
+| **Alert History** | Timeline of all triggered notifications |
+| **One-Click Check** | Manual or automatic alert scanning against new documents |
+
+### 📁 Research Projects
+| Capability | Description |
+|------------|-------------|
+| **Project Management** | Organize papers into research projects with deadlines and priority |
+| **Paper Assignment** | Link papers to projects with status tracking |
+| **Milestones** | Track project progress with completable milestones |
+| **Deadline Management** | Set and track project deadlines |
+
+### 📖 Concept Glossary
+| Capability | Description |
+|------------|-------------|
+| **AI Term Extraction** | Auto-extract key terms and definitions from any paper |
+| **Categorized Glossary** | Terms organized by category (methodology, technique, concept) |
+| **Search & Filter** | Search across all extracted terminology |
+| **Source Linking** | Every term linked back to its source paper |
+
+### 🏷️ Smart Tagging
+| Capability | Description |
+|------------|-------------|
+| **AI Tag Suggestions** | Automatically suggest relevant tags for any paper |
+| **Global Tag Index** | Browse all tags across your library with paper counts |
+| **Tag-Based Filtering** | Find all papers with a specific tag |
+| **Custom Tags** | Apply and manage your own tag system |
+
+### 🔄 Duplicate Detection
+| Capability | Description |
+|------------|-------------|
+| **Title-Based Detection** | Smart duplicate detection using title similarity scoring |
+| **One-Click Merge** | Merge duplicates, preserving annotations, notes, and relationships |
+| **Auto-Clean** | Batch detect and merge all duplicates |
+| **Conflict Resolution** | Keeps the version with richer metadata |
+
+### 📦 Paper Collections
+| Capability | Description |
+|------------|-------------|
+| **Curated Bundles** | Create themed collections of papers |
+| **Public Sharing** | Share collections via unique share codes |
+| **Collaborative Curation** | Build reading lists for students or collaborators |
+| **Notes Per Paper** | Add context notes to each paper in a collection |
+
+### 📊 Research Timeline
+| Capability | Description |
+|------------|-------------|
+| **Temporal Distribution** | See paper counts by year across your library |
+| **Topic Evolution** | Track how research topics have changed over time |
+| **Author Timelines** | Publication timeline for any author in your library |
+| **Trend Visualization** | Spot emerging and declining research areas |
+
+### 🔬 Data Extraction
+| Capability | Description |
+|------------|-------------|
+| **Key Findings Extraction** | Extract research question, methodology, findings, limitations |
+| **Methodology Details** | Extract framework, dataset, metrics, baselines |
+| **Cross-Paper Comparison** | Compare methodology or findings across multiple papers |
+| **Structured Output** | Machine-readable JSON format for further analysis |
+
+### 📧 Email Digest
+| Capability | Description |
+|------------|-------------|
+| **Automated Digest** | Generate formatted email-ready digests of library activity |
+| **Research Highlights** | AI-written paragraph on the most interesting research connections |
+| **Activity Summary** | Recent actions, reading progress, and queue status |
+| **Configurable Period** | Daily, weekly, or custom lookback windows |
+
+### 👥 Team Research Workspaces
+| Capability | Description |
+|------------|-------------|
+| **Team Spaces** | Create shared research workspaces with role-based access (owner/admin/member/viewer) |
+| **Shared Library** | Collaborate on papers with granular view/annotate/edit permissions |
+| **Collaborative Annotations** | Team-wide paper discussions, comments, and shared highlights |
+| **Team Goals** | Set collective reading targets with progress tracking |
+| **Activity Stream** | Real-time visibility into what your team is reading and discussing |
+| **Labels** | Organize papers with team-defined label system |
+| **Invitation System** | Invite members via email or share codes with 7-day expiry |
+| **Team Digest** | Automated weekly summary of team research activity |
+
+### 🤖 AI Research Assistant
+| Capability | Description |
+|------------|-------------|
+| **Daily Agenda** | Personalized daily research plan with AI focus suggestions |
+| **Weekly Briefing** | Executive-level weekly research briefing with key metrics |
+| **Writing Feedback** | Structured AI feedback on academic writing (clarity, argument, rigor) |
+| **Research Directions** | AI analysis of your library suggesting promising research directions |
+
+### 🔄 Peer Review Module
+| Capability | Description |
+|------------|-------------|
+| **Paper Submission** | Submit papers from your library for structured review |
+| **Reviewer Management** | Invite reviewers, track assignments, manage deadlines |
+| **Structured Review Forms** | 8-dimension scoring (novelty, methodology, rigor, clarity, etc.) |
+| **Decision Workflow** | Track papers through draft→submitted→under_review→accepted/rejected |
+| **Discussion Threads** | Post-review discussions between authors and reviewers |
+| **Revision Tracking** | Version tracking for revised manuscripts |
+
+### 🔌 Platform Integrations
+| Capability | Description |
+|------------|-------------|
+| **DingTalk Robot** | Send research digests and alerts to DingTalk groups (钉钉机器人) |
+| **Feishu/Lark Bot** | Receive notifications in Feishu groups (飞书机器人) |
+| **Slack Webhook** | Post to any Slack channel |
+| **WeCom Bot** | WeChat Work integration (企业微信机器人) |
+| **Generic Webhook** | Custom webhooks with JSON payload |
+| **Scheduled Delivery** | Automated daily briefings and weekly digests |
 
 ---
 

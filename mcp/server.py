@@ -209,6 +209,66 @@ def create_server() -> Optional[Any]:
                     "properties": {},
                 },
             ),
+            types.Tool(
+                name="manage_alerts",
+                description="Create or list research alerts. Get notified when new papers match your interests.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["list", "create", "delete", "check"]},
+                        "name": {"type": "string", "description": "Alert name (for create)"},
+                        "query": {"type": "string", "description": "Search query to monitor (for create)"},
+                        "alert_id": {"type": "string", "description": "Alert ID (for delete)"},
+                    },
+                    "required": ["action"],
+                },
+            ),
+            types.Tool(
+                name="manage_projects",
+                description="Organize papers into research projects with milestones and tracking.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["list", "create", "get", "delete"]},
+                        "title": {"type": "string", "description": "Project title"},
+                        "project_id": {"type": "string", "description": "Project ID"},
+                    },
+                    "required": ["action"],
+                },
+            ),
+            types.Tool(
+                name="get_glossary",
+                description="Get automatically extracted key terms and definitions from your papers.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "search": {"type": "string", "description": "Search for specific terms"},
+                    },
+                },
+            ),
+            types.Tool(
+                name="manage_collections",
+                description="Create curated paper collections/bundles for sharing or organization.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["list", "create", "get"]},
+                        "title": {"type": "string", "description": "Collection title"},
+                        "collection_id": {"type": "string", "description": "Collection ID"},
+                    },
+                    "required": ["action"],
+                },
+            ),
+            types.Tool(
+                name="analyze_timeline",
+                description="Get research timeline data showing paper distribution, trends, and author activity over time.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "group_by": {"type": "string", "enum": ["year", "topic"], "default": "year"},
+                    },
+                },
+            ),
         ]
 
     @server.call_tool()
@@ -494,6 +554,145 @@ def create_server() -> Optional[Any]:
 
                 avg_year = sum(k * v for k, v in years.items()) / sum(years.values()) if years else 0
                 text += f"\n**Average publication year**: {avg_year:.0f}\n"
+                return [types.TextContent(type="text", text=text)]
+
+            elif name == "manage_alerts":
+                action = arguments.get("action", "list")
+                from paper_agent.backend.api.routes.alerts import ensure_tables as ensure_alert_tables
+                await ensure_alert_tables(db)
+                if action == "list":
+                    async with db.async_session_maker() as session:
+                        from sqlalchemy import text as sa_text
+                        rows = (await session.execute(sa_text("SELECT name, query, frequency, last_triggered FROM research_alerts WHERE user_id = 'default' AND is_active = 1"))).fetchall()
+                        if not rows:
+                            return [types.TextContent(type="text", text="No active alerts. Create one with manage_alerts(action='create', name='...', query='...').")]
+                        text = "## Active Research Alerts\n\n" + "\n".join(f"- **{r[0]}**: `{r[1]}` ({r[2]})" for r in rows)
+                        return [types.TextContent(type="text", text=text)]
+                elif action == "create":
+                    name = arguments.get("name", "Alert")
+                    query = arguments.get("query", "")
+                    import uuid
+                    async with db.async_session_maker() as session:
+                        from sqlalchemy import text as sa_text
+                        await session.execute(sa_text(
+                            "INSERT INTO research_alerts (id, user_id, name, query, frequency) VALUES (:id, 'default', :n, :q, 'daily')"),
+                            {"id": str(uuid.uuid4()), "n": name, "q": query})
+                        await session.commit()
+                    return [types.TextContent(type="text", text=f"✅ Alert '{name}' created! I'll notify you when new papers match: {query}")]
+                elif action == "check":
+                    # Check all active alerts
+                    async with db.async_session_maker() as session:
+                        from sqlalchemy import text as sa_text
+                        alerts = (await session.execute(sa_text("SELECT id, name, query FROM research_alerts WHERE user_id = 'default' AND is_active = 1"))).fetchall()
+                        matches = 0
+                        for alert_id, name, query in alerts:
+                            if vector_service:
+                                results = vector_service.search_similar(query, limit=3)
+                                for r in results:
+                                    if r.get("score", 0) > 0.5:
+                                        matches += 1
+                                        nid = str(uuid.uuid4())
+                                        await session.execute(sa_text(
+                                            "INSERT INTO alert_history (id, alert_id, user_id, document_id, message) VALUES (:id, :aid, 'default', :did, :msg)"),
+                                            {"id": nid, "aid": alert_id, "did": r.get("document_id", ""), "msg": f"New paper matches '{name}'"})
+                            await session.execute(sa_text("UPDATE research_alerts SET last_triggered = :n WHERE id = :id"),
+                                                  {"n": datetime.utcnow().isoformat(), "id": alert_id})
+                        await session.commit()
+                    return [types.TextContent(type="text", text=f"Checked {len(alerts)} alerts. Found {matches} new matches.")]
+                return [types.TextContent(type="text", text="Unknown action. Use: list, create, check")]
+
+            elif name == "manage_projects":
+                action = arguments.get("action", "list")
+                if action == "list":
+                    from sqlalchemy import text as sa_text
+                    async with db.async_session_maker() as session:
+                        rows = (await session.execute(sa_text(
+                            "SELECT id, title, status, priority, (SELECT COUNT(*) FROM project_papers WHERE project_id = p.id) as cnt FROM research_projects p WHERE user_id = 'default' ORDER BY updated_at DESC"))).fetchall()
+                        if not rows:
+                            return [types.TextContent(type="text", text="No research projects. Create one with manage_projects(action='create', title='...')")]
+                        text = "## Research Projects\n\n" + "\n".join(f"- **{r[1]}** ({r[2]}, {r[3]} priority) — {r[4]} papers" for r in rows)
+                        return [types.TextContent(type="text", text=text)]
+                elif action == "create":
+                    title = arguments.get("title", "New Project")
+                    import uuid
+                    async with db.async_session_maker() as session:
+                        from sqlalchemy import text as sa_text
+                        pid = str(uuid.uuid4())
+                        await session.execute(sa_text("INSERT INTO research_projects (id, user_id, title) VALUES (:id, 'default', :t)"), {"id": pid, "t": title})
+                        await session.commit()
+                    return [types.TextContent(type="text", text=f"✅ Project '{title}' created! (ID: {pid})")]
+                return [types.TextContent(type="text", text="Unknown action")]
+
+            elif name == "get_glossary":
+                search = arguments.get("search", "")
+                from sqlalchemy import text as sa_text
+                async with db.async_session_maker() as session:
+                    sql = "SELECT term, definition, category FROM concept_glossary WHERE user_id = 'default'"
+                    params = {}
+                    if search:
+                        sql += " AND (term LIKE :s OR definition LIKE :s)"
+                        params["s"] = f"%{search}%"
+                    sql += " ORDER BY term ASC LIMIT 30"
+                    rows = (await session.execute(sa_text(sql), params)).fetchall()
+                    if not rows:
+                        return [types.TextContent(type="text", text=f"No glossary terms found{' for ' + search if search else ''}. Extract terms from a paper first.")]
+                    text = "## Glossary\n\n" + "\n\n".join(f"**{r[0]}** ({r[2] or 'concept'}): {r[1] or 'No definition'}" for r in rows)
+                    return [types.TextContent(type="text", text=text)]
+
+            elif name == "manage_collections":
+                action = arguments.get("action", "list")
+                from sqlalchemy import text as sa_text
+                if action == "list":
+                    async with db.async_session_maker() as session:
+                        rows = (await session.execute(sa_text(
+                            "SELECT id, title, description, is_public FROM paper_collections WHERE user_id = 'default' ORDER BY updated_at DESC"))).fetchall()
+                        if not rows:
+                            return [types.TextContent(type="text", text="No collections. Create one with manage_collections(action='create', title='...')")]
+                        text = "## Collections\n\n" + "\n".join(f"- **{r[1]}**: {r[2] or 'No description'} {'🔓' if r[3] else '🔒'}" for r in rows)
+                        return [types.TextContent(type="text", text=text)]
+                elif action == "create":
+                    title = arguments.get("title", "New Collection")
+                    import uuid
+                    async with db.async_session_maker() as session:
+                        cid = str(uuid.uuid4())
+                        await session.execute(sa_text("INSERT INTO paper_collections (id, user_id, title) VALUES (:id, 'default', :t)"), {"id": cid, "t": title})
+                        await session.commit()
+                    return [types.TextContent(type="text", text=f"✅ Collection '{title}' created!")]
+                elif action == "get":
+                    cid = arguments.get("collection_id", "")
+                    async with db.async_session_maker() as session:
+                        col = (await session.execute(sa_text("SELECT title, description FROM paper_collections WHERE id = :id"), {"id": cid})).fetchone()
+                        papers = (await session.execute(sa_text(
+                            "SELECT cp.document_id, d.title, d.authors, d.year FROM collection_papers cp LEFT JOIN documents d ON cp.document_id = d.id WHERE cp.collection_id = :cid"), {"cid": cid})).fetchall()
+                        if not col:
+                            return [types.TextContent(type="text", text="Collection not found")]
+                        text = f"# {col[0]}\n{col[1] or ''}\n\n## Papers ({len(papers)})\n"
+                        for p in papers:
+                            text += f"- **{p[1] or 'Untitled'}** ({p[3] or 'n.d.'})\n"
+                        return [types.TextContent(type="text", text=text)]
+                return [types.TextContent(type="text", text="Unknown action")]
+
+            elif name == "analyze_timeline":
+                group_by = arguments.get("group_by", "year")
+                docs = await db.get_documents(limit=200) if db else []
+                if not docs:
+                    return [types.TextContent(type="text", text="No papers to analyze.")]
+                from collections import defaultdict as dd
+                if group_by == "year":
+                    years = dd(int)
+                    for d in docs:
+                        if d.year: years[d.year] += 1
+                    text = "## Research Timeline\n\n" + "\n".join(f"- **{y}**: {c} papers" for y, c in sorted(years.items()))
+                else:
+                    topics = dd(int)
+                    for d in docs:
+                        for kw in (d.keywords or [])[:3]:
+                            topics[kw] += 1
+                    text = "## Research Topics\n\n" + "\n".join(f"- **{t}**: {c} papers" for t, c in sorted(topics.items(), key=lambda x: -x[1])[:20])
+                text += f"\n\n**Total**: {len(docs)} papers"
+                year_list = [d.year for d in docs if d.year]
+                if year_list:
+                    text += f" | **Range**: {min(year_list)}–{max(year_list)}"
                 return [types.TextContent(type="text", text=text)]
 
             else:

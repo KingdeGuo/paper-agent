@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper Agent Bookmarklet</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #1e293b; line-height: 1.6; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  .subtitle { color: #64748b; margin-bottom: 24px; }
+  .bookmarklet { display: inline-block; padding: 14px 28px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: grab; }
+  .bookmarklet:hover { background: #1d4ed8; }
+  .bookmarklet:active { cursor: grabbing; }
+  .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  ol { padding-left: 20px; }
+  li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+  <h1>📚 Save to Paper Agent</h1>
+  <p class="subtitle">Drag this button to your bookmarks bar to save papers from any website with one click.</p>
+
+  <a class="bookmarklet" href="javascript:(function(){
+    var s=document.createElement('script');
+    s.src=localStorage.getItem('pa_server')||'http://localhost:8000/api/documents/upload';
+    var t=document.title, u=window.location.href;
+    var m=function(){
+      var meta={title:t,url:u};
+      var ct=document.querySelector('meta[name=\\'citation_title\\']');
+      if(ct)meta.title=ct.content;
+      var ca=document.querySelectorAll('meta[name=\\'citation_author\\']');
+      if(ca.length)meta.authors=Array.from(ca).map(function(a){return a.content;});
+      var cd=document.querySelector('meta[name=\\'citation_doi\\']');
+      if(cd)meta.doi=cd.content;
+      var cy=document.querySelector('meta[name=\\'citation_date\\']');
+      if(cy)meta.year=cy.content.match(/\\d{4}/)?.[0];
+      alert('Paper Agent: Paper detected!\\n\\nTitle: '+meta.title+'\\n'+(meta.authors?'Authors: '+meta.authors.join(', ')+'\\n':'')+(meta.doi?'DOI: '+meta.doi:''));
+      var api=localStorage.getItem('pa_api')||'http://localhost:8000/api';
+      fetch(api+'/import/urls',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('pa_token')||'')},
+        body:JSON.stringify({urls:[u]})
+      }).then(function(r){return r.json();}).then(function(d){
+        alert('Saved to Paper Agent!\\n'+(d.imported>0?'Imported '+d.imported+' paper(s)':'Check console for details'));
+      }).catch(function(e){alert('Paper Agent: Error - '+e.message);});
+    };
+    if(document.readyState==='complete')m();else window.addEventListener('load',m);
+  })();">📋 Save to Paper Agent</a>
+
+  <div class="card">
+    <h3>📖 How to Install</h3>
+    <ol>
+      <li>Drag the blue button above to your browser's bookmarks bar</li>
+      <li>Navigate to any academic paper page (arXiv, PubMed, IEEE, any publisher)</li>
+      <li>Click the bookmarklet to detect and save the paper</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Configuration</h3>
+    <p>By default, the bookmarklet connects to <code>http://localhost:8000</code>. To use a different server or add authentication:</p>
+    <ol>
+      <li>Open your browser's developer console (F12)</li>
+      <li>Run: <code>localStorage.setItem('pa_api', 'https://your-server.com/api')</code></li>
+      <li>If using auth: <code>localStorage.setItem('pa_token', 'your-jwt-token')</code></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>🔍 What It Captures</h3>
+    <p>The bookmarklet automatically detects:</p>
+    <ul>
+      <li>Title (from <code>&lt;meta name="citation_title"&gt;</code> or page title)</li>
+      <li>Authors (from <code>&lt;meta name="citation_author"&gt;</code>)</li>
+      <li>DOI (from <code>&lt;meta name="citation_doi"&gt;</code>)</li>
+      <li>Publication date</li>
+      <li>Page URL (for arXiv import, PDF download, etc.)</li>
+    </ul>
+    <p>Supported sites: arXiv, PubMed, IEEE Xplore, Springer, ACM, ScienceDirect, Google Scholar, bioRxiv, OpenReview, and any site with standard citation meta tags.</p>
+  </div>
+</body>
+</html>

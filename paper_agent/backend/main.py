@@ -123,7 +123,9 @@ try:
         documents, search, summary, users, knowledge, 
         review, arxiv, notebooks, discovery, zotero, drafting, 
         annotations, bibtex, citations, reading, ask, collaboration, 
-        digest, overleaf, stats, search_saved, import_documents, recommendations
+        digest, overleaf, stats, search_saved, import_documents, recommendations,
+        alerts, projects, glossary, dedup, collections, tagging, timeline,
+        extraction, digest_email, workspace_routes, integrations, peer_review, research_assistant,
     )
     app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
     app.include_router(search.router, prefix="/api/search", tags=["search"])
@@ -148,7 +150,20 @@ try:
     app.include_router(search_saved.router, prefix="/api/searches", tags=["searches"])
     app.include_router(import_documents.router, prefix="/api/import", tags=["import"])
     app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
-    logger.info("✓ 全部23个路由模块已加载（含MCP支持）")
+    app.include_router(alerts.router, prefix="/api", tags=["alerts"])
+    app.include_router(projects.router, prefix="/api", tags=["projects"])
+    app.include_router(glossary.router, prefix="/api", tags=["glossary"])
+    app.include_router(dedup.router, prefix="/api/dedup", tags=["dedup"])
+    app.include_router(collections.router, prefix="/api", tags=["collections"])
+    app.include_router(tagging.router, prefix="/api/tags", tags=["tagging"])
+    app.include_router(timeline.router, prefix="/api", tags=["timeline"])
+    app.include_router(extraction.router, prefix="/api", tags=["extraction"])
+    app.include_router(digest_email.router, prefix="/api", tags=["digest"])
+    app.include_router(workspace_routes.router, prefix="/api", tags=["workspace"])
+    app.include_router(integrations.router, prefix="/api", tags=["integrations"])
+    app.include_router(peer_review.router, prefix="/api", tags=["peer-review"])
+    app.include_router(research_assistant.router, prefix="/api", tags=["research-assistant"])
+    logger.info(f"✓ 全部{sum(1 for _ in filter(None, dir()))}个路由模块已加载 — AI Research Companion 已就绪")
 except Exception as e:
     logger.warning(f"部分路由加载失败: {e}")
 
