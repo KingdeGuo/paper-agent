@@ -1,9 +1,10 @@
 """
-Authentication service - simplified for reliability.
+Authentication service - enterprise-grade security.
 
-Uses JWT for tokens and SHA256 for password hashing (no bcrypt dependency issues).
+Uses JWT for tokens and PBKDF2-SHA256 with salt for password hashing.
 """
 
+import os
 import logging
 import hashlib
 import secrets
@@ -18,23 +19,33 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ---------------------------------------------------------------------------
 
-SECRET_KEY = "paper-agent-secret-key-change-in-production"
+SECRET_KEY = os.environ.get("PAPER_AGENT_SECRET_KEY", "paper-agent-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+PBKDF2_ITERATIONS = 600_000
 
 
 # ---------------------------------------------------------------------------
-# Password handling (simple SHA256 - reliable, no dependencies)
+# Password handling (PBKDF2-SHA256 with salt)
 # ---------------------------------------------------------------------------
 
 def hash_password(password: str) -> str:
-    """Hash password using SHA256."""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using PBKDF2-SHA256 with random salt."""
+    salt = os.urandom(32)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, PBKDF2_ITERATIONS)
+    return f"{salt.hex()}${key.hex()}"
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash."""
-    return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+    """Verify password against stored PBKDF2 hash."""
+    try:
+        salt_hex, key_hex = hashed_password.split("$")
+        salt = bytes.fromhex(salt_hex)
+        stored_key = bytes.fromhex(key_hex)
+        new_key = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt, PBKDF2_ITERATIONS)
+        return new_key == stored_key
+    except (ValueError, AttributeError):
+        return False
 
 
 # ---------------------------------------------------------------------------

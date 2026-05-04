@@ -19,6 +19,7 @@ import Zotero from './pages/Zotero';
 import Drafting from './pages/Drafting';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
+import { SnackbarProvider } from './contexts/SnackbarContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const theme = createTheme({
@@ -42,6 +43,7 @@ function App() {
   return (
     <I18nextProvider i18n={i18n}>
       <AuthProvider>
+        <SnackbarProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
@@ -65,6 +67,7 @@ function App() {
             </Box>
           </Router>
         </ThemeProvider>
+        </SnackbarProvider>
       </AuthProvider>
     </I18nextProvider>
   );

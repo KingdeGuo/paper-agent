@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Button, Paper, TextField, Alert, 
-  List, ListItem, ListItemText, ListItemIcon, Divider,
+  Grid, List, ListItem, ListItemText, ListItemIcon, Divider,
   CircularProgress, IconButton, Chip
 } from '@mui/material';
 import { 
@@ -59,6 +59,42 @@ const Zotero = () => {
     }
   };
 
+  const handleSyncAll = async () => {
+    setStatus({ type: 'info', message: 'Syncing all items...' });
+    try {
+      for (const col of collections) {
+        try {
+          const response = await api.get(`/zotero/collections/${col.key}/items`);
+          const colItems = response.data || [];
+          for (const item of colItems) {
+            try {
+              await api.post(`/zotero/import/${item.key}`);
+            } catch (e) {
+              console.error(`Failed to import item ${item.key}:`, e);
+            }
+          }
+        } catch (e) {
+          console.error(`Failed to sync collection ${col.key}:`, e);
+        }
+      }
+      setStatus({ type: 'success', message: 'All items synced!' });
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Sync failed.' });
+    }
+  };
+
+  const handleSelectCollection = async (collection) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/zotero/collections/${collection.key}/items`);
+      setItems(response.data || []);
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Failed to load collection items.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!connected) {
     return (
       <Box sx={{ maxWidth: 600, mx: 'auto', mt: 10 }}>
@@ -110,9 +146,9 @@ const Zotero = () => {
             <Typography variant="h6" gutterBottom>Collections</Typography>
             <List>
               {collections.map((col) => (
-                <ListItem button key={col.key}>
+                <ListItem button key={col.key} onClick={() => handleSelectCollection(col)}>
                   <ListItemIcon><FolderIcon color="primary" /></ListItemIcon>
-                  <ListItemText primary={col.data.name} />
+                  <ListItemText primary={col.data?.name || col.name || 'Collection'} />
                 </ListItem>
               ))}
             </List>
@@ -122,15 +158,32 @@ const Zotero = () => {
           <Paper sx={{ p: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="h6">Papers in Library</Typography>
-              <Button startIcon={<RefreshIcon />} size="small">Sync All</Button>
+              <Button startIcon={<RefreshIcon />} size="small" onClick={handleSyncAll}>Sync All</Button>
             </Box>
             <Alert severity="warning" sx={{ mb: 2 }}>
               Only items with valid metadata and PDF attachments will be processed.
             </Alert>
-            {/* Real items would be fetched here based on collection click */}
-            <Typography color="text.secondary" sx={{ textAlign: 'center', py: 5 }}>
-              Select a collection to view papers and import them into Paper Agent.
-            </Typography>
+            {loading ? (
+              <Box sx={{ textAlign: 'center', py: 5 }}><CircularProgress /></Box>
+            ) : items.length > 0 ? (
+              <List>
+                {items.map((item) => (
+                  <ListItem key={item.key} secondaryAction={
+                    <IconButton onClick={() => importItem(item.key)}><DownloadIcon /></IconButton>
+                  }>
+                    <ListItemIcon><ArticleIcon /></ListItemIcon>
+                    <ListItemText
+                      primary={item.data?.title || item.title || 'Untitled'}
+                      secondary={item.data?.creators?.map(c => `${c.firstName || ''} ${c.lastName || ''}`).join(', ')}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography color="text.secondary" sx={{ textAlign: 'center', py: 5 }}>
+                Select a collection to view papers and import them into Paper Agent.
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>

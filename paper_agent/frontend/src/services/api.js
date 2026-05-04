@@ -26,7 +26,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.dispatchEvent(new CustomEvent('auth:logout'));
     }
     return Promise.reject(error);
   }
@@ -86,14 +86,15 @@ export const documentsAPI = {
     formData.append('file', file);
     
     if (metadata.title) formData.append('title', metadata.title);
-    if (metadata.authors) formData.append('authors', metadata.authors.join(', '));
+    if (metadata.authors) formData.append('authors', Array.isArray(metadata.authors) ? metadata.authors.join(', ') : metadata.authors);
     if (metadata.year) formData.append('year', metadata.year.toString());
-    if (metadata.keywords) formData.append('keywords', metadata.keywords.join(', '));
+    if (metadata.keywords) formData.append('keywords', Array.isArray(metadata.keywords) ? metadata.keywords.join(', ') : metadata.keywords);
     
     const response = await api.post('/documents/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      params: { model: getSelectedModel() },
     });
     return response.data;
   },
@@ -399,15 +400,52 @@ export const systemAPI = {
     return response.data;
   },  
   getSupportedModels: async () => {
-    return [
-      { id: 'openai', name: 'OpenAI GPT' },
-      { id: 'qwen', name: 'Qwen (通义千问)' },
-      { id: 'deepseek', name: 'DeepSeek' },
-      { id: 'ollama', name: 'Ollama' },
-      { id: 'anthropic', name: 'Anthropic Claude' },
-      { id: 'huggingface', name: 'HuggingFace Transformers' }
-    ];
+    try {
+      const response = await api.get('/system/models');
+      return response.data?.models || [];
+    } catch {
+      return [
+        { id: 'openai', name: 'OpenAI GPT' },
+        { id: 'qwen', name: 'Qwen (通义千问)' },
+        { id: 'deepseek', name: 'DeepSeek' },
+        { id: 'ollama', name: 'Ollama' },
+        { id: 'anthropic', name: 'Anthropic Claude' },
+        { id: 'huggingface', name: 'HuggingFace Transformers' }
+      ];
+    }
   }
+};
+
+export const annotationsAPI = {
+  getAnnotations: async (documentId, page = null) => {
+    const response = await api.get(`/annotations/${documentId}`, { params: { page } });
+    return response.data;
+  },
+
+  createAnnotation: async (documentId, data) => {
+    const response = await api.post(`/annotations/${documentId}`, data);
+    return response.data;
+  },
+
+  updateAnnotation: async (annotationId, data) => {
+    const response = await api.put(`/annotations/${annotationId}`, data);
+    return response.data;
+  },
+
+  deleteAnnotation: async (annotationId) => {
+    const response = await api.delete(`/annotations/${annotationId}`);
+    return response.data;
+  },
+
+  getNotes: async (documentId) => {
+    const response = await api.get(`/annotations/${documentId}/notes`);
+    return response.data;
+  },
+
+  createNote: async (documentId, data) => {
+    const response = await api.post(`/annotations/${documentId}/notes`, data);
+    return response.data;
+  },
 };
 
 export default api;

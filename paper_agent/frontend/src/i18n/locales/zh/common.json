@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "Paper Agent - 智能文献管理系统",
-    "shortTitle": "文献管理"
+    "shortTitle": "Paper Agent"
   },
   "nav": {
     "dashboard": "仪表板",
@@ -9,6 +9,10 @@
     "search": "智能搜索",
     "knowledge": "知识图谱",
     "comparison": "文献对比",
+    "notebooks": "笔记本",
+    "discovery": "知识发现",
+    "drafting": "写作辅助",
+    "zotero": "Zotero",
     "model": "模型",
     "language": "语言"
   },
@@ -19,7 +23,9 @@
     "email": "邮箱",
     "fullName": "姓名",
     "password": "密码",
+    "confirmPassword": "确认密码",
     "passwordHint": "至少8个字符",
+    "passwordMismatch": "两次密码不一致",
     "noAccount": "没有账号？",
     "hasAccount": "已有账号？",
     "error": "认证失败",
@@ -67,6 +73,9 @@
     "authorsSeparator": "用逗号分隔",
     "keywordsSeparator": "用逗号分隔",
     "keywords": "关键词",
+    "compare": "对比",
+    "distill": "提炼",
+    "noDocuments": "暂无文献。上传第一篇PDF开始使用。",
     "uploadSuccess": "文献上传成功",
     "deleteSuccess": "文献删除成功",
     "confirmDelete": "确定要删除这个文献吗？",
@@ -92,6 +101,7 @@
     },
     "content": "文档内容",
     "thinkingMode": "思考模式",
+    "pdfViewer": "PDF阅读器",
     "interactiveQA": "交互式问答",
     "askQuestion": "向AI提问关于文档内容的问题...",
     "submitQuestion": "提问",
@@ -101,7 +111,6 @@
     "thinkingProcess": "思考过程",
     "analysisResult": "分析结果",
     "beta": "公测",
-
     "thinkingModeDescription": "启用思考模式可以查看AI模型的推理过程和分析思路，帮助您更好地理解模型是如何处理和分析文档内容的。",
     "inProgress": "进行中",
     "summaryGenerated": "摘要生成成功",

@@ -52,7 +52,26 @@ const Notebooks = () => {
     }
   };
 
-  const handleCreateNotebook = async () => {
+  const handleAISynthesis = async () => {
+    if (!selectedNotebook) return;
+    try {
+      const response = await api.post('/discovery/gaps', {
+        doc_ids: entries.filter(e => e.document_id).map(e => e.document_id)
+      }, { params: { notebook_id: selectedNotebook.id } });
+      if (response.data?.length > 0) {
+        for (const gap of response.data) {
+          await api.post('/notebooks/entries', {
+            notebook_id: selectedNotebook.id,
+            type: 'insight',
+            content: typeof gap.content === 'string' ? gap.content : JSON.stringify(gap),
+          });
+        }
+        handleSelectNotebook(selectedNotebook);
+      }
+    } catch (err) {
+      console.error('AI Synthesis failed:', err);
+    }
+  };
     try {
       await api.post('/notebooks', newNotebook);
       setOpenDialog(false);
@@ -104,7 +123,7 @@ const Notebooks = () => {
                   <Typography variant="h4" fontWeight="bold">{selectedNotebook.title}</Typography>
                   <Typography variant="body1" color="text.secondary">{selectedNotebook.description}</Typography>
                 </Box>
-                <Button variant="outlined" startIcon={<MagicIcon />}>AI Synthesis</Button>
+                <Button variant="outlined" startIcon={<MagicIcon />} onClick={handleAISynthesis}>AI Synthesis</Button>
               </Box>
 
               <Divider sx={{ mb: 3 }} />

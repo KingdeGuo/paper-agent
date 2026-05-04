@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 
 from backend.services.paper_review import paper_review, ReviewDimension
 from backend.services.cluster_database import ClusterDatabaseService
-from backend.main import get_db
+from backend.services.registry import get_db
 from backend.services.pdf_processor import PDFProcessor
 
 logger = logging.getLogger(__name__)

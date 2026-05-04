@@ -73,6 +73,23 @@ class VectorService:
     # CRUD
     # ------------------------------------------------------------------
 
+    def add_chunk(
+        self, chunk_id: str, text: str, metadata: Dict[str, Any]
+    ) -> Optional[str]:
+        """Add a single chunk to the vector DB."""
+        try:
+            embedding = self.model.encode([text], show_progress_bar=False)
+            self.collection.add(
+                embeddings=embedding.tolist(),
+                documents=[text],
+                metadatas=[{**metadata, "chunk_text": text[:500]}],
+                ids=[chunk_id],
+            )
+            return chunk_id
+        except Exception as exc:
+            logger.error("Error adding chunk %s: %s", chunk_id, exc)
+            return None
+
     def add_document(
         self, document_id: str, text_chunks: List[str], metadata: Dict[str, Any]
     ) -> List[str]:

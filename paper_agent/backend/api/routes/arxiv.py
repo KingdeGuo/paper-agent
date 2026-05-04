@@ -9,9 +9,13 @@ Provides endpoints for:
 """
 
 import logging
+import httpx
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import JSONResponse
+
+from backend.services.registry import get_db
+from backend.services.cluster_database import ClusterDatabaseService
 
 try:
     from paper_agent.backend.services.arxiv_service import arxiv_service
@@ -162,24 +166,18 @@ async def get_daily_papers(category: str = "cs.AI", max_results: int = 50):
 @router.post("/import/{arxiv_id}", summary="Import arXiv paper")
 async def import_arxiv_paper(
     arxiv_id: str,
-    db_service: DatabaseService = Depends(get_db),
-    task_queue_service = Depends(lambda: None), # Placeholder for task queue
+    db_service: ClusterDatabaseService = Depends(get_db),
+    task_queue_service = Depends(lambda: None),
 ):
-    """
-    Import an arXiv paper into Paper Agent.
-    
-    Downloads metadata and PDF, then processes it via the distributed worker.
-    """
+    """Import an arXiv paper into Paper Agent."""
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
-        # 1. Fetch metadata from arXiv
         paper = arxiv_service.fetch_by_id(arxiv_id)
         if not paper:
             raise HTTPException(status_code=404, detail="Paper not found")
-        
-        # 2. Check if already imported
+
         existing = await db_service.get_document_by_arxiv_id(arxiv_id)
         if existing:
             return {
@@ -188,50 +186,39 @@ async def import_arxiv_paper(
                 "status": "existing"
             }
 
-        # 3. Create document record in database
-        from paper_agent.backend.models.document import DocumentCreate
         from paper_agent.backend.services.pdf_processor import PDFProcessor
         pdf_processor = PDFProcessor()
-        
-        # Download PDF bytes
+
         async with httpx.AsyncClient() as client:
             pdf_response = await client.get(paper["pdf_url"], follow_redirects=True, timeout=60.0)
             pdf_response.raise_for_status()
             pdf_content = pdf_response.content
 
-        # Save PDF and get path
         filename = f"arxiv_{arxiv_id}.pdf"
         file_path = pdf_processor.save_file(pdf_content, filename)
-        
-        doc_create = DocumentCreate(
-            filename=filename,
-            title=paper["title"],
-            authors=paper["authors"],
-            year=paper.get("year"),
-            abstract=paper.get("abstract"),
-            keywords=paper.get("categories", []),
-            file_path=file_path,
-            file_size=len(pdf_content),
-            arxiv_id=arxiv_id,
-            arxiv_url=paper.get("arxiv_url")
-        )
-        
-        new_doc = await db_service.create_document(doc_create)
-        
-        # 4. Handle Cluster/Object Storage
+
+        new_doc = await db_service.create_document({
+            "filename": filename,
+            "title": paper["title"],
+            "authors": paper["authors"],
+            "year": paper.get("year"),
+            "abstract": paper.get("abstract"),
+            "keywords": paper.get("categories", []),
+            "file_path": file_path,
+            "file_size": len(pdf_content),
+            "arxiv_id": arxiv_id,
+        })
+
         from paper_agent.backend.services.object_storage import storage
         if storage.enabled:
             await storage.upload_file(file_path, filename)
-            # Update path to relative if using object storage
             await db_service.update_document_path(new_doc.id, filename)
 
-        # 5. Enqueue processing task
         from paper_agent.backend.services.task_queue import task_queue
         if task_queue.enabled:
             await task_queue.enqueue_document_process(new_doc.id, file_path)
             message = "Paper imported and queued for processing"
         else:
-            # Synchronous processing if no queue (not recommended for production)
             from paper_agent.backend.services.worker import TaskWorker
             worker = TaskWorker()
             await worker._process_document({"document_id": new_doc.id, "file_path": file_path})

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
@@ -7,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored token and user
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     
@@ -22,6 +22,16 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const handleLogout = () => {
+      setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    };
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, []);
+
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -33,12 +43,28 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const isAuthenticated = () => {
-    return !!localStorage.getItem('token');
-  };
+  const isAuthenticated = useCallback(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const getToken = () => {
     return localStorage.getItem('token');
+  };
+
+  const hasRole = (role) => {
+    return user?.role === role || user?.role === 'admin';
   };
 
   return (
@@ -50,6 +76,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         getToken,
         loading,
+        hasRole,
       }}
     >
       {children}

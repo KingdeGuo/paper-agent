@@ -15,7 +15,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { documentsAPI, summaryAPI, knowledgeAPI } from '../services/api';
+import { documentsAPI, summaryAPI, knowledgeAPI, annotationsAPI } from '../services/api';
 import ThinkingMode from '../components/ThinkingMode';
 import PDFViewer from '../components/PDFViewer';
 
@@ -98,20 +98,38 @@ const DocumentDetail = () => {
       const result = await knowledgeAPI.reviewDocument(id);
       setReview(result);
     } catch (err) {
-      setError(`Review failed: ${err.message}`);
+      setError(t('errors.fetchFailed', { message: err.message }));
     } finally {
       setReviewLoading(false);
     }
   };
 
-  const handleHighlight = (data) => {
-    console.log('Highlight created:', data);
-    // TODO: Save highlight via API
+  const handleHighlight = async (data) => {
+    try {
+      await annotationsAPI.createAnnotation(id, {
+        page_number: data.page,
+        text: data.text,
+        position_x: data.position?.x,
+        position_y: data.position?.y,
+        width: data.position?.width,
+        height: data.position?.height,
+        highlight_color: '#FFEB3B',
+      });
+    } catch (err) {
+      console.error('Failed to save highlight:', err);
+    }
   };
 
-  const handleNote = (data) => {
-    console.log('Note created:', data);
-    // TODO: Save note via API
+  const handleNote = async (data) => {
+    try {
+      await annotationsAPI.createNote(id, {
+        page_number: data.page,
+        content: data.content || 'Untitled note',
+        color: '#FFF9C4',
+      });
+    } catch (err) {
+      console.error('Failed to save note:', err);
+    }
   };
 
   if (loading) {
@@ -247,7 +265,7 @@ const DocumentDetail = () => {
         onChange={(e, newValue) => setActiveTab(newValue)}
         sx={{ mb: 2 }}
       >
-        <Tab label="PDF Viewer" />
+        <Tab label={t('documentDetail.pdfViewer') || 'PDF Viewer'} />
         <Tab label={t('documentDetail.thinkingMode')} />
         <Tab label={t('documentDetail.content')} />
       </Tabs>

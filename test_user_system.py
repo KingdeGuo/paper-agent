@@ -1,73 +1,73 @@
-"""
-Test backend functionality directly.
-"""
+"""User system integration tests."""
 import asyncio
 import sys
-sys.path.insert(0, '/Users/kingdeguo/Downloads/同步空间/codes/paper_agent')
+from pathlib import Path
 
-from paper_agent.backend.services.cluster_database import ClusterDatabaseService, User
-from paper_agent.backend.services.auth_service import auth_service
+project_root = Path(__file__).resolve().parent
+sys.path.insert(0, str(project_root))
+
+from paper_agent.backend.services.auth_service import (
+    hash_password, verify_password, create_access_token, decode_token,
+)
+from paper_agent.backend.services.cluster_database import ClusterDatabaseService
+from paper_agent.backend.models.user import User
+
 
 async def test_user_system():
-    print("=== Testing User System ===")
-    
-    # Create tables
-    print("\n1. Creating database tables...")
+    print("=== User System Tests ===\n")
+
+    print("1. Password hashing...")
+    password = "password123"
+    hashed = hash_password(password)
+    assert verify_password(password, hashed)
+    assert not verify_password("wrongpass", hashed)
+    print("   ✓ PBKDF2-SHA256 working")
+
+    print("2. Database tables...")
     db = ClusterDatabaseService()
     db.create_tables()
     print("   ✓ Tables created")
-    
-    # Test password hashing
-    print("\n2. Testing password hashing...")
-    password = "password123"
-    hashed = auth_service.hash_password(password)
-    print(f"   ✓ Password hashed: {hashed[:20]}...")
-    
-    verify_result = auth_service.verify_password(password, hashed)
-    print(f"   ✓ Password verified: {verify_result}")
-    
-    # Create test user
-    print("\n3. Creating test user...")
-    import uuid
-    user_id = str(uuid.uuid4())
-    
-    async with db.async_session_maker() as session:
-        # Check if user exists
-        from sqlalchemy import select
-        result = await session.execute(
-            select(User).where(User.username == "testuser")
-        )
-        existing = result.scalar_one_or_none()
-        
-        if existing:
-            print("   ✓ User already exists")
-            user = existing
-        else:
-            user = User(
-                id=user_id,
-                username="testuser",
-                email="test@example.com",
-                hashed_password=hashed,
-                full_name="Test User",
-            )
-            session.add(user)
-            await session.commit()
-            await session.refresh(user)
-            print(f"   ✓ User created: {user.username}")
-    
-    # Test JWT token
-    print("\n4. Testing JWT token...")
-    token = auth_service.create_access_token({
-        "sub": user.id,
-        "username": user.username,
-    })
-    print(f"   ✓ Token created: {token[:30]}...")
-    
-    # Decode token
-    payload = auth_service.decode_token(token)
-    print(f"   ✓ Token decoded: user_id={payload.get('sub')}")
-    
-    print("\n=== User System Ready! ===")
 
-# Run test
-asyncio.run(test_user_system())
+    print("3. User creation...")
+    import uuid
+    from sqlalchemy import select
+
+    user_id = str(uuid.uuid4())
+    async with db.async_session_maker() as session:
+        user = User(
+            id=user_id,
+            username="testuser",
+            email="test@example.com",
+            hashed_password=hashed,
+            full_name="Test User",
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        print(f"   ✓ User created: {user.username}")
+
+    print("4. JWT token...")
+    token = create_access_token({"sub": user.id, "username": user.username})
+    assert token
+    print(f"   ✓ Token created")
+
+    payload = decode_token(token)
+    assert payload is not None
+    assert payload["sub"] == user.id
+    print(f"   ✓ Token decoded")
+
+    print("5. Cleanup...")
+    async with db.async_session_maker() as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        u = result.scalar_one_or_none()
+        if u:
+            await session.delete(u)
+            await session.commit()
+    print("   ✓ Test user cleaned up")
+
+    print()
+    print("=== User System Ready! ===")
+
+
+if __name__ == "__main__":
+    asyncio.run(test_user_system())

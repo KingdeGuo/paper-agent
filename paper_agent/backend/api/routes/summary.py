@@ -276,4 +276,4 @@ async def regenerate_summary(
         raise
     except Exception as e:
         logger.error(f"Error regenerating summary: {e}")
-        raise HTTPException(status_code=500, detail=str(e))code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

@@ -7,17 +7,19 @@ Supports:
 - Bookmark management
 """
 
+import uuid
 import logging
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
-from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.cluster_database import ClusterDatabaseService, Document
+from backend.services.registry import get_db
 from backend.models.annotation import (
     AnnotationCreate, AnnotationResponse, AnnotationUpdate,
     NoteCreate, NoteResponse,
 )
-from backend.main import get_db
 
 logger = logging.getLogger(__name__)
 

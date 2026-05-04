@@ -46,6 +46,11 @@ except ImportError:
     except ImportError:
         get_db = get_pdf_processor = get_vector_service = get_llm_service = lambda: None
 
+try:
+    from backend.middleware.auth import get_optional_user, get_current_user_from_token
+except ImportError:
+    get_optional_user = get_current_user_from_token = lambda: None
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
@@ -146,10 +151,15 @@ async def get_documents(
     limit: int = 100,
     processed: Optional[int] = None,
     db_service: DatabaseService = Depends(get_db),
+    current_user = Depends(get_optional_user),
 ):
-    """Get all documents with optional filtering."""
+    """Get all documents with optional filtering and user isolation."""
     try:
-        documents = await db_service.get_all_documents(skip=skip, limit=limit)
+        user_id = current_user.id if current_user else None
+        if hasattr(db_service, 'get_documents'):
+            documents = await db_service.get_documents(skip=skip, limit=limit, user_id=user_id)
+        else:
+            documents = await db_service.get_all_documents(skip=skip, limit=limit)
 
         if processed is not None:
             documents = [doc for doc in documents if doc.processed == processed]

@@ -1,4 +1,4 @@
-# Core framework
+# Web framework
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 python-multipart>=0.0.6
@@ -15,46 +15,27 @@ sentence-transformers>=2.2.2
 
 # PDF processing
 pypdf>=3.17.0
+pdfplumber>=0.10.0
 
 # Validation & settings
-pydantic>=2.0.0
 pydantic-settings>=2.1.0
 
-# HTTP client (for LLM API calls)
+# HTTP client
 httpx>=0.26.0
 
-# Auth & Security
+# Async utils
+anyio>=4.2.0
+
+# Auth
 python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
 
-# Cache & Task Queue
-redis>=5.0.0
-
-# Object Storage
+# Object storage
 boto3>=1.34.0
 
-# Knowledge Graph
-networkx>=3.1
+# Redis
+redis>=5.0.0
 
-# Utilities
-aiofiles>=23.2.1
-PyYAML>=6.0.1
-python-dotenv>=1.0.0
-anyio>=4.2.0
-tqdm>=4.65.0
-
-# LLM Providers
-openai>=1.0.0
-anthropic>=0.3.0
-requests>=2.28.0
-
-# Testing
+# Dev
 pytest>=7.4.0
 pytest-asyncio>=0.23.0
-pytest-cov>=4.1.0
-
-# Code Quality
-black>=23.11.0
-isort>=5.12.0
-mypy>=1.7.0
 ruff>=0.1.0

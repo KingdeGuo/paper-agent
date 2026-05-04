@@ -27,6 +27,7 @@ const Login = () => {
     username: '',
     email: '',
     password: '',
+    confirmPassword: '',
     fullName: '',
   });
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,12 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (mode === 'register' && formData.password !== formData.confirmPassword) {
+      setError(t('auth.passwordMismatch'));
+      setLoading(false);
+      return;
+    }
 
     try {
       let response;
@@ -78,7 +85,7 @@ const Login = () => {
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" align="center" gutterBottom>
-          Paper Agent
+          {t('app.shortTitle')}
         </Typography>
         
         <Tabs
@@ -142,6 +149,21 @@ const Login = () => {
             required
             helperText={mode === 'register' ? t('auth.passwordHint') : ''}
           />
+
+          {mode === 'register' && (
+            <TextField
+              fullWidth
+              margin="normal"
+              label={t('auth.confirmPassword')}
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              error={formData.confirmPassword && formData.password !== formData.confirmPassword}
+              helperText={formData.confirmPassword && formData.password !== formData.confirmPassword ? t('auth.passwordMismatch') : ''}
+            />
+          )}
 
           <Button
             fullWidth

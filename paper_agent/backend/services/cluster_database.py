@@ -82,6 +82,10 @@ class Document(Base):
     vector_id = Column(String(255))
     doc_metadata = Column(JSON, default=dict)
     
+    # arXiv fields
+    arxiv_id = Column(String(50))
+    arxiv_url = Column(String(500))
+
     # Cluster fields
     user_id = Column(String(36), default="default")  # For multi-tenant
     tenant_id = Column(String(36), default="default")
@@ -175,7 +179,12 @@ class ClusterDatabaseService:
         logger.info(f"Database tables created (type: {self.config.type})")
 
     async def close(self):
-...
+        """Close database connections."""
+        if self._async_engine:
+            await self._async_engine.dispose()
+        if self._sync_engine:
+            self._sync_engine.dispose()
+
     # -----------------------------------------------------------------------
     # Notebook operations
     # -----------------------------------------------------------------------
@@ -296,11 +305,6 @@ class ClusterDatabaseService:
                 select(ResearchThread).where(ResearchThread.user_id == user_id).order_by(ResearchThread.updated_at.desc())
             )
             return list(result.scalars().all())
-        """Close connections."""
-        if self._async_engine:
-            await self._async_engine.dispose()
-        if self._sync_engine:
-            self._sync_engine.dispose()
 
     # -----------------------------------------------------------------------
     # Document operations
@@ -435,6 +439,21 @@ class ClusterDatabaseService:
             
             result = await session.execute(q)
             return list(result.scalars().all())
+
+    async def get_document_by_arxiv_id(self, arxiv_id: str) -> Optional[Document]:
+        """Get document by arXiv ID."""
+        async with self.async_session_maker() as session:
+            result = await session.execute(
+                select(Document).where(
+                    Document.arxiv_id == arxiv_id,
+                    Document.is_deleted == False
+                )
+            )
+            return result.scalar_one_or_none()
+
+    async def update_document_path(self, document_id: str, file_path: str) -> bool:
+        """Update document file path."""
+        return await self.update_document(document_id, {"file_path": file_path})
 
     async def get_processing_stats(self, user_id: Optional[str] = None) -> Dict[str, int]:
         """Get document processing statistics."""
