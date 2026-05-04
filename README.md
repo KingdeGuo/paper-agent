@@ -1,331 +1,216 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version 2.0.0"/>
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License MIT"/>
-  <img src="https://img.shields.io/badge/docker-ready-blue.svg" alt="Docker Ready"/>
-  <img src="https://img.shields.io/badge/k8s-native-blue.svg" alt="K8s Native"/>
-  <img src="https://img.shields.io/badge/python-3.10%2B-green.svg" alt="Python 3.10+"/>
-  <img src="https://img.shields.io/badge/react-18-blue.svg" alt="React 18"/>
-  <img src="https://img.shields.io/badge/MCP-enabled-purple.svg" alt="MCP Enabled"/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/version-v2.0.0-2563eb?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNCAxOWw4LTEwIDggMTAtMTAgNyAyIDUgMTAtMTAtMTAgMTAgMTAgMTAtMTAgMi01eiIvPjwvc3ZnPg=="/>
+    <img src="https://img.shields.io/badge/version-v2.0.0-2563eb?style=for-the-badge" alt="Version 2.0.0" width="130"/>
+  </picture>
+  <img src="https://img.shields.io/github/stars/KingdeGuo/paper-agent?style=for-the-badge&color=7c3aed" alt="GitHub Stars"/>
+  <img src="https://img.shields.io/github/license/KingdeGuo/paper-agent?style=for-the-badge&color=16a34a" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/344_API_endpoints-2563eb?style=for-the-badge" alt="344 APIs"/>
 </p>
 
-<h1 align="center">📚 Paper Agent 2.0</h1>
-<h3 align="center">AI Research Companion — From Literature Management to Knowledge Creation</h3>
-<h4 align="center"><i>AI for Science, embodied. Open-source. Enterprise-ready. Team-native.</i></h4>
+<h1 align="center">
+  📚 Paper Agent
+  <br/>
+  <sup>AI Research Companion — From Literature to Discovery</sup>
+</h1>
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="docs/installation.md">Installation</a> •
-  <a href="docs/user-guide.md">User Guide</a> •
-  <a href="docs/api.md">API</a> •
-  <a href="docs/architecture.md">Architecture</a> •
-  <a href="mcp/">MCP Integration</a> •
-  <a href="skills/">Skills</a> •
-  <a href="paper_agent/frontend/public/bookmarklet.html">Bookmarklet</a> •
-  <a href="./README_zh.md">中文</a>
+  <b>Open-source · Self-hosted · AI-native · Team-ready</b>
 </p>
 
----
+<p align="center">
+  <a href="#-quick-start"><b>Quick Start</b></a> •
+  <a href="docs/user-guide.md"><b>User Guide</b></a> •
+  <a href="docs/api/index.md"><b>API</b></a> •
+  <a href="docs/architecture/index.md"><b>Architecture</b></a> •
+  <a href="mcp/"><b>MCP</b></a> •
+  <a href="CONTRIBUTING.md"><b>Contributing</b></a> •
+  <a href="README_zh.md"><b>中文</b></a>
+</p>
 
-## 🎯 The Vision: AI Research Companion
+<br/>
 
-Paper Agent is more than a literature management tool. It is an **AI Research Companion** — a concrete embodiment of **AI for Science** — that accompanies researchers through the **entire research lifecycle**.
+> **Paper Agent transforms how researchers interact with literature.** Upload PDFs → AI reads, summarizes, connects, and writes. From a single paper to an entire research field, in minutes, not weeks.
 
-```
-Discovery → Comprehension → Synthesis → Writing → Publication → Impact
-    ↑                                                        │
-    └─────────────────── AI Feedback Loop ────────────────────┘
-```
-
-**For Individual Researchers:** Your personal AI research assistant that reads with you, remembers what you've learned, connects ideas across papers, helps you write with proper citations, and never forgets a reference.
-
-**For Research Teams:** A shared workspace where PIs, postdocs, and students can collaboratively explore literature, annotate papers together, set team reading goals, and generate collective insights.
-
-**For the Scientific Community:** An open-source platform that embodies the principles of open science — transparent, extensible, built for and by researchers.
-
-### ✨ What Makes This Different?
-
-| Dimension | Traditional Tools | Paper Agent |
-|-----------|-----------------|-------------|
-| **Scope** | PDF management | Full research lifecycle companion |
-| **AI** | Basic search | Deep reasoning, synthesis, gap analysis |
-| **Team** | Siloed | Workspaces, shared annotations, team goals |
-| **Integration** | Desktop-only | MCP, DingTalk, Feishu, Slack, Webhook, Browser |
-| **Extensibility** | Closed | Open-source, 36 API modules, MCP tools, Skills |
-| **Data** | Vendor lock-in | Self-hosted, full ownership |
+<br/>
 
 ---
 
-## ✨ Features
+## 🎯 Why Paper Agent?
 
-### 🧠 Knowledge Distillery
-| Capability | Description |
-|------------|-------------|
-| **Contradiction Detection** | Automatically identifies conflicting findings across papers using multi-LLM reasoning |
-| **Research Gap Analysis** | Discovers "semantic voids" and generates high-impact research hypotheses |
-| **Cross-Paper Synthesis** | Connects methodologies and results across related work |
-| **Knowledge Graph** | Interactive D3.js visualization of citation networks and semantic relationships |
+| You're a researcher | Paper Agent helps you |
+|---------------------|----------------------|
+| Drowning in PDFs | AI reads them → structured summaries with citations |
+| Writing lit review → takes weeks | `POST /api/agents/literature-review` → draft in seconds |
+| Can't find research gaps | GraphRAG traverses citation networks → finds blind spots |
+| Team needs shared reading | Workspaces with annotations, goals, activity feeds |
+| Need to generate code from papers | AI → Python/Julia/R implementation code |
+| Want to know "who cited whom" | Citation chains forward & backward |
+| Presenting at a conference | Auto-generate slides + figures from papers |
 
-### ✍️ Drafting Bridge
-| Capability | Description |
-|------------|-------------|
-| **Literature Review Generator** | Drafts structured `Related Work` sections in LaTeX format |
-| **Formula Decoder** | Explains complex mathematical expressions in plain language |
-| **Citation-Grounded QA** | Every AI claim includes specific citations `[Page X, Para Y]` with source links |
+---
 
-### 🔬 Document Intelligence
-| Capability | Description |
-|------------|-------------|
-| **Smart Search** | Hybrid keyword + semantic vector search across your library |
-| **AI Summarization** | Three styles (academic/simple/detailed) with streaming thinking mode |
-| **Paper Review** | Multi-dimensional AI review (methodology, innovation, clarity, etc.) |
-| **PDF Annotations** | In-browser PDF viewer with highlights and notes |
-| **Comparative Analysis** | Side-by-side deep comparison of 2-3 papers |
+## ✨ Feature Atlas
 
-### 🔌 Integrations
-| Integration | Description |
-|-------------|------------|
-| **Zotero Sync** | One-click import from your existing Zotero library |
-| **arXiv Radar** | Search, browse categories, and import pre-prints instantly |
-| **Multi-LLM** | OpenAI, Qwen, DeepSeek, Anthropic Claude, Ollama, HuggingFace |
+<table>
+<tr>
+  <td width="50%" valign="top">
 
-### 🏢 Enterprise
-| Capability | Description |
-|------------|-------------|
-| **Multi-Tenant** | User isolation with JWT authentication and role-based access |
-| **Cluster Native** | Kubernetes-ready with Redis task queues and MinIO object storage |
-| **Horizontal Scaling** | Multiple API replicas and worker nodes for large-scale processing |
-| **Audit Logging** | Full API audit trail for enterprise compliance |
-| **Rate Limiting** | Built-in protection against brute-force attacks |
+  ### 📖 Reading
+  - **AI Summaries** — Academic/simple/detailed styles with streaming thinking
+  - **PDF Viewer** — In-browser with highlights, notes, annotations
+  - **Reading List** — to-read / reading / read with progress tracking
+  - **Flashcards** — SM-2 spaced repetition (Anki-algorithm)
+  - **Research Journal** — Daily diary with auto-populated stats
 
-### 🤖 MCP Integration (AI-Native)
-| Capability | Description |
-|------------|-------------|
-| **13 MCP Tools** | Search, analyze, cite, and manage papers via any MCP-compatible AI assistant (Claude, Copilot, Cursor, etc.) |
-| **4 Research Prompts** | Pre-built templates for paper analysis, lit review, comparison, and idea generation |
-| **Resource Access** | AI can read paper summaries, abstracts, and annotations directly |
-| **Zero Configuration** | Plug-and-play with Claude Desktop, VS Code, Cursor, and Claude Code |
+  ### 🔍 Discovery
+  - **Smart Search** — Hybrid vector + keyword across library & arXiv
+  - **Multi-Source Search** — arXiv + PubMed + CrossRef + local at once
+  - **GraphRAG** — Graph-based retrieval through citation networks
+  - **Research Chat** — Persistent multi-session AI conversations
+  - **Recommendations** — Topic-based, "read next", trending
 
-### 📋 AI Research Skills
-| Skill | Description |
-|-------|-------------|
-| **Literature Review** | Generate structured related work sections with proper citations |
-| **Deep Paper Analysis** | Systematic methodology/contribution/limitation analysis |
-| **Research Gap Analysis** | Identify underexplored areas and generate novel hypotheses |
-| **Daily Briefing** | Automated morning research digest with reading priorities |
-| **Writing Assistant** | Academic writing with real-time citation support |
-| **Systematic Review** | PRISMA-compliant full systematic literature review |
+  ### 🧠 Analysis
+  - **Literature Matrix** — 10-dimension cross-paper comparison table
+  - **Knowledge Graph** — D3.js interactive citation visualization
+  - **Research Gaps** — AI identifies contradictions & hypotheses
+  - **Paper Clustering** — Auto-cluster by topic with LLM
+  - **Concept Extraction** — Build concept maps across papers
+  </td>
+  <td width="50%" valign="top">
 
-### 🎯 Smart Reading Goals
-| Capability | Description |
-|------------|-------------|
-| **Reading Targets** | Set weekly/monthly paper reading goals with progress tracking |
-| **Session Logging** | Track reading time, pages, and daily streaks |
-| **Smart Recommendations** | AI suggests next papers based on your reading history |
-| **Trend Analysis** | Spot emerging topics and keyword trends in your library |
-| **Reading Statistics** | Visualize your reading habits over time |
+  ### ✍️ Writing & Publishing
+  - **Related Work Generator** — Structured LaTeX sections
+  - **Review Response** — Draft point-by-point reviewer responses
+  - **Grant Proposal Writer** — NSF/NIH/ERC/Horizon formats
+  - **Patent Idea Extractor** — Identify patentable innovations
+  - **Code Generator** — Methodology → Python/Julia/R/MATLAB
+  - **Figure Generator** — Publication-quality chart code
+  - **Conference Tracker** — 17 venues, CFP deadlines, submissions
 
-### 🔔 Smart Alerts
-| Capability | Description |
-|------------|-------------|
-| **Research Alerts** | Get notified when new papers match your saved search queries |
-| **Frequency Control** | Daily/weekly alert schedule |
-| **Alert History** | Timeline of all triggered notifications |
-| **One-Click Check** | Manual or automatic alert scanning against new documents |
+  ### 🤖 AI & Automation
+  - **MCP Protocol** — 19 tools for any AI assistant
+  - **AI Agents** — LiteratureReview + GapAnalysis + Writing agents
+  - **Skills Marketplace** — 8 built-in research skills + community
+  - **Proactive Monitor** — Daily briefings, deadline alerts
+  - **Memory System** — Persistent SOUL.md + MEMORY.md + AGENTS.md
 
-### 📁 Research Projects
-| Capability | Description |
-|------------|-------------|
-| **Project Management** | Organize papers into research projects with deadlines and priority |
-| **Paper Assignment** | Link papers to projects with status tracking |
-| **Milestones** | Track project progress with completable milestones |
-| **Deadline Management** | Set and track project deadlines |
+  ### 👥 Team & Enterprise
+  - **Workspaces** — Owner/admin/member/viewer roles
+  - **Shared Annotations** — Collaborative paper discussions
+  - **Team Goals** — Collective reading targets with tracking
+  - **Bot Integrations** — DingTalk / Feishu / Slack / WeCom
 
-### 📖 Concept Glossary
-| Capability | Description |
-|------------|-------------|
-| **AI Term Extraction** | Auto-extract key terms and definitions from any paper |
-| **Categorized Glossary** | Terms organized by category (methodology, technique, concept) |
-| **Search & Filter** | Search across all extracted terminology |
-| **Source Linking** | Every term linked back to its source paper |
-
-### 🏷️ Smart Tagging
-| Capability | Description |
-|------------|-------------|
-| **AI Tag Suggestions** | Automatically suggest relevant tags for any paper |
-| **Global Tag Index** | Browse all tags across your library with paper counts |
-| **Tag-Based Filtering** | Find all papers with a specific tag |
-| **Custom Tags** | Apply and manage your own tag system |
-
-### 🔄 Duplicate Detection
-| Capability | Description |
-|------------|-------------|
-| **Title-Based Detection** | Smart duplicate detection using title similarity scoring |
-| **One-Click Merge** | Merge duplicates, preserving annotations, notes, and relationships |
-| **Auto-Clean** | Batch detect and merge all duplicates |
-| **Conflict Resolution** | Keeps the version with richer metadata |
-
-### 📦 Paper Collections
-| Capability | Description |
-|------------|-------------|
-| **Curated Bundles** | Create themed collections of papers |
-| **Public Sharing** | Share collections via unique share codes |
-| **Collaborative Curation** | Build reading lists for students or collaborators |
-| **Notes Per Paper** | Add context notes to each paper in a collection |
-
-### 📊 Research Timeline
-| Capability | Description |
-|------------|-------------|
-| **Temporal Distribution** | See paper counts by year across your library |
-| **Topic Evolution** | Track how research topics have changed over time |
-| **Author Timelines** | Publication timeline for any author in your library |
-| **Trend Visualization** | Spot emerging and declining research areas |
-
-### 🔬 Data Extraction
-| Capability | Description |
-|------------|-------------|
-| **Key Findings Extraction** | Extract research question, methodology, findings, limitations |
-| **Methodology Details** | Extract framework, dataset, metrics, baselines |
-| **Cross-Paper Comparison** | Compare methodology or findings across multiple papers |
-| **Structured Output** | Machine-readable JSON format for further analysis |
-
-### 📧 Email Digest
-| Capability | Description |
-|------------|-------------|
-| **Automated Digest** | Generate formatted email-ready digests of library activity |
-| **Research Highlights** | AI-written paragraph on the most interesting research connections |
-| **Activity Summary** | Recent actions, reading progress, and queue status |
-| **Configurable Period** | Daily, weekly, or custom lookback windows |
-
-### 👥 Team Research Workspaces
-| Capability | Description |
-|------------|-------------|
-| **Team Spaces** | Create shared research workspaces with role-based access (owner/admin/member/viewer) |
-| **Shared Library** | Collaborate on papers with granular view/annotate/edit permissions |
-| **Collaborative Annotations** | Team-wide paper discussions, comments, and shared highlights |
-| **Team Goals** | Set collective reading targets with progress tracking |
-| **Activity Stream** | Real-time visibility into what your team is reading and discussing |
-| **Labels** | Organize papers with team-defined label system |
-| **Invitation System** | Invite members via email or share codes with 7-day expiry |
-| **Team Digest** | Automated weekly summary of team research activity |
-
-### 🤖 AI Research Assistant
-| Capability | Description |
-|------------|-------------|
-| **Daily Agenda** | Personalized daily research plan with AI focus suggestions |
-| **Weekly Briefing** | Executive-level weekly research briefing with key metrics |
-| **Writing Feedback** | Structured AI feedback on academic writing (clarity, argument, rigor) |
-| **Research Directions** | AI analysis of your library suggesting promising research directions |
-
-### 🔄 Peer Review Module
-| Capability | Description |
-|------------|-------------|
-| **Paper Submission** | Submit papers from your library for structured review |
-| **Reviewer Management** | Invite reviewers, track assignments, manage deadlines |
-| **Structured Review Forms** | 8-dimension scoring (novelty, methodology, rigor, clarity, etc.) |
-| **Decision Workflow** | Track papers through draft→submitted→under_review→accepted/rejected |
-| **Discussion Threads** | Post-review discussions between authors and reviewers |
-| **Revision Tracking** | Version tracking for revised manuscripts |
-
-### 🔌 Platform Integrations
-| Capability | Description |
-|------------|-------------|
-| **DingTalk Robot** | Send research digests and alerts to DingTalk groups (钉钉机器人) |
-| **Feishu/Lark Bot** | Receive notifications in Feishu groups (飞书机器人) |
-| **Slack Webhook** | Post to any Slack channel |
-| **WeCom Bot** | WeChat Work integration (企业微信机器人) |
-| **Generic Webhook** | Custom webhooks with JSON payload |
-| **Scheduled Delivery** | Automated daily briefings and weekly digests |
+  ### 🔧 Platform
+  - **344 API endpoints** — 69 modules, full OpenAPI
+  - **Self-hosted** — Your data, your infrastructure
+  - **Docker / K8s** — One-command deploy, cluster scaling
+  - **Dark Mode** — System-aware with manual toggle
+  </td>
+</tr>
+</table>
 
 ---
 
 ## 🚀 Quick Start
 
-### One-command with Docker Compose
-
 ```bash
+# One command — start all services
 git clone https://github.com/KingdeGuo/paper-agent.git
 cd paper-agent
-cp .env.example .env        # Configure your environment
-docker-compose up -d         # Start all services
+cp .env.example .env
+docker-compose up -d
+
+# Open http://localhost:3000 → create account → upload a paper
 ```
 
-Then open **http://localhost:3000** and create your account.
+<details>
+<summary><b>Or run without Docker (bare metal)</b></summary>
 
-### Bare-metal (Development)
-
-**Backend:**
 ```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-pip install -e .                     # Install the package
-python -m paper_agent.backend.main   # Start on :8000
-```
+# Backend
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt beautifulsoup4
+python3 -m paper_agent.backend.main  # → http://localhost:8000
 
-**Frontend:**
-```bash
+# Frontend (separate terminal)
 cd paper_agent/frontend
 npm install
-npm start                            # Start on :3000
+npm start  # → http://localhost:3000
 ```
+</details>
+
+**First steps after setup:**
+1. 📄 **Upload a PDF** → Documents → Upload
+2. 🤖 **Ask AI about your library** → Ask AI
+3. 🔗 **Connect AI assistants** → `pip install mcp && python mcp/server.py`
+4. 🧠 **Generate flashcards** → Open a paper → Flashcards tab
 
 ---
 
-## 📸 Screenshots
+## 🏗️ Architecture at a Glance
 
-> *Screenshots coming soon. See the [User Guide](docs/user-guide.md) for detailed walkthroughs.*
+```
+                    ┌─────────────────────────┐
+                    │     Frontend (React)     │
+                    │  32 pages · MUI · D3.js  │
+                    └───────────┬─────────────┘
+                                │ HTTP / SSE
+                    ┌───────────▼─────────────┐
+                    │    Backend (FastAPI)     │
+                    │  69 modules · 344 APIs   │
+                    └───┬──────┬──────┬───────┘
+                        │      │      │
+              ┌─────────▼┐ ┌──▼───┐ ┌▼──────────┐
+              │PostgreSQL│ │Redis │ │  MinIO/S3 │
+              │ (async)  │ │Cache+Q│ │  Storage  │
+              └──────────┘ └──────┘ └───────────┘
+                        │              │
+              ┌─────────▼┐    ┌────────▼────────┐
+              │ ChromaDB │    │  LLM Strategy   │
+              │ Vectors  │    │ 6 providers      │
+              └──────────┘    └─────────────────┘
+```
 
-| Page | Description |
-|------|-------------|
-| **Dashboard** | System overview with document stats, trending papers, and system info |
-| **Documents** | Upload, manage, and search your PDF library with batch operations |
-| **Search** | Hybrid semantic + keyword search with arXiv integration |
-| **Knowledge Graph** | Interactive D3.js visualization of paper relationships |
-| **Discovery** | AI-powered contradiction detection and research gap analysis |
-| **Drafting** | LaTeX literature review generation and formula decoding |
+**Key design patterns:**
+- **Service Registry** — DI container, lazy init, no circular imports
+- **LLM Strategy** — 6 providers, graceful fallback on failure
+- **MCP Server** — 19 tools, 4 prompts, stdio transport
+- **Memory System** — SOUL.md + MEMORY.md + AGENTS.md
 
 ---
 
-## 🏗️ Architecture
+## 📊 By the Numbers
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Frontend (React)                  │
-│         Material UI  |  D3.js  |  i18next            │
-└──────────────────────┬──────────────────────────────┘
-                       │ HTTP / Streaming SSE
-┌──────────────────────▼──────────────────────────────┐
-│              Backend API (FastAPI)                   │
-│   Routes  →  Services  →  LLM Strategy Pattern      │
-└────────┬─────────┬──────────┬───────────────────────┘
-         │         │          │
-    ┌────▼──┐ ┌───▼────┐ ┌───▼────────┐
-    │PostgreSQL│ │ Redis  │ │  MinIO/S3  │
-    │  (Async) │ │Cache+Q │ │  Storage   │
-    └─────────┘ └────────┘ └────────────┘
-         │                           │
-    ┌────▼──────┐          ┌─────────▼────────┐
-    │ ChromaDB  │          │  GPU Workers      │
-    │  Vectors  │          │  (Optional)       │
-    └───────────┘          └──────────────────┘
-```
-
-See the [Architecture Guide](docs/architecture.md) for a deep dive.
+<table>
+<tr><th></th><th></th><th></th><th></th></tr>
+<tr>
+  <td align="center"><b>344</b><br/><sub>API Endpoints</sub></td>
+  <td align="center"><b>69</b><br/><sub>Route Modules</sub></td>
+  <td align="center"><b>32</b><br/><sub>Frontend Pages</sub></td>
+  <td align="center"><b>8</b><br/><sub>AI Paradigms</sub></td>
+</tr>
+<tr>
+  <td align="center"><b>6</b><br/><sub>LLM Providers</sub></td>
+  <td align="center"><b>40+</b><br/><sub>Database Tables</sub></td>
+  <td align="center"><b>10</b><br/><sub>CI/CD Pipelines</sub></td>
+  <td align="center"><b>6</b><br/><sub>Research Skills</sub></td>
+</tr>
+</table>
 
 ---
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
-|-------|------------|
+|-------|-----------|
 | **Backend** | Python 3.12+, FastAPI, SQLAlchemy 2.0 (async) |
-| **Database** | PostgreSQL 16 (production) / SQLite (development) |
-| **Vector DB** | ChromaDB with SentenceTransformer embeddings |
-| **AI/LLM** | Strategy pattern: OpenAI, Qwen, DeepSeek, Claude, Ollama, HuggingFace |
-| **Frontend** | React 18, Material UI 5, D3.js, i18next |
-| **Cache/Queue** | Redis 7 (distributed caching + task queue) |
-| **Storage** | MinIO / S3-compatible object storage |
-| **Infrastructure** | Docker, Docker Compose, Kubernetes |
+| **Database** | PostgreSQL 16 (prod) / SQLite (dev) |
+| **Vector DB** | ChromaDB + SentenceTransformers |
+| **AI/LLM** | OpenAI · Qwen · DeepSeek · Claude · Ollama · HuggingFace |
+| **Frontend** | React 18 · Material UI 5 · D3.js · i18next |
+| **Infrastructure** | Docker · Docker Compose · Kubernetes |
+| **CI/CD** | GitHub Actions · CodeQL · GHCR · MkDocs |
 
 ---
 
@@ -333,39 +218,44 @@ See the [Architecture Guide](docs/architecture.md) for a deep dive.
 
 | Guide | Description |
 |-------|-------------|
-| [Installation Guide](docs/installation.md) | Detailed setup for all platforms |
-| [User Guide](docs/user-guide.md) | Complete walkthrough of all features |
-| [API Reference](docs/api.md) | Full API documentation with examples |
-| [Architecture Guide](docs/architecture.md) | System design and data flow |
-| [Configuration Guide](docs/configuration.md) | All config options and environment variables |
-| [Deployment Guide](docs/deployment.md) | Production deployment (Docker, K8s) |
-| [MCP Integration Guide](mcp/README.md) | Connect AI assistants to your research library |
-| [AI Research Skills](skills/) | Reusable workflows for common research tasks |
-| [Contributing Guide](CONTRIBUTING.md) | How to contribute code |
+| [User Guide](docs/user-guide.md) | Complete feature walkthrough |
+| [Installation Guide](docs/installation.md) | Setup for all platforms |
+| [API Reference](docs/api/index.md) | 344 endpoints with examples |
+| [Architecture Guide](docs/architecture/index.md) | System design & data flow |
+| [Configuration Guide](docs/configuration.md) | All environment variables |
+| [Deployment Guide](docs/deployment.md) | Docker & Kubernetes |
+| [MCP Integration](mcp/README.md) | Connect any AI assistant |
+| [Research Skills](skills/) | 6 pre-built research workflows |
+| [FAQs](docs/faq.md) | Frequently asked questions |
+| [Changelog](docs/changelog.md) | Release history |
+| [Roadmap](docs/roadmap.md) | Upcoming features |
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions of all kinds! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome all contributions — code, docs, translations, feedback.
 
-- 🐛 Bug reports & feature requests
-- 💻 Code contributions
-- 📖 Documentation improvements
-- 🌐 Translations
+| Area | How to start |
+|------|-------------|
+| 🐛 **Bug report** | Open a [GitHub Issue](https://github.com/KingdeGuo/paper-agent/issues) |
+| 💡 **Feature idea** | Start a [Discussion](https://github.com/KingdeGuo/paper-agent/discussions) |
+| 💻 **Code** | See [CONTRIBUTING.md](CONTRIBUTING.md) |
+| 📖 **Docs** | Improve anything in `docs/` |
+| 🌐 **Translation** | Add or improve i18n files |
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
+Distributed under the **MIT License**. See [LICENSE](LICENSE).
 
 ---
 
-## ⭐ Support
-
-If Paper Agent helps your research, please give us a ⭐ on GitHub! It helps other researchers discover the project.
-
----
-
-<p align="center"><i>Built with ❤️ for the global research community</i></p>
+<p align="center">
+  <b>Built by researchers, for researchers.</b>
+  <br/><br/>
+  <a href="https://github.com/KingdeGuo/paper-agent">
+    <img src="https://img.shields.io/github/stars/KingdeGuo/paper-agent?style=social" alt="Stars"/>
+  </a>
+</p>
