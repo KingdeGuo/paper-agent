@@ -31,7 +31,7 @@ docs/**/*:
   - documentation
   - docs
 
-*.md:
+"*.md":
   - documentation
 
 # Infrastructure
