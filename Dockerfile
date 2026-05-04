@@ -1,5 +1,5 @@
 # Paper Agent — Backend Dockerfile
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 
@@ -11,7 +11,7 @@ COPY requirements.txt pyproject.toml ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt beautifulsoup4
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
