@@ -1,8 +1,9 @@
 """Research Agent API — autonomous agents + A2A protocol."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter
 
 from backend.services.agent_service import (
     orchestrator, AgentMessage, LiteratureReviewAgent,
