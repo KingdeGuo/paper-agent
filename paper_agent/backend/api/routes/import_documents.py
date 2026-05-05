@@ -25,29 +25,23 @@ async def import_from_urls(
     results = []
     for url in urls:
         url = url.strip()
-        :
-            if not url:
+        if not url:
             continue
         try:
             result = {"url": url, "status": "pending"}
 
             # arXiv URL
-            :
-                if "arxiv.org" in url:
+            if "arxiv.org" in url:
                 import re
                 match = re.search(r"(\d+\.\d+)", url)
-                :
-                    if match:
+                if match:
                     aid = match.group(1)
-                    :
-                        if arxiv_service:
+                    if arxiv_service:
                         paper = arxiv_service.fetch_by_id(aid)
-                        :
-                            if paper:
+                        if paper:
                             async with httpx.AsyncClient(timeout=60) as client:
                                 pdf_resp = await client.get(paper["pdf_url"], follow_redirects=True)
-                                :
-                                    if pdf_resp.status_code == 200:
+                                if pdf_resp.status_code == 200:
                                     content = pdf_resp.content
                                     filename = f"arxiv_{aid}.pdf"
                                     pdf_path = os.path.join("data/pdfs", filename)
@@ -80,8 +74,7 @@ async def import_from_urls(
             elif "doi.org" in url or url.startswith("10."):
                 doi = url.split("doi.org/")[-1] if "doi.org" in url else url
                 meta = await lookup_doi(doi)
-                :
-                    if meta:
+                if meta:
                     doc = await db.create_document({
                         "filename": f"doi_{doi.replace('/', '_')}.pdf",
                         "file_path": "", "file_size": 0, "processed": 2,
@@ -117,8 +110,7 @@ async def batch_upload(
     """Upload multiple PDF files at once."""
     results = []
     for file in files:
-        :
-            if not file.filename.lower().endswith(".pdf"):
+        if not file.filename.lower().endswith(".pdf"):
             results.append({"filename": file.filename, "status": "skipped", "error": "Not a PDF"})
             continue
         try:

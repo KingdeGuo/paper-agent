@@ -29,8 +29,7 @@ async def get_full_stats(
 
     try:
         reading_result = await _get_reading_stats(db)
-        :
-            if reading_result:
+        if reading_result:
             reading_stats = reading_result
     except Exception as e:
         logger.debug(f"Reading stats unavailable: {e}")
@@ -67,8 +66,7 @@ async def get_quick_insight(
 ):
     """Generate an AI-powered quick insight about the library."""
     docs = await db.get_documents(limit=10, user_id="default") if hasattr(db, 'get_documents') else []
-    :
-        if not docs:
+    if not docs:
         return {"insight": "Upload papers to get AI-powered insights about your research library."}
 
     titles = "\n".join(f"- {d.title or d.filename} ({d.year or 'n.d.'})" for d in docs)
@@ -92,8 +90,7 @@ async def _get_reading_stats(db):
                    AVG(progress)
             FROM reading_list WHERE user_id = 'default'
         """))).fetchone()
-        :
-            if row:
+        if row:
             reading_result = {
                 "total": row[0] or 0, "to_read": row[1] or 0,
                 "reading": row[2] or 0, "read_count": row[3] or 0,

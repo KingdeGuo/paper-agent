@@ -9,8 +9,7 @@ from typing import List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
@@ -84,21 +83,18 @@ async def process_document_task(
         await db.update_processing_status(document_id, 1)
 
         document = await db.get_document(document_id)
-        :
-            if not document:
+        if not document:
             logger.error(f"Document {document_id} not found")
             return
 
         text = pdf.extract_text(document.file_path)
-        :
-            if not text:
+        if not text:
             await db.update_processing_status(document_id, 3)
             logger.error(f"Failed to extract text from {document_id}")
             return
 
         chunks = pdf.chunk_text(text)
-        :
-            if not chunks:
+        if not chunks:
             await db.update_processing_status(document_id, 3)
             logger.error(f"Failed to chunk text for {document_id}")
             return
@@ -138,17 +134,13 @@ async def upload_document(
         content = await file.read()
         document_data, text = pdf_processor.process_document(content, file.filename)
 
-        :
-            if title:
+        if title:
             document_data.title = title
-        :
-            if authors:
+        if authors:
             document_data.authors = [a.strip() for a in authors.split(",")]
-        :
-            if keywords:
+        if keywords:
             document_data.keywords = [k.strip() for k in keywords.split(",")]
-        :
-            if year:
+        if year:
             document_data.year = year
 
         document = await db_service.create_document(document_data)
@@ -174,14 +166,12 @@ async def get_documents(
     """Get all documents with optional filtering and user isolation."""
     try:
         user_id = current_user.id if current_user else None
-        :
-            if hasattr(db_service, 'get_documents'):
+        if hasattr(db_service, 'get_documents'):
             documents = await db_service.get_documents(skip=skip, limit=limit, user_id=user_id)
         else:
             documents = await db_service.get_all_documents(skip=skip, limit=limit)
 
-        :
-            if processed is not None:
+        if processed is not None:
             documents = [doc for doc in documents if doc.processed == processed]
 
         return documents
@@ -199,8 +189,7 @@ async def get_document(
     """Get document by ID."""
     try:
         document = await db_service.get_document(document_id)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
         return document
     except HTTPException:
@@ -219,8 +208,7 @@ async def update_document(
     """Update document metadata."""
     try:
         document = await db_service.update_document(document_id, update_data)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
         return document
     except HTTPException:
@@ -239,14 +227,12 @@ async def delete_document(
     """Delete document from database and vector store."""
     try:
         document = await db_service.get_document(document_id)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         vector_service.delete_document(document_id)
         success = await db_service.delete_document(document_id)
-        :
-            if not success:
+        if not success:
             raise HTTPException(status_code=404, detail="Document not found")
 
         return {"message": "Document deleted successfully"}
@@ -266,14 +252,12 @@ async def download_document(
     """Download the original PDF file."""
     try:
         document = await db_service.get_document(document_id)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         import os as os_mod
 
-        :
-            if not os_mod.path.exists(document.file_path):
+        if not os_mod.path.exists(document.file_path):
             raise HTTPException(status_code=404, detail="File not found")
 
         from fastapi.responses import FileResponse
@@ -300,8 +284,7 @@ async def get_document_text(
     """Get extracted text content from a document."""
     try:
         document = await db_service.get_document(document_id)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         text = pdf_processor.extract_text(document.file_path)
@@ -323,8 +306,7 @@ async def get_document_chunks(
     """Get document chunks from vector database."""
     try:
         document = await db_service.get_document(document_id)
-        :
-            if not document:
+        if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         chunks = vector_service.get_document_chunks(document_id)

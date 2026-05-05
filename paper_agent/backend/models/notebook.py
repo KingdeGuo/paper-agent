@@ -18,11 +18,9 @@ except ImportError:
         from backend.services.cluster_database import Base
     except ImportError:
         for _mod_name in list(_sys.modules.keys()):
-            :
-                if 'cluster_database' in _mod_name:
+            if 'cluster_database' in _mod_name:
                 _mod = _sys.modules[_mod_name]
-                :
-                    if hasattr(_mod, 'Base'):
+                if hasattr(_mod, 'Base'):
                     Base = _mod.Base
                     break
         else:

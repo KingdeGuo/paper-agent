@@ -26,8 +26,7 @@ async def list_agents():
 async def get_agent_card(agent_name: str):
     """Get an agent's capabilities card (A2A agent card)."""
     agent = orchestrator.get_agent(agent_name)
-    :
-        if not agent:
+    if not agent:
         return {"error": f"Agent '{agent_name}' not found"}
     return agent.get_agent_card()
 

@@ -17,8 +17,7 @@ from typing import List
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fastapi import APIRouter, Depends, HTTPException, Security
@@ -74,13 +73,11 @@ async def get_current_user(
     token = credentials.credentials
     payload = auth_service.decode_token(token)
 
-    :
-        if not payload:
+    if not payload:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
     user_id = payload.get("sub")
-    :
-        if not user_id:
+    if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
     # Get user from database
@@ -90,8 +87,7 @@ async def get_current_user(
         from paper_agent.backend.models.user import User
 
         db = get_db()
-        :
-            if db is None:
+        if db is None:
             raise HTTPException(status_code=503, detail="Database not available")
 
         async with db.async_session_maker() as session:
@@ -100,8 +96,7 @@ async def get_current_user(
             )
             user = result.scalar_one_or_none()
 
-            :
-                if not user:
+            if not user:
                 raise HTTPException(status_code=401, detail="User not found or inactive")
 
             return UserResponse.model_validate(user)
@@ -128,8 +123,7 @@ async def register(user_data: UserCreate):
             raise HTTPException(status_code=500, detail="User model not available")
 
     db = get_db()
-    :
-        if db is None:
+    if db is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
     async with db.async_session_maker() as session:
@@ -137,16 +131,14 @@ async def register(user_data: UserCreate):
         result = await session.execute(
             select(User).where(User.username == user_data.username)
         )
-        :
-            if result.scalar_one_or_none():
+        if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Username already registered")
 
         # Check if email exists
         result = await session.execute(
             select(User).where(User.email == user_data.email)
         )
-        :
-            if result.scalar_one_or_none():
+        if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="Email already registered")
 
         # Create user
@@ -186,12 +178,10 @@ async def login(credentials: UserLogin, db: ClusterDatabaseService = Depends(get
         )
         user = result.scalar_one_or_none()
 
-        :
-            if not user or not auth_service.verify_password(credentials.password, user.hashed_password):
+        if not user or not auth_service.verify_password(credentials.password, user.hashed_password):
             raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-        :
-            if not user.is_active:
+        if not user.is_active:
             raise HTTPException(status_code=400, detail="User account is inactive")
 
         # Update last login
@@ -229,22 +219,17 @@ async def update_me(
         )
         user = result.scalar_one_or_none()
 
-        :
-            if not user:
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Update fields
-        :
-            if update_data.email is not None:
+        if update_data.email is not None:
             user.email = update_data.email
-        :
-            if update_data.full_name is not None:
+        if update_data.full_name is not None:
             user.full_name = update_data.full_name
-        :
-            if update_data.language is not None:
+        if update_data.language is not None:
             user.language = update_data.language
-        :
-            if update_data.preferences is not None:
+        if update_data.preferences is not None:
             user.preferences = update_data.preferences
 
         user.updated_at = datetime.utcnow()
@@ -276,8 +261,7 @@ async def create_api_key(
         )
         user = result.scalar_one_or_none()
 
-        :
-            if not user:
+        if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Add API key to user
@@ -293,8 +277,7 @@ async def create_api_key(
             "last_used": None,
         }
 
-        :
-            if not user.api_keys:
+        if not user.api_keys:
             user.api_keys = []
         user.api_keys.append(api_key_entry)
         await session.commit()
@@ -325,8 +308,7 @@ async def list_api_keys(
         )
         user = result.scalar_one_or_none()
 
-        :
-            if not user or not user.api_keys:
+        if not user or not user.api_keys:
             return []
 
         return [
@@ -358,8 +340,7 @@ async def delete_api_key(
         )
         user = result.scalar_one_or_none()
 
-        :
-            if not user or not user.api_keys:
+        if not user or not user.api_keys:
             raise HTTPException(status_code=404, detail="API key not found")
 
         user.api_keys = [k for k in user.api_keys if k["id"] != key_id]

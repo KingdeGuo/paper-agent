@@ -27,12 +27,10 @@ class SemanticDistillery:
         docs = []
         for d_id in doc_ids:
             doc = await self.db.get_document(d_id)
-            :
-                if doc:
+            if doc:
                 docs.append(doc)
 
-        :
-            if len(docs) < 2:
+        if len(docs) < 2:
             return []
 
         prompt = "Compare the findings of the following papers and identify any direct contradictions or significant differences in results/methodologies:\n\n"
@@ -53,8 +51,7 @@ class SemanticDistillery:
         docs = []
         for d_id in doc_ids:
             doc = await self.db.get_document(d_id)
-            :
-                if doc:
+            if doc:
                 docs.append(doc)
 
         prompt = "As a senior research architect, analyze these papers to find 'semantic voids'—areas where these works almost touch but leave a gap, or where their methodologies could be hybridized to solve an unaddressed problem:\n\n"

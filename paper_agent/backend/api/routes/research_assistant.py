@@ -22,12 +22,10 @@ async def daily_agenda(db=Depends(get_db), llm_service=Depends(get_llm_service))
             from sqlalchemy import text as sa_text
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
-            :
-                if row:
+            if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
             recent_activity = (await session.execute(sa_text(
                 "SELECT description, created_at FROM activity_feed ORDER BY created_at DESC LIMIT 5"))).fetchall()
-    except Exception:
-        recent_activity = []
+    except: recent_activity = []
 
     docs = await db.get_documents(limit=5) if db else []
     for d in docs:
@@ -38,8 +36,7 @@ async def daily_agenda(db=Depends(get_db), llm_service=Depends(get_llm_service))
 
     # AI-suggested focus
     ai_suggestion = ""
-    :
-        if llm_service and recent_docs:
+    if llm_service and recent_docs:
         try:
             titles = "\n".join(f"- {d['title']} ({d['year']})" for d in recent_docs)
             resp = await llm_service.chat_completion(
@@ -47,8 +44,7 @@ async def daily_agenda(db=Depends(get_db), llm_service=Depends(get_llm_service))
                 system_prompt="You are a research productivity assistant. Give concise, actionable advice.",
             )
             ai_suggestion = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except Exception:
-            pass
+        except Exception: pass
 
     agenda = {
         "date": date_str,
@@ -79,8 +75,7 @@ async def daily_agenda(db=Depends(get_db), llm_service=Depends(get_llm_service))
 @router.post("/assistant/writing-feedback", summary="Get AI writing feedback")
 async def writing_feedback(text: str, context: str = "academic paper section", llm_service=Depends(get_llm_service)):
     """Get AI feedback on academic writing."""
-    :
-        if len(text) < 50:
+    if len(text) < 50:
         return {"error": "Text too short (min 50 characters)"}
 
     prompt = f"Please review this {context} and provide structured feedback:\n\n{text[:3000]}"
@@ -111,8 +106,7 @@ async def research_directions(db=Depends(get_db), llm_service=Depends(get_llm_se
                               vector_service=Depends(get_vector_service)):
     """Analyze your library and suggest promising research directions."""
     docs = await db.get_documents(limit=30) if db else []
-    :
-        if not docs:
+    if not docs:
         return {"directions": [], "message": "Not enough papers to analyze. Upload more papers first."}
 
     # Extract topics and keywords
@@ -128,8 +122,7 @@ async def research_directions(db=Depends(get_db), llm_service=Depends(get_llm_se
 
     # AI analysis
     analysis = ""
-    :
-        if llm_service:
+    if llm_service:
         try:
             titles = "\n".join(f"- {d.title or d.filename} ({d.year or 'n.d.'}) - {', '.join((d.keywords or [])[:3])}" for d in docs[:15])
             resp = await llm_service.chat_completion(
@@ -137,8 +130,7 @@ async def research_directions(db=Depends(get_db), llm_service=Depends(get_llm_se
                 system_prompt="You are a research strategist. Be specific about how each direction connects to existing papers in the library.",
             )
             analysis = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except Exception:
-            pass
+        except Exception: pass
 
     return {
         "total_papers_analyzed": len(docs),
@@ -163,26 +155,22 @@ async def weekly_briefing(db=Depends(get_db), llm_service=Depends(get_llm_servic
             from sqlalchemy import text as sa_text
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
-            :
-                if row:
-    except Exception:
-        pass
+            if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
+    except Exception: pass
 
     recent_papers = []
     for d in docs[:5]:
         recent_papers.append(f"- **{d.title or d.filename}** ({d.year or 'n.d.'}) — {', '.join((d.authors or [])[:2])}")
 
     ai_highlight = ""
-    :
-        if llm_service and recent_papers:
+    if llm_service and recent_papers:
         try:
             resp = await llm_service.chat_completion(
                 messages=[{"role": "user", "content": f"Write a 2-paragraph executive briefing highlighting the most important research trends, connections, or insights from this week's papers:\n\n{chr(10).join(recent_papers)}"}],
                 system_prompt="You are a research director writing an executive briefing. Be insightful, not just descriptive.",
             )
             ai_highlight = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except Exception:
-            pass
+        except Exception: pass
 
     return {
         "week_ending": datetime.utcnow().strftime("%B %d, %Y"),

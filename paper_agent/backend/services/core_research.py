@@ -27,8 +27,7 @@ class CoreResearchIntelligence:
         llm = get_llm_service()
         docs = await db.get_documents(limit=max_papers) if db else []
 
-        :
-            if not docs or not llm:
+        if not docs or not llm:
             return {"clusters": [], "total": 0}
 
         # Extract titles + abstracts for clustering
@@ -53,8 +52,7 @@ class CoreResearchIntelligence:
             for c in clusters.get("clusters", []):
                 papers = []
                 for idx in c.get("papers", []):
-                    :
-                        if 0 <= idx - 1 < len(docs):
+                    if 0 <= idx - 1 < len(docs):
                         d = docs[idx - 1]
                         papers.append({"id": d.id, "title": d.title or d.filename, "year": d.year})
                 enriched.append({
@@ -78,8 +76,7 @@ class CoreResearchIntelligence:
         results = []
 
         # Use vector search to find papers with similar text
-        :
-            if vs:
+        if vs:
             search_results = vs.search_similar(quote, limit=max_results * 3)
         else:
             search_results = await db.search_documents(quote, limit=max_results) if db else []
@@ -87,14 +84,12 @@ class CoreResearchIntelligence:
         seen_docs = set()
         for r in search_results:
             did = r.get("document_id", r.get("id", ""))
-            :
-                if did in seen_docs:
+            if did in seen_docs:
                 continue
             seen_docs.add(did)
 
             doc = await db.get_document(did) if db else None
-            :
-                if not doc:
+            if not doc:
                 continue
 
             text = (doc.abstract or "") + " " + (doc.summary or "")
@@ -104,16 +99,14 @@ class CoreResearchIntelligence:
             best_score = 0
             for s in sentences:
                 s = s.strip()
-                :
-                    if not s:
+                if not s:
                     continue
                 # Simple relevance scoring
                 quote_words = set(quote.lower().split())
                 sent_words = set(s.lower().split())
                 overlap = len(quote_words & sent_words)
                 score = overlap / max(len(quote_words), 1)
-                :
-                    if score > best_score:
+                if score > best_score:
                     best_score = score
                     best_sentence = s[:300]
 
@@ -141,8 +134,7 @@ class CoreResearchIntelligence:
         db = get_db()
         llm = get_llm_service()
         doc = await db.get_document(document_id) if db else None
-        :
-            if not doc:
+        if not doc:
             return {"error": "Document not found"}
 
         text = f"Title: {doc.title}\nAuthors: {', '.join(doc.authors or [])}\nAbstract: {(doc.abstract or '')[:1000]}"
@@ -163,8 +155,7 @@ class CoreResearchIntelligence:
             meta = doc.doc_metadata or {}
             existing_tags = meta.get("auto_tags", [])
             all_tags = list(set(existing_tags + tags))
-            :
-                if len(all_tags) > 50:
+            if len(all_tags) > 50:
                 all_tags = all_tags[:50]
             meta["auto_tags"] = all_tags
             await db.update_document(document_id, {"doc_metadata": meta, "keywords": all_tags})
@@ -181,13 +172,11 @@ class CoreResearchIntelligence:
         results = []
         for doc in docs:
             meta = doc.doc_metadata or {}
-            :
-                if not meta.get("auto_tags") and not doc.keywords:
+            if not meta.get("auto_tags") and not doc.keywords:
                 try:
                     result = await self.auto_tag_paper(doc.id)
                     results.append({"id": doc.id, "tags": result.get("tags", [])})
-                except Exception:
-                    pass
+                except Exception: pass
         return {"tagged": len(results), "results": results}
 
     # ─── 4. Paper Summary Cards ───────────────────────────────
@@ -197,18 +186,15 @@ class CoreResearchIntelligence:
         db = get_db()
         llm = get_llm_service()
         doc = await db.get_document(document_id) if db else None
-        :
-            if not doc:
+        if not doc:
             return {"error": "Not found"}
 
         text = f"Title: {doc.title}\nAuthors: {', '.join(doc.authors or [])}\nYear: {doc.year}\nAbstract: {(doc.abstract or '')[:1500]}"
-        :
-            if doc.summary:
+        if doc.summary:
             text += f"\nSummary: {doc.summary}"
 
         # Try to get structured card from LLM
-        :
-            if llm:
+        if llm:
             try:
                 resp = await llm.chat_completion(
                     messages=[{"role": "user", "content":
@@ -240,8 +226,7 @@ class CoreResearchIntelligence:
     async def get_reading_history(self, days: int = 90) -> Dict[str, Any]:
         """Get detailed reading history with analytics."""
         db = get_db()
-        :
-            if not db:
+        if not db:
             return {"error": "DB unavailable"}
 
         history = {
@@ -303,8 +288,7 @@ class CoreResearchIntelligence:
                 weekly[week]["papers"] += s["papers"]
                 weekly[week]["minutes"] += s["minutes"]
                 weekly[week]["pages"] += s["pages"]
-            except Exception:
-                pass
+            except Exception: pass
 
         history["weekly_stats"] = [{"week": w, **s} for w, s in sorted(weekly.items())]
 
@@ -327,8 +311,7 @@ class CoreResearchIntelligence:
         vs = get_vector_service()
         exclude = set(exclude_ids or [])
 
-        :
-            if vs:
+        if vs:
             results = vs.search_similar(topic, limit=max_results * 2)
         else:
             results = await db.search_documents(topic, limit=max_results * 2) if db else []
@@ -337,13 +320,11 @@ class CoreResearchIntelligence:
         seen = set()
         for r in results:
             did = r.get("document_id", r.get("id", ""))
-            :
-                if did in exclude or did in seen:
+            if did in exclude or did in seen:
                 continue
             seen.add(did)
             doc = await db.get_document(did) if db else None
-            :
-                if doc:
+            if doc:
                 papers.append({
                     "id": doc.id, "title": doc.title or doc.filename,
                     "authors": doc.authors or [], "year": doc.year,
@@ -359,14 +340,12 @@ class CoreResearchIntelligence:
         db = get_db()
         vs = get_vector_service()
         doc = await db.get_document(document_id) if db else None
-        :
-            if not doc:
+        if not doc:
             return {"error": "Document not found"}
 
         text = (doc.abstract or "") + " " + (doc.title or "")
 
-        :
-            if vs:
+        if vs:
             results = vs.search_similar(text, limit=max_results + 3)
         else:
             results = []
@@ -374,12 +353,10 @@ class CoreResearchIntelligence:
         papers = []
         for r in results:
             did = r.get("document_id")
-            :
-                if did == document_id:
+            if did == document_id:
                 continue
             d = await db.get_document(did) if db else None
-            :
-                if d:
+            if d:
                 papers.append({
                     "id": d.id, "title": d.title or d.filename,
                     "authors": d.authors or [], "year": d.year,
@@ -401,19 +378,16 @@ class CoreResearchIntelligence:
         citing = await db.get_document(citing_doc_id) if db else None
         cited = await db.get_document(cited_doc_id) if db else None
 
-        :
-            if not citing or not cited:
+        if not citing or not cited:
             return {"error": "One or both papers not found"}
 
         # Search for citation in the citing paper's text
         search_terms = []
-        :
-            if cited.authors:
+        if cited.authors:
             for author in cited.authors[:2]:
                 parts = author.split(", ")
                 search_terms.append(parts[0])  # Last name
-        :
-            if cited.year:
+        if cited.year:
             search_terms.append(str(cited.year))
 
         context = ""
@@ -427,8 +401,7 @@ class CoreResearchIntelligence:
             # Check for common citation patterns
             has_citation = any(term.lower() in s_lower for term in search_terms)
             has_bracket = '[' in s and ']' in s
-            :
-                if has_citation or has_bracket:
+            if has_citation or has_bracket:
                 relevant.append(s)
 
         context = " ".join(relevant[:5]) if relevant else "Citation context not found in available text."
@@ -447,28 +420,24 @@ class CoreResearchIntelligence:
         db = get_db()
         llm = get_llm_service()
 
-        :
-            if document_id:
+        if document_id:
             doc = await db.get_document(document_id) if db else None
             docs = [doc] if doc else []
         else:
             docs = await db.get_documents(limit=max_docs) if db else []
 
-        :
-            if not docs:
+        if not docs:
             return {"concepts": [], "error": "No papers"}
 
         # First pass: extract concepts from each paper
         all_concepts = {}
         for doc in docs:
             text = f"Title: {doc.title}\nAbstract: {(doc.abstract or '')[:500]}"
-            :
-                if not text.strip():
+            if not text.strip():
                 continue
 
             # Use LLM if available
-            :
-                if llm:
+            if llm:
                 try:
                     resp = await llm.chat_completion(
                         messages=[{"role": "user", "content":
@@ -488,11 +457,9 @@ class CoreResearchIntelligence:
 
             for c in concepts:
                 name = c.get("concept", "")
-                :
-                    if not name:
+                if not name:
                     continue
-                :
-                    if name not in all_concepts:
+                if name not in all_concepts:
                     all_concepts[name] = {"concept": name, "type": c.get("type", "concept"), "papers": [], "relevance": 0}
                 all_concepts[name]["papers"].append({"id": doc.id, "title": doc.title or doc.filename})
                 all_concepts[name]["relevance"] = max(all_concepts[name]["relevance"], c.get("relevance", 0.1))
@@ -506,8 +473,7 @@ class CoreResearchIntelligence:
         for i, c1 in enumerate(top_concepts):
             for c2 in top_concepts[i + 1:]:
                 shared = len(set(p["id"] for p in c1["papers"]) & set(p["id"] for p in c2["papers"]))
-                :
-                    if shared > 0:
+                if shared > 0:
                     relationships.append({
                         "source": c1["concept"],
                         "target": c2["concept"],

@@ -147,67 +147,56 @@ class ArxivService:
 
                 # ID
                 id_elem = entry.find("atom:id", ns)
-                :
-                    if id_elem is not None:
+                if id_elem is not None:
                     paper["arxiv_id"] = id_elem.text.split("/abs/")[-1]
 
                 # Title
                 title_elem = entry.find("atom:title", ns)
-                :
-                    if title_elem is not None:
+                if title_elem is not None:
                     paper["title"] = title_elem.text.replace("\n", " ").strip()
 
                 # Authors
                 authors = []
                 for author in entry.findall("atom:author", ns):
                     name = author.find("atom:name", ns)
-                    :
-                        if name is not None:
+                    if name is not None:
                         authors.append(name.text)
                 paper["authors"] = authors
 
                 # Summary/Abstract
                 summary = entry.find("atom:summary", ns)
-                :
-                    if summary is not None:
+                if summary is not None:
                     paper["abstract"] = summary.text.replace("\n", " ").strip()
 
                 # Published date
                 published = entry.find("atom:published", ns)
-                :
-                    if published is not None:
+                if published is not None:
                     paper["published"] = published.text
                     # Extract year
                     match = re.search(r"(\d{4})", published.text)
-                    :
-                        if match:
+                    if match:
                         paper["year"] = int(match.group(1))
 
                 # arXiv categories
                 categories = []
                 for cat in entry.findall("atom:category", ns):
                     term = cat.get("term")
-                    :
-                        if term:
+                    if term:
                         categories.append(term)
                 paper["categories"] = categories
 
                 # PDF link
                 for link in entry.findall("atom:link", ns):
-                    :
-                        if link.get("title") == "pdf":
+                    if link.get("title") == "pdf":
                         paper["pdf_url"] = link.get("href")
                         break
-                :
-                    if "pdf_url" not in paper:
-                    :
-                        if "arxiv_id" in paper:
+                if "pdf_url" not in paper:
+                    if "arxiv_id" in paper:
                         paper["pdf_url"] = self.fetch_pdf_url(paper["arxiv_id"])
 
                 # arXiv URL
                 for link in entry.findall("atom:link", ns):
-                    :
-                        if link.get("rel") == "alternate":
+                    if link.get("rel") == "alternate":
                         paper["arxiv_url"] = link.get("href")
                         break
 
@@ -224,11 +213,9 @@ class ArxivService:
         arxiv_id = re.sub(r"v\d+$", "", arxiv_id)
 
         # Add arxiv prefix if not present
-        :
-            if not arxiv_id.startswith("arxiv/") and "/" not in arxiv_id:
+        if not arxiv_id.startswith("arxiv/") and "/" not in arxiv_id:
             # Could be old or new format
-            :
-                if len(arxiv_id.split(".")[0]) <= 4:
+            if len(arxiv_id.split(".")[0]) <= 4:  # Old format like "quant-ph/0603068"
                 pass  # Keep as-is
             else:  # New format like "2103.12345"
                 pass  # Keep as-is

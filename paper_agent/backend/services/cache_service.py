@@ -10,8 +10,7 @@ from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Try to import redis
@@ -46,8 +45,7 @@ class CacheService:
                     redis = Redis()
                 cluster_settings = DummyClusterSettings()
 
-        :
-            if not cluster_settings.redis.enabled:
+        if not cluster_settings.redis.enabled:
             logger.info("Redis cache disabled")
             return
 
@@ -67,29 +65,25 @@ class CacheService:
             self.enabled = False
 
     async def close(self):
-        :
-            if self._redis:
+        if self._redis:
             await self._redis.close()
 
     def _make_key(self, key: str) -> str:
         return f"{self._prefix}{key}"
 
     async def get(self, key: str) -> Optional[Any]:
-        :
-            if not self.enabled:
+        if not self.enabled:
             return None
         try:
             data = await self._redis.get(self._make_key(key))
-            :
-                if data:
+            if data:
                 return pickle.loads(data)
         except Exception as e:
             logger.error(f"Cache get error: {e}")
         return None
 
     async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
-        :
-            if not self.enabled:
+        if not self.enabled:
             return False
         try:
             from backend.config.cluster_settings import cluster_settings
@@ -102,8 +96,7 @@ class CacheService:
             return False
 
     async def delete(self, key: str) -> bool:
-        :
-            if not self.enabled:
+        if not self.enabled:
             return False
         try:
             await self._redis.delete(self._make_key(key))
@@ -113,13 +106,11 @@ class CacheService:
             return False
 
     async def delete_pattern(self, pattern: str) -> int:
-        :
-            if not self.enabled:
+        if not self.enabled:
             return 0
         try:
             keys = await self._redis.keys(self._make_key(pattern))
-            :
-                if keys:
+            if keys:
                 return await self._redis.delete(*keys)
         except Exception as e:
             logger.error(f"Cache delete pattern error: {e}")
@@ -146,8 +137,7 @@ class CacheService:
         await self.set(f"search:{query_hash}", results, ttl)
 
     async def get_stats(self) -> Dict[str, Any]:
-        :
-            if not self.enabled:
+        if not self.enabled:
             return {"enabled": False}
         try:
             info = await self._redis.info()

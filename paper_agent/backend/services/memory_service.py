@@ -43,22 +43,19 @@ class ResearchMemory:
 
     def read_memory(self) -> str:
         """Read the full RESEARCH_MEMORY.md file."""
-        :
-            if MEMORY_FILE.exists():
+        if MEMORY_FILE.exists():
             return MEMORY_FILE.read_text(encoding='utf-8')
         return "# Research Memory\n\n*(Not yet initialized)*\n"
 
     def read_soul(self) -> str:
         """Read the RESEARCH_SOUL.md file."""
-        :
-            if SOUL_FILE.exists():
+        if SOUL_FILE.exists():
             return SOUL_FILE.read_text(encoding='utf-8')
         return "# Research Soul\n\n*(Not yet initialized)*\n"
 
     def read_agents(self) -> str:
         """Read the AGENTS.md file."""
-        :
-            if AGENTS_FILE.exists():
+        if AGENTS_FILE.exists():
             return AGENTS_FILE.read_text(encoding='utf-8')
         return "# Agent Instructions\n\n*(Not yet initialized)*\n"
 
@@ -67,8 +64,7 @@ class ResearchMemory:
         date = date or datetime.utcnow().strftime("%Y-%m-%d")
         daily_dir = MEMORY_DIR / "daily"
         daily_file = daily_dir / f"{date}.md"
-        :
-            if daily_file.exists():
+        if daily_file.exists():
             return daily_file.read_text(encoding='utf-8')
         return ""
 
@@ -81,30 +77,25 @@ class ResearchMemory:
             section_header = f"## {section}"
             section_end_pattern = r"## "
 
-            :
-                if section_header in memory:
+            if section_header in memory:
                 # Replace existing section
                 lines = memory.split('\n')
                 in_section = False
                 new_lines = []
                 section_content = []
                 for line in lines:
-                    :
-                        if line.startswith(section_header):
+                    if line.startswith(section_header):
                         in_section = True
                         section_content = [line, '', content, '']
                         continue
-                    :
-                        if in_section and line.startswith('## '):
+                    if in_section and line.startswith('## '):
                         in_section = False
                         new_lines.extend(section_content)
                         new_lines.append(line)
                         continue
-                    :
-                        if not in_section:
+                    if not in_section:
                         new_lines.append(line)
-                :
-                    if in_section:
+                if in_section:
                     new_lines.extend(section_content)
                 memory = '\n'.join(new_lines)
             else:
@@ -126,16 +117,13 @@ class ResearchMemory:
         daily_file = daily_dir / f"{date}.md"
         try:
             existing = ""
-            :
-                if daily_file.exists():
+            if daily_file.exists():
                 existing = daily_file.read_text(encoding='utf-8')
             with open(daily_file, 'w', encoding='utf-8') as f:
                 f.write(f"# Research Notes — {date}\n\n")
-                :
-                    if existing:
+                if existing:
                     f.write(existing)
-                    :
-                        if not existing.endswith('\n'):
+                    if not existing.endswith('\n'):
                         f.write('\n')
                 f.write(f"\n---\n\n{content}\n")
             return True
@@ -157,13 +145,11 @@ class ResearchMemory:
         # Simple relevance scoring
         sections = re.split(r'(?=## )', search_text)
         for section in sections:
-            :
-                if not section.strip():
+            if not section.strip():
                 continue
             section_lower = section.lower()
             matches = sum(1 for w in query_words if w in section_lower)
-            :
-                if matches > 0:
+            if matches > 0:
                 # Extract section title
                 title_match = re.match(r'## (.+)', section)
                 title = title_match.group(1) if title_match else "Unknown"
@@ -181,16 +167,14 @@ class ResearchMemory:
     def _get_recent_daily_notes(self, days: int = 7) -> Dict[str, str]:
         """Get recent daily notes."""
         daily_dir = MEMORY_DIR / "daily"
-        :
-            if not daily_dir.exists():
+        if not daily_dir.exists():
             return {}
         notes = {}
         from datetime import timedelta
         for i in range(days):
             date = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
             f = daily_dir / f"{date}.md"
-            :
-                if f.exists():
+            if f.exists():
                 notes[date] = f.read_text(encoding='utf-8')[:500]
         return notes
 
@@ -215,16 +199,14 @@ class ResearchMemory:
             memory[:1500],
         ]
 
-        :
-            if relevant_memories:
+        if relevant_memories:
             parts.append("\n\n## Relevant Memories\n")
             for mem in relevant_memories:
                 parts.append(f"- {mem['section']}: {mem['content']}")
 
         # Add daily note context
         today_note = self.read_daily_note()
-        :
-            if today_note:
+        if today_note:
             parts.append(f"\n\n## Today's Notes\n{today_note[:500]}")
 
         return "\n".join(parts)
@@ -234,8 +216,7 @@ class ResearchMemory:
     async def extract_facts(self, conversation: str) -> Dict[str, Any]:
         """Use LLM to extract learnable facts from a conversation."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"facts": [], "error": "LLM unavailable"}
 
         try:
@@ -258,8 +239,7 @@ class ResearchMemory:
 
         changes = {}
         for category, items in facts.items():
-            :
-                if items and isinstance(items, list):
+            if items and isinstance(items, list):
                 # Check if this category exists in memory
                 section_map = {
                     "interests": "Research Interests",
@@ -269,8 +249,7 @@ class ResearchMemory:
                 }
                 section = section_map.get(category, category.title())
                 for item in items:
-                    :
-                        if isinstance(item, str) and len(item) > 5:
+                    if isinstance(item, str) and len(item) > 5:
                         self._append_to_section(section, f"- {item}")
                         changes[section] = changes.get(section, 0) + 1
 
@@ -281,11 +260,9 @@ class ResearchMemory:
         memory = self.read_memory()
         header = f"## {section}"
 
-        :
-            if header in memory:
+        if header in memory:
             # Check if item already exists
-            :
-                if item in memory:
+            if item in memory:
                 return
             # Find the section and add after the last item
             lines = memory.split('\n')
@@ -293,21 +270,17 @@ class ResearchMemory:
             in_section = False
             insert_at = None
             for i, line in enumerate(lines):
-                :
-                    if line.startswith(header):
+                if line.startswith(header):
                     in_section = True
                     insert_at = i + 1
                     continue
-                :
-                    if in_section and line.startswith('## '):
+                if in_section and line.startswith('## '):
                     insert_at = i
                     break
-                :
-                    if in_section and line.strip().startswith('- '):
+                if in_section and line.strip().startswith('- '):
                     insert_at = i + 1
 
-            :
-                if insert_at is not None:
+            if insert_at is not None:
                 lines.insert(insert_at, item)
                 MEMORY_FILE.write_text('\n'.join(lines), encoding='utf-8')
         else:

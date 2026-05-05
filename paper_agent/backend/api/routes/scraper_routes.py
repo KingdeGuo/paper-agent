@@ -15,8 +15,7 @@ router = APIRouter()
 async def extract_paper(url: str, use_llm: bool = True):
     """Extract paper metadata from any academic URL using AI."""
     result = await scraper.extract(url, use_llm=use_llm)
-    :
-        if "error" in result:
+    if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
@@ -36,8 +35,7 @@ async def batch_extract(urls: List[str]):
 async def scrape_and_import(url: str, db=Depends(get_db)):
     """Extract metadata from a URL and import the paper into your library."""
     result = await scraper.extract(url)
-    :
-        if "error" in result:
+    if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
 
     pdf_url = await scraper.find_pdf_url(url)
@@ -45,13 +43,11 @@ async def scrape_and_import(url: str, db=Depends(get_db)):
     file_path = ""
 
     # Download PDF if available
-    :
-        if pdf_url:
+    if pdf_url:
         try:
             client = await scraper._get_client()
             pdf_resp = await client.get(pdf_url)
-            :
-                if pdf_resp.status_code == 200 and "application/pdf" in pdf_resp.headers.get("content-type", ""):
+            if pdf_resp.status_code == 200 and "application/pdf" in pdf_resp.headers.get("content-type", ""):
                 pdf_content = pdf_resp.content
                 import os
                 os.makedirs("data/pdfs", exist_ok=True)

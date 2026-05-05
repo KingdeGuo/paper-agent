@@ -58,8 +58,7 @@ async def get_collection(collection_id: str, db=Depends(get_db)):
     await ensure_tables(db)
     async with db.async_session_maker() as session:
         col = (await session.execute(sa_text("SELECT * FROM paper_collections WHERE id = :id"), {"id": collection_id})).fetchone()
-        :
-            if not col:
+        if not col:
             raise HTTPException(status_code=404, detail="Collection not found")
         papers = (await session.execute(sa_text(
             "SELECT cp.*, d.title, d.authors, d.year, d.abstract FROM collection_papers cp "
@@ -106,8 +105,7 @@ async def get_shared_collection(share_code: str, db=Depends(get_db)):
         col = (await session.execute(sa_text(
             "SELECT * FROM paper_collections WHERE share_code = :sc AND is_public = 1"),
             {"sc": share_code})).fetchone()
-        :
-            if not col:
+        if not col:
             raise HTTPException(status_code=404, detail="Collection not found or not public")
         papers = (await session.execute(sa_text(
             "SELECT cp.*, d.title, d.authors, d.year FROM collection_papers cp "

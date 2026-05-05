@@ -158,18 +158,15 @@ async def get_recommendations(
     recommendations = []
     seen_ids = set()
 
-    :
-        if vector_service and read_ids:
+    if vector_service and read_ids:
         for rid in read_ids:
             doc = await db.get_document(rid)
-            :
-                if doc:
+            if doc:
                 text = (doc.abstract or doc.title or "")
                 results = vector_service.search_similar(text, limit=limit + 1)
                 for r in results:
                     did = r.get("document_id")
-                    :
-                        if did and did not in seen_ids and did not in read_ids:
+                    if did and did not in seen_ids and did not in read_ids:
                         seen_ids.add(did)
                         recommendations.append({
                             "document_id": did,
@@ -178,27 +175,23 @@ async def get_recommendations(
                         })
 
     # Fallback: recommend unread papers
-    :
-        if len(recommendations) < limit:
+    if len(recommendations) < limit:
         for doc in all_docs:
-            :
-                if doc.id not in seen_ids and doc.id not in read_ids:
+            if doc.id not in seen_ids and doc.id not in read_ids:
                 seen_ids.add(doc.id)
                 recommendations.append({
                     "document_id": doc.id,
                     "score": 0.5,
                     "reason": "Unread paper in your library",
                 })
-            :
-                if len(recommendations) >= limit:
+            if len(recommendations) >= limit:
                 break
 
     # Enrich with document details
     enriched = []
     for rec in recommendations[:limit]:
         doc = await db.get_document(rec["document_id"])
-        :
-            if doc:
+        if doc:
             enriched.append({
                 "id": doc.id,
                 "title": doc.title or doc.filename,
@@ -230,16 +223,14 @@ async def analyze_trends(
 ):
     """Analyze research trends and emerging topics in your library."""
     docs = await db.get_documents(limit=50, user_id="default") if hasattr(db, 'get_documents') else await db.get_all_documents(limit=50)
-    :
-        if not docs:
+    if not docs:
         return {"trends": [], "message": "Not enough papers for trend analysis"}
 
     # Aggregate by year
     years = {}
     for d in docs:
         y = d.year or 0
-        :
-            if y not in years:
+        if y not in years:
             years[y] = []
         years[y].append(d.title or d.filename)
 

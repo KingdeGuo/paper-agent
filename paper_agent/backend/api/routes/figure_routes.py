@@ -50,8 +50,7 @@ async def extract_figures(document_id: str, db=Depends(get_db)):
     """Extract all figures, tables, and charts from a paper's PDF."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     result = await figure_extractor.extract_all(document_id, doc.file_path or "", db=db)
@@ -89,13 +88,11 @@ async def get_figure_image(figure_id: str, db=Depends(get_db)):
         row = (await session.execute(sa_text(
             "SELECT filepath, filename FROM extracted_figures WHERE id = :id"),
             {"id": figure_id})).fetchone()
-        :
-            if not row:
+        if not row:
             raise HTTPException(status_code=404, detail="Figure not found")
 
     filepath = row[0]
-    :
-        if not os.path.exists(filepath):
+    if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Image file not found")
 
     return FileResponse(filepath, media_type=f"image/{row[1].split('.')[-1] if '.' in row[1] else 'png'}")
@@ -114,12 +111,10 @@ async def browse_figures(
     async with db.async_session_maker() as session:
         sql = "SELECT f.*, d.title as doc_title FROM extracted_figures f LEFT JOIN documents d ON f.document_id = d.id WHERE 1=1"
         params = {}
-        :
-            if document_id:
+        if document_id:
             sql += " AND f.document_id = :did"
             params["did"] = document_id
-        :
-            if page is not None:
+        if page is not None:
             sql += " AND f.page = :p"
             params["p"] = page
         sql += " ORDER BY f.created_at DESC LIMIT :lim OFFSET :off"

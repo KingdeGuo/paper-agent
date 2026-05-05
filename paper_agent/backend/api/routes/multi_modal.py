@@ -16,13 +16,11 @@ router = APIRouter()
 async def extract_figures_tables(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Extract descriptions of figures, tables, and key visual elements from a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = (doc.abstract or "") + " " + (doc.summary or "")
-    :
-        if not text:
+    if not text:
         return {"elements": [], "message": "No text available for analysis"}
 
     try:
@@ -61,8 +59,7 @@ async def extract_batch(document_ids: List[str], db=Depends(get_db), llm_service
 async def extract_data_tables(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Extract numerical data and results tables from a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = (doc.abstract or "")[:2000]

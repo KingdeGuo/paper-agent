@@ -22,12 +22,10 @@ async def get_timeline(
     docs = await db.get_documents(limit=500)
     filtered = [d for d in docs if (d.year or 0) >= min_year and (d.year or 0) <= max_year]
 
-    :
-        if not filtered:
+    if not filtered:
         return {"timeline": [], "summary": {}}
 
-    :
-        if group_by == "year":
+    if group_by == "year":
         groups = defaultdict(list)
         for d in filtered:
             y = d.year or 0

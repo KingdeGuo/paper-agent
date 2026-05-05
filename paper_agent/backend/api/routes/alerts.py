@@ -71,8 +71,7 @@ async def check_alerts(db=Depends(get_db), vector_service=Depends(get_vector_ser
         docs = await db.get_documents(limit=20)
         notifications = []
         for alert_id, name, query in alerts:
-            :
-                if vector_service:
+            if vector_service:
                 results = vector_service.search_similar(query, limit=3)
                 new_matches = [r for r in results if r.get("score", 0) > 0.5]
                 for match in new_matches[:3]:

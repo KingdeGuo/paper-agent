@@ -21,16 +21,13 @@ async def rerank_results(
     """Re-rank search results using cross-encoder style scoring."""
     # Get initial candidates
     candidates = []
-    :
-        if vector_service:
+    if vector_service:
         candidates = vector_service.search_similar(query, limit=20)
-    :
-        if not candidates and db:
+    if not candidates and db:
         docs = await db.search_documents(query, limit=20) if hasattr(db, 'search_documents') else []
         candidates = [{"document_id": d.id, "title": d.title, "text": d.abstract or ""} for d in docs]
 
-    :
-        if not candidates:
+    if not candidates:
         return {"query": query, "results": [], "count": 0}
 
     # Re-rank

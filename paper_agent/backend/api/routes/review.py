@@ -34,22 +34,19 @@ async def review_paper(
     try:
         # Get document
         doc = await db.get_document(document_id)
-        :
-            if not doc:
+        if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
         # Get text
         pdf_processor = PDFProcessor()
         text = pdf_processor.extract_text(doc.file_path) if hasattr(doc, 'file_path') else ""
 
-        :
-            if not text:
+        if not text:
             raise HTTPException(status_code=400, detail="Could not extract text from document")
 
         # Parse dimensions
         review_dims = None
-        :
-            if dimensions:
+        if dimensions:
             review_dims = [ReviewDimension(d) for d in dimensions if d in ReviewDimension._value2member_map_]
 
         # Perform review
@@ -72,13 +69,11 @@ async def get_paper_score(
     """Get overall score for a paper."""
     try:
         doc = await db.get_document(document_id)
-        :
-            if not doc:
+        if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
         # Check if review exists in summary or metadata
-        :
-            if doc.summary and "review" in (doc.doc_metadata or {}):
+        if doc.summary and "review" in (doc.doc_metadata or {}):
             review_data = doc.doc_metadata.get("review", {})
             return {
                 "document_id": document_id,
@@ -90,8 +85,7 @@ async def get_paper_score(
         pdf_processor = PDFProcessor()
         text = pdf_processor.extract_text(doc.file_path) if hasattr(doc, 'file_path') else ""
 
-        :
-            if not text:
+        if not text:
             return {"document_id": document_id, "overall_score": 0, "message": "No text available"}
 
         result = await paper_review.review_paper(text[:3000])  # Quick review with shorter text
@@ -121,15 +115,13 @@ async def predict_impact(
     """
     try:
         doc = await db.get_document(document_id)
-        :
-            if not doc:
+        if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
         pdf_processor = PDFProcessor()
         text = pdf_processor.extract_text(doc.file_path) if hasattr(doc, 'file_path') else ""
 
-        :
-            if not text:
+        if not text:
             raise HTTPException(status_code=400, detail="Could not extract text")
 
         result = await paper_review.predict_citation_count(text, title=doc.title or "")
@@ -166,16 +158,14 @@ async def compare_papers_deep(
 
     Returns a synthesized comparison with internal reasoning.
     """
-    :
-        if len(document_ids) < 2:
+    if len(document_ids) < 2:
         raise HTTPException(status_code=400, detail="At least 2 papers are required for comparison")
 
     try:
         papers_data = []
         for doc_id in document_ids[:3]:  # Limit to 3 for deep analysis
             doc = await db.get_document(doc_id)
-            :
-                if not doc:
+            if not doc:
                 continue
 
             papers_data.append({
@@ -184,8 +174,7 @@ async def compare_papers_deep(
                 "abstract": doc.abstract
             })
 
-        :
-            if len(papers_data) < 2:
+        if len(papers_data) < 2:
             raise HTTPException(status_code=404, detail="Could not find enough papers for comparison")
 
         result = await paper_review.compare_papers(papers_data, aspects=aspects)

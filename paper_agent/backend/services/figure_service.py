@@ -47,12 +47,10 @@ class FigureExtractor:
 
     async def extract_all(self, document_id: str, pdf_path: str, db=None) -> Dict[str, Any]:
         """Extract all figures and tables from a PDF."""
-        :
-            if not FITZ_AVAILABLE:
+        if not FITZ_AVAILABLE:
             return {"figures": [], "tables": [], "error": "PyMuPDF not installed"}
 
-        :
-            if not pdf_path or not os.path.exists(pdf_path):
+        if not pdf_path or not os.path.exists(pdf_path):
             return {"figures": [], "tables": [], "error": f"PDF not found: {pdf_path}"}
 
         result = {
@@ -80,8 +78,7 @@ class FigureExtractor:
                 ext = base_image["ext"]
 
                 # Skip very small images (icons, decorations)
-                :
-                    if len(image_bytes) < 5000:
+                if len(image_bytes) < 5000:
                     continue
 
                 # Generate unique ID
@@ -115,8 +112,7 @@ class FigureExtractor:
                 result["figures"].append(figure)
 
             # Extract tables using pdfplumber
-            :
-                if PDFPLUMBER_AVAILABLE:
+            if PDFPLUMBER_AVAILABLE:
                 tables = self._extract_tables(pdf_path, page_num)
                 for t in tables:
                     tid = str(uuid.uuid4())
@@ -133,8 +129,7 @@ class FigureExtractor:
         doc.close()
 
         # Save metadata to database
-        :
-            if db:
+        if db:
             await self._save_metadata(db, document_id, result)
 
         result["total_figures"] = len(result["figures"])
@@ -146,17 +141,14 @@ class FigureExtractor:
         """Get the bounding box of an image on a page."""
         try:
             rect = image_info[-1] if len(image_info) > 7 else None
-            :
-                if rect and len(rect) >= 4:
+            if rect and len(rect) >= 4:
                 return {"x0": rect[0], "y0": rect[1], "x1": rect[2], "y1": rect[3]}
-        except Exception:
-            pass
+        except Exception: pass
         return None
 
     def _find_caption(self, doc, page_num: int, bbox: Optional[Dict]) -> Optional[str]:
         """Find the caption associated with a figure by looking for text near it."""
-        :
-            if not bbox:
+        if not bbox:
             return None
 
         page = doc[page_num]
@@ -165,32 +157,26 @@ class FigureExtractor:
             blocks = page.get_text("blocks")
             img_y1 = bbox.get("y1", 0)
             for block in blocks:
-                :
-                    if block[3] > img_y1 + 5 and block[3] < img_y1 + 80:
+                if block[3] > img_y1 + 5 and block[3] < img_y1 + 80:
                     text = block[4].strip()
-                    :
-                        if text and len(text) > 10 and any(w in text.lower() for w in ["fig", "figure", "table", "fig.", "tab."]):
+                    if text and len(text) > 10 and any(w in text.lower() for w in ["fig", "figure", "table", "fig.", "tab."]):
                         return text[:300]
-        except Exception:
-            pass
+        except Exception: pass
         return None
 
     def _extract_tables(self, pdf_path: str, page_num: int) -> List[Dict]:
         """Extract tables from a PDF page using pdfplumber."""
         tables = []
-        :
-            if not PDFPLUMBER_AVAILABLE:
+        if not PDFPLUMBER_AVAILABLE:
             return tables
 
         try:
             with pdfplumber.open(pdf_path) as pdf:
-                :
-                    if page_num < len(pdf.pages):
+                if page_num < len(pdf.pages):
                     page = pdf.pages[page_num]
                     page_tables = page.extract_tables()
                     for t in page_tables:
-                        :
-                            if t and len(t) > 1:
+                        if t and len(t) > 1:  # At least header + 1 row
                             tables.append({
                                 "data": t,
                                 "rows": len(t),
@@ -243,8 +229,7 @@ class FigureExtractor:
 
     async def describe_figure(self, figure_id: str, db=None) -> Optional[str]:
         """Generate an AI description of a figure."""
-        :
-            if not db:
+        if not db:
             return None
 
         # Get figure metadata
@@ -254,8 +239,7 @@ class FigureExtractor:
                 "SELECT f.*, d.title, d.abstract FROM extracted_figures f "
                 "LEFT JOIN documents d ON f.document_id = d.id WHERE f.id = :id"),
                 {"id": figure_id})).fetchone()
-            :
-                if not fig:
+            if not fig:
                 return None
 
         caption = fig[6] or ""
@@ -264,8 +248,7 @@ class FigureExtractor:
 
         # Use caption + context to generate description
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return f"Figure on page {fig[3]}. Caption: {caption}" if caption else f"Figure on page {fig[3]}"
 
         try:
@@ -290,8 +273,7 @@ class FigureExtractor:
 
     async def search_figures(self, query: str, document_id: str = None, limit: int = 20) -> List[Dict]:
         """Search figures by caption or description."""
-        :
-            if not get_llm_service():
+        if not get_llm_service():
             return []
 
         llm = get_llm_service()

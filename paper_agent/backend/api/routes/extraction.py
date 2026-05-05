@@ -15,12 +15,10 @@ router = APIRouter()
 async def extract_findings(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Extract structured key findings from a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         return {"error": "Not found"}
     text = (doc.abstract or "") + "\n" + (doc.summary or "")
-    :
-        if not text:
+    if not text:
         return {"findings": [], "message": "No text available"}
     try:
         resp = await llm_service.chat_completion(
@@ -40,8 +38,7 @@ async def extract_findings(document_id: str, db=Depends(get_db), llm_service=Dep
 async def extract_methods(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Extract methodology details from a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         return {"error": "Not found"}
     text = (doc.abstract or "")[:2000]
     try:
@@ -63,12 +60,10 @@ async def compare_findings(document_ids: list[str], aspect: str = "methodology",
     docs = []
     for did in document_ids[:5]:
         doc = await db.get_document(did)
-        :
-            if doc:
+        if doc:
             docs.append(f"Paper: {doc.title} ({doc.year})\nAbstract: {(doc.abstract or '')[:500]}")
 
-    :
-        if len(docs) < 2:
+    if len(docs) < 2:
         return {"error": "Need at least 2 papers"}
     try:
         resp = await llm_service.chat_completion(

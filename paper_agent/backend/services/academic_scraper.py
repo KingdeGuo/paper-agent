@@ -48,8 +48,7 @@ class AcademicScraper:
         self.client = None
 
     async def _get_client(self) -> httpx.AsyncClient:
-        :
-            if self.client is None:
+        if self.client is None:
             self.client = httpx.AsyncClient(
                 timeout=30,
                 follow_redirects=True,
@@ -90,25 +89,21 @@ class AcademicScraper:
 
         # Phase 1: Try site-specific extractor
         metadata = self._try_site_extractors(url, html)
-        :
-            if metadata and metadata.get("title"):
+        if metadata and metadata.get("title"):
             metadata["source"] = metadata.get("source", "site_extractor")
             metadata["confidence"] = 0.9
             return metadata
 
         # Phase 2: Try meta tag extraction (works on most academic sites)
         metadata = self._extract_from_meta_tags(html, url)
-        :
-            if metadata and metadata.get("title") and metadata.get("confidence", 0) > 0.6:
+        if metadata and metadata.get("title") and metadata.get("confidence", 0) > 0.6:
             metadata["source"] = "meta_tags"
             return metadata
 
         # Phase 3: LLM-based extraction (works everywhere, slower)
-        :
-            if use_llm:
+        if use_llm:
             metadata = await self._extract_with_llm(html, url)
-            :
-                if metadata and metadata.get("title"):
+            if metadata and metadata.get("title"):
                 metadata["source"] = "llm"
                 metadata["confidence"] = 0.7
                 return metadata
@@ -118,8 +113,7 @@ class AcademicScraper:
     def _try_site_extractors(self, url: str, html: str) -> Optional[Dict]:
         """Try registered site-specific extractors."""
         for pattern, extractor in SITE_EXTRACTORS.items():
-            :
-                if re.search(pattern, url, re.I):
+            if re.search(pattern, url, re.I):
                 try:
                     return extractor(html, url)
                 except Exception as e:
@@ -139,18 +133,15 @@ class AcademicScraper:
         # Authors
         authors = []
         for tag in soup.find_all("meta", attrs={"name": "citation_author"}):
-            :
-                if tag.get("content"):
+            if tag.get("content"):
                 authors.append(tag["content"].strip())
         meta["authors"] = authors
 
         # Date
         date_str = self._get_meta(soup, "citation_date") or self._get_meta(soup, "citation_publication_date")
-        :
-            if date_str:
+        if date_str:
             match = re.search(r'(\d{4})', date_str)
-            :
-                if match:
+            if match:
                 meta["year"] = int(match.group(1))
 
         # Journal/venue
@@ -161,20 +152,15 @@ class AcademicScraper:
 
         # Keywords
         keywords_str = self._get_meta(soup, "citation_keywords") or self._get_meta(soup, "keywords")
-        :
-            if keywords_str:
+        if keywords_str:
             meta["keywords"] = [k.strip() for k in keywords_str.split(",") if k.strip()]
 
         # Confidence calculation
         confidence = 0
-        :
-            if meta.get("title"):
-        :
-            if meta.get("authors"):
-        :
-            if meta.get("doi"):
-        :
-            if meta.get("abstract"):
+        if meta.get("title"): confidence += 0.4
+        if meta.get("authors"): confidence += 0.2
+        if meta.get("doi"): confidence += 0.2
+        if meta.get("abstract"): confidence += 0.2
         meta["confidence"] = min(confidence, 1.0)
 
         meta["url"] = url
@@ -183,8 +169,7 @@ class AcademicScraper:
     async def _extract_with_llm(self, html: str, url: str) -> Dict[str, Any]:
         """Use LLM to extract paper metadata from raw HTML."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {}
 
         # Extract readable text (first 8000 chars)
@@ -200,14 +185,12 @@ class AcademicScraper:
             )
             content = resp.get("content", "{}") if isinstance(resp, dict) else str(resp)
             match = re.search(r'\{.*\}', content, re.DOTALL)
-            :
-                if match:
+            if match:
                 data = json.loads(match.group())
                 data["url"] = url
                 # Clean up
                 for key in ["title", "abstract", "doi", "venue"]:
-                    :
-                        if isinstance(data.get(key), str) and len(data[key]) > 1000:
+                    if isinstance(data.get(key), str) and len(data[key]) > 1000:
                         data[key] = data[key][:1000]
                 return data
         except Exception as e:
@@ -229,27 +212,22 @@ class AcademicScraper:
     async def find_pdf_url(self, url: str) -> Optional[str]:
         """Find the PDF download URL for a paper page."""
         meta = await self.extract(url)
-        :
-            if meta.get("pdf_url"):
+        if meta.get("pdf_url"):
             return meta["pdf_url"]
 
         # Try common patterns
-        :
-            if "arxiv.org" in url:
+        if "arxiv.org" in url:
             aid = re.search(r'(\d+\.\d+)', url)
-            :
-                if aid:
+            if aid:
                 return f"https://arxiv.org/pdf/{aid.group(1)}.pdf"
-        :
-            if "doi.org" in url:
+        if "doi.org" in url:
             doi = url.split("doi.org/")[-1]
             return f"https://doi.org/{doi}"
 
         return meta.get("pdf_url")
 
     async def close(self):
-        :
-            if self.client:
+        if self.client:
             await self.client.aclose()
 
 
@@ -263,42 +241,35 @@ def _extract_arxiv(html: str, url: str) -> Dict:
 
     # arXiv ID
     match = re.search(r'(\d+\.\d+)', url)
-    :
-        if match:
+    if match:
         meta["arxiv_id"] = match.group(1)
 
     # Title
     title_tag = soup.find("h1", class_="title")
-    :
-        if title_tag:
+    if title_tag:
         meta["title"] = title_tag.text.replace("Title:", "").strip()
     else:
         meta["title"] = soup.title.text.replace(" - arXiv", "").strip() if soup.title else None
 
     # Authors
     authors_tag = soup.find("div", class_="authors")
-    :
-        if authors_tag:
+    if authors_tag:
         meta["authors"] = [a.strip() for a in authors_tag.text.replace("Authors:", "").split(",")]
 
     # Abstract
     abstract_tag = soup.find("blockquote", class_="abstract")
-    :
-        if abstract_tag:
+    if abstract_tag:
         meta["abstract"] = abstract_tag.text.replace("Abstract:", "").strip()
 
     # Year from submission date
     date_tag = soup.find("div", class_="dateline")
-    :
-        if date_tag:
+    if date_tag:
         match = re.search(r'(\d{4})', date_tag.text)
-        :
-            if match:
+        if match:
             meta["year"] = int(match.group(1))
 
     # PDF URL
-    :
-        if meta.get("arxiv_id"):
+    if meta.get("arxiv_id"):
         meta["pdf_url"] = f"https://arxiv.org/pdf/{meta['arxiv_id']}.pdf"
 
     meta["confidence"] = 0.95
@@ -314,32 +285,27 @@ def _extract_pubmed(html: str, url: str) -> Dict:
 
     # PMID
     match = re.search(r'/(\d+)/?', url)
-    :
-        if match:
+    if match:
         meta["pmid"] = match.group(1)
 
     # Title
     h1 = soup.find("h1", class_="heading-title")
-    :
-        if h1:
+    if h1:
         meta["title"] = h1.text.strip()
 
     # Authors
     author_cont = soup.find("div", class_="authors-list")
-    :
-        if author_cont:
+    if author_cont:
         meta["authors"] = [a.text.strip() for a in author_cont.find_all("a") if a.text.strip()]
 
     # Abstract
     abstract_div = soup.find("div", class_="abstract-content")
-    :
-        if abstract_div:
+    if abstract_div:
         meta["abstract"] = abstract_div.text.strip()
 
     # DOI
     doi_link = soup.find("a", href=re.compile(r"doi\.org"))
-    :
-        if doi_link:
+    if doi_link:
         meta["doi"] = doi_link.text.strip()
 
     meta["confidence"] = 0.9
@@ -366,17 +332,14 @@ def _extract_meta_only(html: str, url: str) -> Dict:
 
     authors = []
     for tag in soup.find_all("meta", attrs={"name": "citation_author"}):
-        :
-            if tag.get("content"):
+        if tag.get("content"):
             authors.append(tag["content"].strip())
     meta["authors"] = authors
 
     date_str = _get_meta(soup, "citation_date") or _get_meta(soup, "citation_publication_date")
-    :
-        if date_str:
+    if date_str:
         ym = re.search(r'(\d{4})', date_str)
-        :
-            if ym:
+        if ym: meta["year"] = int(ym.group(1))
 
     meta["pdf_url"] = _get_meta(soup, "citation_pdf_url")
     meta["journal"] = _get_meta(soup, "citation_journal_title") or _get_meta(soup, "citation_conference_title")

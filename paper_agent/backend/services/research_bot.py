@@ -58,16 +58,13 @@ class ResearchBot:
         """
         intent = self._detect_intent(message)
 
-        :
-            if intent == "help":
+        if intent == "help":
             return self._help_response(platform)
 
-        :
-            if intent == "stats":
+        if intent == "stats":
             return await self._handle_stats(user_id)
 
-        :
-            if intent == "read":
+        if intent == "read":
             return await self._handle_reading_suggestion(user_id)
 
         # Default: use GraphRAG for deep research question answering
@@ -78,8 +75,7 @@ class ResearchBot:
         msg_lower = message.lower()
         for intent, patterns in self.intent_patterns.items():
             for pattern in patterns:
-                :
-                    if msg_lower.startswith(pattern) or f" {pattern} " in f" {msg_lower} ":
+                if msg_lower.startswith(pattern) or f" {pattern} " in f" {msg_lower} ":
                     return intent
         return "ask"
 
@@ -104,8 +100,7 @@ class ResearchBot:
     async def _handle_stats(self, user_id: str) -> Dict:
         """Handle stats intent."""
         db = get_db()
-        :
-            if not db:
+        if not db:
             return {"reply": "Database unavailable.", "type": "text"}
 
         stats = await db.get_processing_stats() if hasattr(db, 'get_processing_stats') else {}
@@ -118,12 +113,10 @@ class ResearchBot:
                     "SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), "
                     "SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"
                 ))).fetchone()
-                :
-                    if row:
+                if row:
                     reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0,
                                      "reading": row[2] or 0, "read": row[3] or 0}
-        except Exception:
-            pass
+        except Exception: pass
 
         reply = (
             f"📊 *Library Statistics*\n\n"
@@ -140,13 +133,11 @@ class ResearchBot:
         """Suggest what to read next."""
         db = get_db()
         vs = get_vector_service()
-        :
-            if not db:
+        if not db:
             return {"reply": "No papers in your library yet. Upload some first!", "type": "text"}
 
         docs = await db.get_documents(limit=20) if hasattr(db, 'get_documents') else []
-        :
-            if not docs:
+        if not docs:
             return {"reply": "Your library is empty. Upload papers to get started!", "type": "text"}
 
         # Get unread papers
@@ -157,12 +148,10 @@ class ResearchBot:
                 rows = (await session.execute(sa_text(
                     "SELECT document_id FROM reading_list WHERE user_id = 'default' AND status IN ('read', 'reading')"))).fetchall()
                 reading_list_ids = {r[0] for r in rows}
-        except Exception:
-            pass
+        except Exception: pass
 
         unread = [d for d in docs if d.id not in reading_list_ids]
-        :
-            if not unread:
+        if not unread:
             unread = docs
 
         # Pick top 3
@@ -171,8 +160,7 @@ class ResearchBot:
         for i, d in enumerate(suggestions, 1):
             authors = ', '.join((d.authors or [])[:2])
             reply_lines.append(f"{i}. *{d.title or d.filename}*")
-            :
-                if authors:
+            if authors:
                 reply_lines.append(f"   by {authors} ({d.year or 'n.d.'})")
 
         return {"reply": "\n".join(reply_lines), "type": "markdown"}
@@ -183,16 +171,14 @@ class ResearchBot:
         vs = get_vector_service()
         llm = get_llm_service()
 
-        :
-            if not all([db, vs, llm]):
+        if not all([db, vs, llm]):
             return {"reply": "Research Q&A requires all services (database, vector search, LLM). Please check your configuration.", "type": "text"}
 
         try:
             engine = GraphRAGEngine(db, vs, llm, GraphRAGConfig(max_depth=2))
             result = await engine.retrieve(question)
 
-            :
-                if result.get("total_sources", 0) == 0:
+            if result.get("total_sources", 0) == 0:
                 return {"reply": f"I searched your library but couldn't find relevant papers for: '{question}'. Try rephrasing or uploading more papers on this topic.", "type": "text"}
 
             answer = result.get("answer", "")
@@ -217,8 +203,7 @@ class ResearchBot:
 
         payload = payloads.get(platform, payloads[BotPlatform.GENERIC])
         headers = {"Content-Type": "application/json"}
-        :
-            if secret:
+        if secret:
             headers["Authorization"] = f"Bearer {secret}"
 
         try:

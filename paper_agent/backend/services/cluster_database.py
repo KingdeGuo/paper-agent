@@ -13,8 +13,7 @@ from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from sqlalchemy import (
@@ -124,11 +123,9 @@ class ClusterDatabaseService:
 
     @property
     def async_engine(self):
-        :
-            if self._async_engine is None:
+        if self._async_engine is None:
             kwargs = {}
-            :
-                if self.config.type == "postgresql":
+            if self.config.type == "postgresql":
                 kwargs = {
                     "pool_size": self.config.pool_size,
                     "max_overflow": self.config.max_overflow,
@@ -143,11 +140,9 @@ class ClusterDatabaseService:
 
     @property
     def sync_engine(self):
-        :
-            if self._sync_engine is None:
+        if self._sync_engine is None:
             kwargs = {}
-            :
-                if self.config.type == "postgresql":
+            if self.config.type == "postgresql":
                 kwargs = {
                     "pool_size": self.config.pool_size,
                     "max_overflow": self.config.max_overflow,
@@ -162,8 +157,7 @@ class ClusterDatabaseService:
 
     @property
     def async_session_maker(self):
-        :
-            if self._async_session_maker is None:
+        if self._async_session_maker is None:
             self._async_session_maker = async_sessionmaker(
                 self.async_engine,
                 class_=AsyncSession,
@@ -173,8 +167,7 @@ class ClusterDatabaseService:
 
     @property
     def sync_session_maker(self):
-        :
-            if self._sync_session_maker is None:
+        if self._sync_session_maker is None:
             self._sync_session_maker = sessionmaker(
                 bind=self.sync_engine,
                 expire_on_commit=False,
@@ -208,11 +201,9 @@ class ClusterDatabaseService:
 
     async def close(self):
         """Close database connections."""
-        :
-            if self._async_engine:
+        if self._async_engine:
             await self._async_engine.dispose()
-        :
-            if self._sync_engine:
+        if self._sync_engine:
             self._sync_engine.dispose()
 
     # -----------------------------------------------------------------------
@@ -316,8 +307,7 @@ class ClusterDatabaseService:
                 select(ResearchThread).where(ResearchThread.id == thread_id)
             )
             thread = result.scalar_one_or_none()
-            :
-                if not thread:
+            if not thread:
                 return False
 
             thread.messages = messages
@@ -390,17 +380,13 @@ class ClusterDatabaseService:
         async with self.async_session_maker() as session:
             query = select(Document).where(not Document.is_deleted)
 
-            :
-                if user_id:
+            if user_id:
                 query = query.where(Document.user_id == user_id)
 
-            :
-                if filters:
-                :
-                    if filters.get("year"):
+            if filters:
+                if filters.get("year"):
                     query = query.where(Document.year == filters["year"])
-                :
-                    if filters.get("status") is not None:
+                if filters.get("status") is not None:
                     query = query.where(Document.processed == filters["status"])
 
             query = query.order_by(Document.upload_date.desc())
@@ -423,13 +409,11 @@ class ClusterDatabaseService:
                 select(Document).where(Document.id == document_id)
             )
             doc = result.scalar_one_or_none()
-            :
-                if not doc:
+            if not doc:
                 return None
 
             for key, value in data.items():
-                :
-                    if hasattr(doc, key) and key not in ("id", "created_at"):
+                if hasattr(doc, key) and key not in ("id", "created_at"):
                     setattr(doc, key, value)
 
             doc.updated_at = datetime.utcnow()
@@ -444,8 +428,7 @@ class ClusterDatabaseService:
                 select(Document).where(Document.id == document_id)
             )
             doc = result.scalar_one_or_none()
-            :
-                if not doc:
+            if not doc:
                 return False
 
             # Soft delete
@@ -470,8 +453,7 @@ class ClusterDatabaseService:
                 )
             )
 
-            :
-                if user_id:
+            if user_id:
                 q = q.where(Document.user_id == user_id)
 
             q = q.order_by(Document.upload_date.desc()).limit(limit)
@@ -500,8 +482,7 @@ class ClusterDatabaseService:
             q = select(Document.processed, func.count(Document.id)).where(
                 not Document.is_deleted
             )
-            :
-                if user_id:
+            if user_id:
                 q = q.where(Document.user_id == user_id)
 
             result = await session.execute(q.group_by(Document.processed))
@@ -531,16 +512,13 @@ class ClusterDatabaseService:
                 select(Document).where(Document.id == document_id)
             )
             doc = result.scalar_one_or_none()
-            :
-                if not doc:
+            if not doc:
                 return False
 
             doc.processed = status
-            :
-                if summary is not None:
+            if summary is not None:
                 doc.summary = summary
-            :
-                if vector_id is not None:
+            if vector_id is not None:
                 doc.vector_id = vector_id
             doc.updated_at = datetime.utcnow()
 
@@ -549,8 +527,7 @@ class ClusterDatabaseService:
 
     async def get_node_stats(self) -> Dict[str, Any]:
         """Get statistics per node (for cluster monitoring)."""
-        :
-            if not cluster_settings.enable_clustering:
+        if not cluster_settings.enable_clustering:
             return {}
 
         async with self.async_session_maker() as session:

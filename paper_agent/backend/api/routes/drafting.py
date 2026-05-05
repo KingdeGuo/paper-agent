@@ -61,8 +61,7 @@ async def grounded_chat(
     docs_context = []
     for d_id in doc_ids:
         doc = await db.get_document(d_id)
-        :
-            if doc:
+        if doc:
             # Fetch some relevant snippets (simplified: use abstract and summary)
             docs_context.append({
                 "id": doc.id,

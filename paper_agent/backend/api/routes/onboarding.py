@@ -36,53 +36,43 @@ async def get_onboarding_status(db=Depends(get_db)):
     try:
         docs = await db.get_documents(limit=1) if db else []
         has_docs = len(docs) > 0
-    except Exception:
-        pass
+    except Exception: pass
 
     # Check if LLM is configured
     try:
         from backend.services.registry import get_llm_service
         llm = get_llm_service()
         has_llm = llm is not None and hasattr(llm, 'provider') and llm.provider is not None
-    except Exception:
-        pass
+    except Exception: pass
 
     # Check if literature tree has nodes
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM directory_nodes WHERE is_deleted = 0"))).scalar() or 0
             has_folders = cnt > 0
-    except Exception:
-        pass
+    except Exception: pass
 
     # Check if reading goals exist
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM reading_goals WHERE is_active = 1"))).scalar() or 0
             has_goals = cnt > 0
-    except Exception:
-        pass
+    except Exception: pass
 
     # Check Zotero connected
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM zotero_credentials"))).scalar() or 0
             has_zotero = cnt > 0
-    except Exception:
-        pass
+    except Exception: pass
 
     # Determine completed steps
     completed_steps = ["welcome"]
-    :
-        if has_docs:
-    :
-        if has_llm:
-    :
-        if has_folders:
-    :
-        if has_goals:
-    :
-        if has_zotero:
+    if has_docs: completed_steps.append("upload_first_paper")
+    if has_llm: completed_steps.append("configure_llm")
+    if has_folders: completed_steps.append("create_folder")
+    if has_goals: completed_steps.append("set_goals")
+    if has_zotero: completed_steps.append("connect_zotero")
 
     # Determine overall progress
     required_steps = [s for s in ONBOARDING_STEPS if s["required"]]
@@ -105,8 +95,7 @@ async def get_onboarding_status(db=Depends(get_db)):
 
 def _get_next_step(completed):
     for step in ONBOARDING_STEPS:
-        :
-            if step["id"] not in completed:
+        if step["id"] not in completed:
             return step
     return None
 

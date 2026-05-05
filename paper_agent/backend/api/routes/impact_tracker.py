@@ -14,8 +14,7 @@ router = APIRouter()
 async def get_impact(document_id: str, db=Depends(get_db)):
     """Get citation count, altmetrics, and impact indicators for a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     impact = {
@@ -33,16 +32,13 @@ async def get_impact(document_id: str, db=Depends(get_db)):
     title = doc.title
 
     # 1. OpenCitations (COCI)
-    :
-        if doi:
+    if doi:
         try:
             async with httpx.AsyncClient(timeout=15) as client:
                 resp = await client.get(f"https://opencitations.net/index/coci/api/v1/citation-count/doi:{doi}")
-                :
-                    if resp.status_code == 200:
+                if resp.status_code == 200:
                     data = resp.json()
-                    :
-                        if data and len(data) > 0:
+                    if data and len(data) > 0:
                         impact["citation_count"] = data[0].get("count", 0)
                         impact["sources"]["opencitations"] = int(data[0].get("count", 0))
         except Exception as e:
@@ -52,21 +48,17 @@ async def get_impact(document_id: str, db=Depends(get_db)):
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             params = {}
-            :
-                if doi:
+            if doi:
                 params["query"] = doi
             elif title:
                 params["query"] = title
-            :
-                if params:
+            if params:
                 resp = await client.get("https://api.semanticscholar.org/graph/v1/paper/search",
                                         params={**params, "limit": 1, "fields": "citationCount, influentialCitationCount, title"})
-                :
-                    if resp.status_code == 200:
+                if resp.status_code == 200:
                     data = resp.json()
                     papers = data.get("data", [])
-                    :
-                        if papers and len(papers) > 0:
+                    if papers and len(papers) > 0:
                         p = papers[0]
                         impact["citation_count"] = max(impact["citation_count"], p.get("citationCount", 0) or 0)
                         impact["influential_citations"] = p.get("influentialCitationCount", 0) or 0
@@ -102,8 +94,7 @@ async def get_impact(document_id: str, db=Depends(get_db)):
 async def get_library_impact(db=Depends(get_db)):
     """Get impact overview across all papers in the library."""
     docs = await db.get_documents(limit=100) if db else []
-    :
-        if not docs:
+    if not docs:
         return {"total_papers": 0}
 
     total_citations = 0
@@ -114,8 +105,7 @@ async def get_library_impact(db=Depends(get_db)):
         meta = doc.doc_metadata or {}
         impact = meta.get("impact", {})
         cites = impact.get("citation_count", 0) or 0
-        :
-            if cites > 0:
+        if cites > 0:
             total_citations += cites
             papers_with_citations += 1
             top_papers.append({

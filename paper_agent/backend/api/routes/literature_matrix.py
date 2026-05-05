@@ -37,13 +37,11 @@ async def extract_dimensions(document_id: str, db=Depends(get_db), llm_service=D
     """Extract structured comparison dimensions from a paper."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = f"Title: {doc.title}\nAbstract: {(doc.abstract or '')[:1500]}\nSummary: {(doc.summary or '')[:1000]}"
-    :
-        if len(text.strip()) < 100:
+    if len(text.strip()) < 100:
         # Use existing data if no full text
         data = {d: "" for d in MATRIX_DIMENSIONS}
         data["research_question"] = doc.title or ""
@@ -66,8 +64,7 @@ async def extract_dimensions(document_id: str, db=Depends(get_db), llm_service=D
         data = json.loads(match.group()) if match else {}
         # Ensure all dimensions exist
         for d in MATRIX_DIMENSIONS:
-            :
-                if d not in data:
+            if d not in data:
                 data[d] = ""
     except Exception as e:
         logger.warning(f"Extraction failed: {e}")
@@ -87,8 +84,7 @@ async def get_matrix(document_ids: str, db=Depends(get_db)):
     """Get comparison matrix for selected papers. Comma-separated IDs."""
     await ensure_tables(db)
     ids = [d.strip() for d in document_ids.split(",") if d.strip()]
-    :
-        if not ids:
+    if not ids:
         raise HTTPException(status_code=400, detail="At least one document ID required")
 
     results = []
@@ -119,19 +115,16 @@ async def get_matrix(document_ids: str, db=Depends(get_db)):
 @router.post("/matrix/compare", summary="AI compare papers across dimensions")
 async def ai_compare_matrix(document_ids: List[str], db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Use AI to compare papers and generate insights across dimensions."""
-    :
-        if len(document_ids) < 2:
+    if len(document_ids) < 2:
         raise HTTPException(status_code=400, detail="Need at least 2 papers")
 
     docs = []
     for did in document_ids[:5]:
         doc = await db.get_document(did)
-        :
-            if doc:
+        if doc:
             docs.append(doc)
 
-    :
-        if len(docs) < 2:
+    if len(docs) < 2:
         raise HTTPException(status_code=400, detail="Not enough valid documents")
 
     # Build comparison prompt
@@ -159,8 +152,7 @@ async def ai_compare_matrix(document_ids: List[str], db=Depends(get_db), llm_ser
 
 def _build_comparison_table(results):
     """Build a markdown comparison table from extracted data."""
-    :
-        if not results:
+    if not results:
         return ""
 
     dimensions = MATRIX_DIMENSIONS

@@ -39,8 +39,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception:
-                pass
+            except Exception: pass
         await session.commit()
 
 
@@ -72,20 +71,16 @@ async def list_entries(entry_type: str = None, tag: str = None,
     async with db.async_session_maker() as session:
         sql = "SELECT * FROM codex_entries WHERE user_id = 'default' AND is_deleted = 0"
         params = {}
-        :
-            if entry_type:
+        if entry_type:
             sql += " AND entry_type = :et"
             params["et"] = entry_type
-        :
-            if tag:
+        if tag:
             sql += " AND tags LIKE :tg"
             params["tg"] = f'%"{tag}"%'
-        :
-            if search:
+        if search:
             sql += " AND (title LIKE :s OR content LIKE :s)"
             params["s"] = f"%{search}%"
-        :
-            if importance_min is not None:
+        if importance_min is not None:
             sql += " AND importance >= :imp"
             params["imp"] = importance_min
         sql += " ORDER BY importance DESC, updated_at DESC LIMIT 100"
@@ -108,8 +103,7 @@ async def get_entry(entry_id: str, db=Depends(get_db)):
         row = (await session.execute(sa_text(
             "SELECT * FROM codex_entries WHERE id = :id AND is_deleted = 0"),
             {"id": entry_id})).fetchone()
-        :
-            if not row:
+        if not row:
             return {"error": "Entry not found"}
         return {
             "id": row[0], "title": row[2], "content": row[3],
@@ -128,14 +122,10 @@ async def update_entry(entry_id: str, content: str = None, title: str = None,
     await ensure_tables(db)
     sets = ["updated_at = :n"]
     params = {"id": entry_id, "n": datetime.utcnow().isoformat()}
-    :
-        if content is not None:
-    :
-        if title is not None:
-    :
-        if importance is not None:
-    :
-        if tags is not None:
+    if content is not None: sets.append("content = :c"); params["c"] = content
+    if title is not None: sets.append("title = :t"); params["t"] = title
+    if importance is not None: sets.append("importance = :i"); params["i"] = importance
+    if tags is not None: sets.append("tags = :tg"); params["tg"] = json.dumps(tags)
     async with db.async_session_maker() as session:
         await session.execute(sa_text(f"UPDATE codex_entries SET {', '.join(sets)} WHERE id = :id"), params)
         await session.commit()
@@ -174,8 +164,7 @@ async def get_connection_graph(entry_id: str, db=Depends(get_db)):
     async with db.async_session_maker() as session:
         entry = (await session.execute(sa_text(
             "SELECT id, title, entry_type FROM codex_entries WHERE id = :id"), {"id": entry_id})).fetchone()
-        :
-            if not entry:
+        if not entry:
             return {"error": "Entry not found"}
 
         connections = (await session.execute(sa_text(
@@ -189,12 +178,10 @@ async def get_connection_graph(entry_id: str, db=Depends(get_db)):
 
         nodes = [{"id": entry[0], "title": entry[1], "type": entry[2], "center": True}]
         for rid in related_ids:
-            :
-                if rid != entry_id:
+            if rid != entry_id:
                 r = (await session.execute(sa_text(
                     "SELECT id, title, entry_type FROM codex_entries WHERE id = :id"), {"id": rid})).fetchone()
-                :
-                    if r:
+                if r:
                     nodes.append({"id": r[0], "title": r[1], "type": r[2], "center": False})
 
         edges = [{"source": c[1], "target": c[2], "type": c[3], "description": c[4]} for c in connections]
@@ -214,27 +201,23 @@ async def auto_import_annotations(document_id: str = None, db=Depends(get_db)):
         # Get annotations
         sql = "SELECT id, document_id, text, note, page_number FROM annotations WHERE is_deleted = 0"
         params = {}
-        :
-            if document_id:
+        if document_id:
             sql += " AND document_id = :did"
             params["did"] = document_id
         annotations = (await session.execute(sa_text(sql), params)).fetchall()
 
         for a in annotations:
             content = a[2] or ""
-            :
-                if a[3]:
+            if a[3]:
                 content += f"\n\nNote: {a[3]}"
-            :
-                if not content.strip():
+            if not content.strip():
                 continue
 
             # Check if already imported
             existing = (await session.execute(sa_text(
                 "SELECT id FROM codex_entries WHERE source_document_id = :sid AND content = :c AND entry_type = 'annotation'"),
                 {"sid": a[1], "c": content[:200]})).fetchone()
-            :
-                if not existing:
+            if not existing:
                 await session.execute(sa_text(
                     "INSERT INTO codex_entries (id, user_id, title, content, entry_type, source_document_id) "
                     "VALUES (:id, 'default', :t, :c, 'annotation', :sid)"),

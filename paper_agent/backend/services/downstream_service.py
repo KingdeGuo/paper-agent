@@ -22,8 +22,7 @@ class DownstreamService:
                             task: str = "implement the main algorithm") -> Dict[str, Any]:
         """Generate implementation code from a paper's methodology."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"code": "", "error": "LLM not available"}
 
         try:
@@ -42,8 +41,7 @@ class DownstreamService:
     async def generate_code_from_formula(self, formula: str, language: str = "python") -> Dict[str, Any]:
         """Generate code for a specific mathematical formula."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"code": ""}
 
         try:
@@ -62,8 +60,7 @@ class DownstreamService:
     async def validate_expression(self, expression: str, context: str = "") -> Dict[str, Any]:
         """Validate a mathematical expression or derivation for correctness."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"valid": None, "error": "LLM not available"}
 
         try:
@@ -92,8 +89,7 @@ class DownstreamService:
     async def check_data_accuracy(self, data_claims: str, context: str = "") -> Dict[str, Any]:
         """Cross-validate numerical claims against paper context."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"error": "LLM not available"}
 
         try:
@@ -120,8 +116,7 @@ class DownstreamService:
                                  constraints: str = "") -> Dict[str, Any]:
         """Design experiments based on paper methodology."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"error": "LLM not available"}
 
         try:
@@ -193,8 +188,7 @@ class DownstreamService:
                                     style: str = "publication") -> Dict[str, Any]:
         """Generate Python code for creating publication-quality figures."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"code": ""}
 
         style_configs = {
@@ -228,8 +222,7 @@ class DownstreamService:
                                         tone: str = "professional") -> Dict[str, Any]:
         """Draft point-by-point responses to reviewer comments."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"error": "LLM not available"}
 
         tone_guides = {
@@ -263,8 +256,7 @@ class DownstreamService:
     async def extract_patent_ideas(self, paper_text: str) -> Dict[str, Any]:
         """Identify patentable ideas and innovations from research papers."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"error": "LLM not available"}
 
         try:
@@ -288,8 +280,7 @@ class DownstreamService:
                                     pi_background: str = "", budget: str = "") -> Dict[str, Any]:
         """Draft a research grant proposal based on papers and research direction."""
         llm = get_llm_service()
-        :
-            if not llm:
+        if not llm:
             return {"error": "LLM not available"}
 
         agency_guides = {

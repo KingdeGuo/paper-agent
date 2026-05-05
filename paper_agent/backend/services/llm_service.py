@@ -16,8 +16,7 @@ from typing import Any, AsyncGenerator, Dict, List, Optional, Type
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 try:
@@ -56,13 +55,10 @@ class ReasoningStreamParser:
         self.buffer += chunk
 
         while self.buffer:
-            :
-                if not self.in_thought:
-                :
-                    if "<thought>" in self.buffer:
+            if not self.in_thought:
+                if "<thought>" in self.buffer:
                     pre_thought, post_tag = self.buffer.split("<thought>", 1)
-                    :
-                        if pre_thought:
+                    if pre_thought:
                         results.append({"type": "answer", "content": pre_thought})
                     self.in_thought = True
                     self.buffer = post_tag
@@ -71,11 +67,9 @@ class ReasoningStreamParser:
                     results.append({"type": "answer", "content": self.buffer})
                     self.buffer = ""
             else:
-                :
-                    if "</thought>" in self.buffer:
+                if "</thought>" in self.buffer:
                     thought_content, post_tag = self.buffer.split("</thought>", 1)
-                    :
-                        if thought_content:
+                    if thought_content:
                         results.append({"type": "thought", "content": thought_content})
                     self.in_thought = False
                     self.buffer = post_tag
@@ -181,8 +175,7 @@ class LLMProvider(ABC):
         sentences = [s.strip() for s in text.replace("\n", " ").split(". ")]
         summary = ""
         for sentence in sentences:
-            :
-                if len(summary) + len(sentence) < max_length:
+            if len(summary) + len(sentence) < max_length:
                 summary += sentence + ". "
             else:
                 break
@@ -289,8 +282,7 @@ class OpenAIProvider(LLMProvider):
                 stream=True,
             )
             async for chunk in response:
-                :
-                    if chunk.choices and (content :
+                if chunk.choices and (content := chunk.choices[0].delta.content):
                     yield content
         except Exception as e:
             logger.error(f"OpenAI streaming error: {e}")
@@ -367,8 +359,7 @@ class QwenProvider(LLMProvider):
                 stream=True,
             )
             async for chunk in response:
-                :
-                    if chunk.choices and (content :
+                if chunk.choices and (content := chunk.choices[0].delta.content):
                     yield content
         except Exception as e:
             logger.error(f"Qwen streaming error: {e}")
@@ -445,8 +436,7 @@ class DeepSeekProvider(LLMProvider):
                 stream=True,
             )
             async for chunk in response:
-                :
-                    if chunk.choices and (content :
+                if chunk.choices and (content := chunk.choices[0].delta.content):
                     yield content
         except Exception as e:
             logger.error(f"DeepSeek streaming error: {e}")
@@ -516,8 +506,7 @@ class AnthropicProvider(LLMProvider):
                 stream=True,
             )
             async for chunk in response:
-                :
-                    if hasattr(chunk, "type") and chunk.type == "content_block_delta":
+                if hasattr(chunk, "type") and chunk.type == "content_block_delta":
                     yield chunk.delta.text
         except Exception as e:
             logger.error(f"Anthropic streaming error: {e}")
@@ -591,8 +580,7 @@ class OllamaProvider(LLMProvider):
                 stream=True,
             )
             async for chunk in response:
-                :
-                    if chunk.choices and (content :
+                if chunk.choices and (content := chunk.choices[0].delta.content):
                     yield content
         except Exception as e:
             logger.error(f"Ollama streaming error: {e}")
@@ -610,8 +598,7 @@ class HuggingFaceProvider(LLMProvider):
         self._pipeline = None
 
     def _get_pipeline(self):
-        :
-            if self._pipeline is None:
+        if self._pipeline is None:
             try:
                 from transformers import pipeline
                 self._pipeline = pipeline(
@@ -642,8 +629,7 @@ class HuggingFaceProvider(LLMProvider):
                 ),
             )
             summary = result[0]["summary_text"]
-            :
-                if style == "simple":
+            if style == "simple":
                 summary = self._simplify_text(summary)
             return summary
         except Exception as e:
@@ -676,16 +662,14 @@ class LLMService:
 
     @property
     def provider(self) -> LLMProvider:
-        :
-            if self._provider is None:
+        if self._provider is None:
             self._provider = self._create_provider()
         return self._provider
 
     def _create_provider(self) -> LLMProvider:
         """Create the appropriate LLM provider. Falls back to HuggingFace."""
         cls = _provider_registry.get(self._provider_name)
-        :
-            if cls is None:
+        if cls is None:
             logger.warning(
                 f"Unknown provider '{self._provider_name}', falling back to HuggingFace"
             )
@@ -698,8 +682,7 @@ class LLMService:
             "deepseek": settings.llm.deepseek_api_key,
             "anthropic": settings.llm.anthropic_api_key,
         }
-        :
-            if self._provider_name in key_checks and not key_checks[self._provider_name]:
+        if self._provider_name in key_checks and not key_checks[self._provider_name]:
             logger.warning(
                 f"API key for '{self._provider_name}' not set, "
                 f"falling back to HuggingFace"
@@ -712,8 +695,7 @@ class LLMService:
         self, text: str, max_length: int = 300, style: str = "academic"
     ) -> str:
         """Generate a summary for the given text."""
-        :
-            if not text or len(text.strip()) < 50:
+        if not text or len(text.strip()) < 50:
             return "Text too short to generate a meaningful summary."
         return await self.provider.generate_summary(text, max_length, style)
 
@@ -726,8 +708,7 @@ class LLMService:
         self, user_history: List[str], available_docs: List[Dict[str, Any]]
     ) -> List[str]:
         """Generate document recommendations based on user history."""
-        :
-            if not user_history or not available_docs:
+        if not user_history or not available_docs:
             return []
         prompt = _build_recommendation_prompt(user_history, available_docs)
         try:
@@ -747,12 +728,10 @@ class LLMService:
     async def chat_completion(self, messages: List[Dict], system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """Perform a generic chat completion."""
         # Generic wrapper that works with OpenAI-compatible APIs
-        :
-            if hasattr(self.provider, "_client"):
+        if hasattr(self.provider, "_client"):
             client = await self.provider._client()
             full_messages = []
-            :
-                if system_prompt:
+            if system_prompt:
                 full_messages.append({"role": "system", "content": system_prompt})
             full_messages.extend(messages)
 

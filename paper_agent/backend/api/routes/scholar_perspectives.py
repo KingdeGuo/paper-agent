@@ -58,8 +58,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception:
-                pass
+            except Exception: pass
         await session.commit()
 
 
@@ -73,8 +72,7 @@ async def add_discussion(document_id: str, content: str, title: str = None,
     """Add a discussion thread, insight, or question about a paper."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     did = str(uuid.uuid4())
@@ -96,8 +94,7 @@ async def get_discussions(document_id: str, discussion_type: str = None, db=Depe
     async with db.async_session_maker() as session:
         sql = "SELECT * FROM paper_discussions WHERE document_id = :did AND is_deleted = 0"
         params = {"did": document_id}
-        :
-            if discussion_type:
+        if discussion_type:
             sql += " AND discussion_type = :dt"
             params["dt"] = discussion_type
         sql += " ORDER BY upvotes DESC, created_at DESC"
@@ -113,8 +110,7 @@ async def get_discussions(document_id: str, discussion_type: str = None, db=Depe
                 "created_at": str(r[10]) if r[10] else None,
                 "replies": [],
             }
-            :
-                if r[6] and r[6] in threads:
+            if r[6] and r[6] in threads:
                 threads[r[6]]["replies"].append(entry)
             else:
                 threads[r[0]] = entry
@@ -133,8 +129,7 @@ async def vote_discussion(discussion_id: str, vote: int = 1, db=Depends(get_db))
         existing = (await session.execute(sa_text(
             "SELECT id FROM discussion_votes WHERE discussion_id = :did AND user_id = 'default'"),
             {"did": discussion_id})).fetchone()
-        :
-            if existing:
+        if existing:
             await session.execute(sa_text("DELETE FROM discussion_votes WHERE id = :id"), {"id": existing[0]})
         else:
             await session.execute(sa_text(
@@ -156,8 +151,7 @@ async def synthesize_perspectives(document_id: str, db=Depends(get_db), llm_serv
     """Use AI to synthesize all discussions, annotations, and insights about a paper."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     # Gather all discussions
@@ -170,8 +164,7 @@ async def synthesize_perspectives(document_id: str, db=Depends(get_db), llm_serv
             "SELECT content, annotation_type FROM scholar_annotations WHERE document_id = :did AND is_deleted = 0"),
             {"did": document_id})).fetchall()
 
-    :
-        if not discussions and not annotations:
+    if not discussions and not annotations:
         return {
             "document_id": document_id,
             "title": doc.title or doc.filename,

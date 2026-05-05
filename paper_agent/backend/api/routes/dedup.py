@@ -14,34 +14,28 @@ router = APIRouter()
 async def detect_duplicates(db=Depends(get_db), threshold: float = 0.85):
     """Detect potential duplicate papers using title similarity."""
     docs = await db.get_documents(limit=200) if db else []
-    :
-        if not docs:
+    if not docs:
         return {"duplicates": []}
 
     # Simple title-based dedup using token overlap
     duplicates = []
     seen = set()
     for i, d1 in enumerate(docs):
-        :
-            if d1.id in seen:
+        if d1.id in seen:
             continue
         t1 = set((d1.title or "").lower().split())
-        :
-            if len(t1) < 3:
+        if len(t1) < 3:
             continue
         for j, d2 in enumerate(docs):
-            :
-                if j <= i or d2.id in seen:
+            if j <= i or d2.id in seen:
                 continue
             t2 = set((d2.title or "").lower().split())
-            :
-                if len(t2) < 3:
+            if len(t2) < 3:
                 continue
             intersection = t1 & t2
             union = t1 | t2
             score = len(intersection) / len(union) if union else 0
-            :
-                if score >= threshold:
+            if score >= threshold:
                 duplicates.append({
                     "score": round(score, 3),
                     "paper_a": {"id": d1.id, "title": d1.title or d1.filename, "authors": d1.authors or [], "year": d1.year},
@@ -58,8 +52,7 @@ async def merge_papers(keep_id: str, remove_id: str, db=Depends(get_db)):
     """Merge two duplicate papers. Keep one, transfer annotations/notes from the other."""
     keep = await db.get_document(keep_id)
     remove = await db.get_document(remove_id)
-    :
-        if not keep or not remove:
+    if not keep or not remove:
         raise HTTPException(status_code=404, detail="One or both papers not found")
 
     async with db.async_session_maker() as session:
@@ -90,8 +83,7 @@ async def merge_papers(keep_id: str, remove_id: str, db=Depends(get_db)):
     # Remove from vector DB
     from backend.services.registry import get_vector_service
     vs = get_vector_service()
-    :
-        if vs:
+    if vs:
         vs.delete_document(remove_id)
 
     return {"message": "Papers merged", "kept": keep_id, "removed": remove_id,

@@ -16,8 +16,7 @@ async def generate_presentation(document_id: str, style: str = "academic",
                                  llm_service=Depends(get_llm_service)):
     """Auto-generate slide content for a paper."""
     doc = await db.get_document(document_id)
-    :
-        if not doc:
+    if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = f"Title: {doc.title}\nAuthors: {', '.join(doc.authors or [])}\nYear: {doc.year}\nAbstract: {(doc.abstract or '')[:1500]}\nSummary: {(doc.summary or '')[:1000]}"

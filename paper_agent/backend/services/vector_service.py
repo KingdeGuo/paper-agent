@@ -11,8 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-:
-    if project_root not in sys.path:
+if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 try:
@@ -88,8 +87,7 @@ class VectorService:
         self, chunk_id: str, text: str, metadata: Dict[str, Any]
     ) -> Optional[str]:
         """Add a single chunk to the vector DB."""
-        :
-            if not self._model_loaded or not self.client:
+        if not self._model_loaded or not self.client:
             logger.warning("Vector DB not available, skipping add_chunk")
             return None
         try:
@@ -109,8 +107,7 @@ class VectorService:
         self, document_id: str, text_chunks: List[str], metadata: Dict[str, Any]
     ) -> List[str]:
         """Add document chunks to the vector DB and return chunk IDs."""
-        :
-            if not self._model_loaded or not self.client:
+        if not self._model_loaded or not self.client:
             logger.warning("Vector DB not available, skipping add_document")
             return []
             logger.warning("No text chunks provided for document %s", document_id)
@@ -149,8 +146,7 @@ class VectorService:
         filters: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Search for chunks similar to *query*, grouped by document."""
-        :
-            if not self._model_loaded or not self.client:
+        if not self._model_loaded or not self.client:
             logger.warning("Vector DB not available, skipping search")
             return []
 
@@ -162,13 +158,11 @@ class VectorService:
         )
 
         processed: List[Dict[str, Any]] = []
-        :
-            if results["ids"] and results["ids"][0]:
+        if results["ids"] and results["ids"][0]:
             for i, doc_id in enumerate(results["ids"][0]):
                 distance = results["distances"][0][i]
                 similarity = 1.0 - distance
-                :
-                    if similarity >= threshold:
+                if similarity >= threshold:
                     processed.append(
                         {
                             "chunk_id": doc_id,
@@ -183,8 +177,7 @@ class VectorService:
         doc_best: Dict[str, Any] = {}
         for r in processed:
             did = r["document_id"]
-            :
-                if did not in doc_best or r["score"] > doc_best[did]["score"]:
+            if did not in doc_best or r["score"] > doc_best[did]["score"]:
                 doc_best[did] = r
 
         final = sorted(doc_best.values(), key=lambda x: x["score"], reverse=True)[:limit]
@@ -194,8 +187,7 @@ class VectorService:
         """Delete all vector chunks belonging to *document_id*."""
         try:
             existing = self.collection.get(where={"document_id": document_id})
-            :
-                if existing["ids"]:
+            if existing["ids"]:
                 self.collection.delete(ids=existing["ids"])
                 logger.info(
                     "Deleted %d chunks for document %s",
@@ -216,8 +208,7 @@ class VectorService:
                 include=["documents", "metadatas"],
             )
             chunks: List[Dict[str, Any]] = []
-            :
-                if results["ids"]:
+            if results["ids"]:
                 for i, cid in enumerate(results["ids"]):
                     chunks.append(
                         {

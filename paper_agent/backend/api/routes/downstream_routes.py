@@ -15,14 +15,11 @@ async def generate_code(document_id: str = None, paper_text: str = "",
                         language: str = "python", task: str = "implement the main algorithm",
                         db=Depends(get_db)):
     """Generate implementation code from a paper's methodology."""
-    :
-        if document_id and not paper_text:
+    if document_id and not paper_text:
         doc = await db.get_document(document_id) if db else None
-        :
-            if doc:
+        if doc:
             paper_text = f"Title: {doc.title}\nAbstract: {doc.abstract or ''}\nSummary: {doc.summary or ''}"
-    :
-        if not paper_text:
+    if not paper_text:
         return {"error": "No paper text provided"}
     return await downstream.generate_code(paper_text, language, task)
 
@@ -69,11 +66,9 @@ async def generate_review_response(reviewer_comments: str, paper_summary: str = 
 @router.post("/downstream/patent-ideas", summary="Extract patent ideas from paper")
 async def extract_patent_ideas(document_id: str = None, paper_text: str = "",
                                 db=Depends(get_db)):
-    :
-        if document_id and not paper_text:
+    if document_id and not paper_text:
         doc = await db.get_document(document_id) if db else None
-        :
-            if doc:
+        if doc:
             paper_text = f"Title: {doc.title}\nAbstract: {doc.abstract or ''}\nSummary: {doc.summary or ''}"
     return await downstream.extract_patent_ideas(paper_text)
 
