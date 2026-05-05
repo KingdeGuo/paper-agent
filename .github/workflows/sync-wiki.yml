@@ -1,0 +1,48 @@
+name: Sync Docs to Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  sync-wiki:
+    name: Sync docs/ to GitHub Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: repo
+
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}.wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: wiki
+
+      - name: Sync docs to wiki
+        run: |
+          rm -rf wiki/*.md wiki/*/
+          cp -r repo/docs/* wiki/
+          rm -f wiki/requirements.txt
+
+      - name: Rename index.md to Home.md
+        run: |
+          if [ -f wiki/index.md ]; then
+            mv wiki/index.md wiki/Home.md
+          fi
+
+      - name: Commit and push
+        run: |
+          cd wiki
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Sync docs from main repo"
+            git push
+          fi
