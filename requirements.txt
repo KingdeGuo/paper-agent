@@ -24,7 +24,7 @@ pydantic-settings>=2.1.0
 httpx>=0.26.0
 
 # Async utils
-anyio>=4.2.0
+anyio>=4.13.0
 
 # Auth
 python-jose[cryptography]>=3.3.0
