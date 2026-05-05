@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class Task:
     """Represents a task in the queue."""
-    
+
     def __init__(
         self,
         task_type: str,
@@ -32,7 +32,7 @@ class Task:
         self.payload = payload
         self.retry_count = retry_count
         self.created_at = datetime.utcnow().isoformat()
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -41,7 +41,7 @@ class Task:
             "retry_count": self.retry_count,
             "created_at": self.created_at,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Task":
         return cls(
@@ -58,26 +58,26 @@ class Task:
 
 class TaskQueueBase:
     """Base class for task queues."""
-    
+
     def __init__(self):
         self.enabled = False
         self.queue_name = "paper_agent_tasks"
-    
+
     async def init(self):
         pass
-    
+
     async def close(self):
         pass
-    
+
     async def enqueue(self, task: Task) -> bool:
         raise NotImplementedError
-    
+
     async def dequeue(self) -> Optional[Task]:
         raise NotImplementedError
-    
+
     async def ack(self, task_id: str) -> bool:
         raise NotImplementedError
-    
+
     async def get_stats(self) -> Dict[str, Any]:
         return {"enabled": self.enabled, "queue": self.queue_name}
 
@@ -88,16 +88,16 @@ class TaskQueueBase:
 
 class RedisTaskQueue(TaskQueueBase):
     """Redis-based task queue using lists."""
-    
+
     def __init__(self):
         super().__init__()
         self._redis = None
-    
+
     async def init(self):
         from backend.config.cluster_settings import cluster_settings
         if not cluster_settings.task_queue.type == "redis":
             return
-        
+
         try:
             import redis.asyncio as aioredis
             self._redis = aioredis.from_url(
@@ -110,11 +110,11 @@ class RedisTaskQueue(TaskQueueBase):
             logger.info(f"Redis task queue connected: {self.queue_name}")
         except Exception as e:
             logger.warning(f"Redis task queue failed: {e}")
-    
+
     async def close(self):
         if self._redis:
             await self._redis.close()
-    
+
     async def enqueue(self, task: Task) -> bool:
         if not self.enabled:
             return False
@@ -125,7 +125,7 @@ class RedisTaskQueue(TaskQueueBase):
         except Exception as e:
             logger.error(f"Enqueue failed: {e}")
             return False
-    
+
     async def dequeue(self) -> Optional[Task]:
         if not self.enabled:
             return None
@@ -139,7 +139,7 @@ class RedisTaskQueue(TaskQueueBase):
         except Exception as e:
             logger.error(f"Dequeue failed: {e}")
         return None
-    
+
     async def get_stats(self) -> Dict[str, Any]:
         if not self.enabled:
             return {"enabled": False}
@@ -161,34 +161,34 @@ class RedisTaskQueue(TaskQueueBase):
 
 class TaskQueueService:
     """Task queue service with automatic backend selection."""
-    
+
     def __init__(self):
         self._queue: Optional[TaskQueueBase] = None
-    
+
     async def init(self):
         from backend.config.cluster_settings import cluster_settings
-        
+
         if cluster_settings.task_queue.type == "redis":
             self._queue = RedisTaskQueue()
         else:
             logger.info("No task queue configured (type: none)")
             return
-        
+
         await self._queue.init()
-    
+
     async def close(self):
         if self._queue:
             await self._queue.close()
-    
+
     @property
     def enabled(self) -> bool:
         return self._queue is not None and self._queue.enabled
-    
+
     async def enqueue_document_process(self, document_id: str, file_path: str) -> bool:
         """Enqueue a document processing task."""
         if not self.enabled:
             return False
-        
+
         task = Task(
             task_type="document_process",
             payload={
@@ -197,14 +197,14 @@ class TaskQueueService:
             }
         )
         return await self._queue.enqueue(task)
-    
+
     async def enqueue_summary_generate(
         self, document_id: str, style: str = "academic"
     ) -> bool:
         """Enqueue a summary generation task."""
         if not self.enabled:
             return False
-        
+
         task = Task(
             task_type="summary_generate",
             payload={
@@ -213,12 +213,12 @@ class TaskQueueService:
             }
         )
         return await self._queue.enqueue(task)
-    
+
     async def dequeue(self) -> Optional[Task]:
         if not self.enabled:
             return None
         return await self._queue.dequeue()
-    
+
     async def get_stats(self) -> Dict[str, Any]:
         if not self._queue:
             return {"enabled": False}
