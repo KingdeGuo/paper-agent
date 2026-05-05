@@ -1,63 +1,17 @@
----
-template: home.html
-title: Paper Agent Documentation
----
-
 # 🚀 Paper Agent Documentation
 
 Welcome to the Paper Agent documentation! Paper Agent is your **AI Research Companion** — an open-source, enterprise-grade academic literature management platform.
 
-<div class="grid cards" markdown>
+## 📖 Quick Links
 
--   :material-clock-fast:{ .lg .middle } **Get Started in 5 Minutes**
-
-    ---
-
-    Install with Docker Compose and manage your first paper.
-
-    [:octicons-arrow-right-24: Installation Guide](installation.md)
-
--   :material-book-open-variant:{ .lg .middle } **Complete User Guide**
-
-    ---
-
-    Learn every feature: from document management to AI analysis.
-
-    [:octicons-arrow-right-24: User Guide](user-guide/index.md)
-
--   :material-api:{ .lg .middle } **API Reference**
-
-    ---
-
-    Full API documentation with examples for all endpoints.
-
-    [:octicons-arrow-right-24: API Reference](api/index.md)
-
--   :material-sitemap:{ .lg .middle } **Architecture**
-
-    ---
-
-    Understand the system design, data flow, and security model.
-
-    [:octicons-arrow-right-24: Architecture](architecture/index.md)
-
--   :material-robot:{ .lg .middle } **MCP Integration**
-
-    ---
-
-    Connect any MCP-compatible AI assistant to your library.
-
-    [:octicons-arrow-right-24: MCP Guide](mcp.md)
-
--   :material-brain:{ .lg .middle } **AI Research Skills**
-
-    ---
-
-    Pre-built workflows for literature review, gap analysis, and more.
-
-    [:octicons-arrow-right-24: Research Skills](skills.md)
-
-</div>
+| Guide | Description |
+|-------|-------------|
+| [Installation](installation.md) | Get started in 5 minutes with Docker Compose |
+| [User Guide](user-guide/index.md) | Complete feature walkthrough |
+| [API Reference](api/index.md) | Full API documentation with examples |
+| [Architecture](architecture/index.md) | System design and data flow |
+| [MCP Integration](mcp.md) | Connect AI assistants to your library |
+| [Research Skills](skills.md) | Pre-built workflows for research |
 
 ---
 
