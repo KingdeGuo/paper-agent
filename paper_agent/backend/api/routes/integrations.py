@@ -33,7 +33,8 @@ async def register_webhook(platform: str, name: str, webhook_url: str,
                            secret: str = None, notify_on: str = "digest", db=Depends(get_db)):
     """Register a platform webhook (DingTalk, Feishu, Slack, WeCom)."""
     await ensure_tables(db)
-    if platform not in [p.value for p in Platform]:
+    :
+        if platform not in [p.value for p in Platform]:
         raise HTTPException(status_code=400, detail=f"Unsupported platform: {platform}")
     wid = str(uuid.uuid4())
     async with db.async_session_maker() as session:
@@ -93,7 +94,8 @@ async def send_digest_to_all(days: int = 7, db=Depends(get_db)):
         hooks = (await session.execute(sa_text(
             "SELECT * FROM webhook_configs WHERE user_id = 'default' AND enabled = 1"))).fetchall()
 
-    if not hooks:
+    :
+        if not hooks:
         return {"message": "No active webhooks configured", "sent": 0}
 
     # Gather stats
@@ -104,8 +106,10 @@ async def send_digest_to_all(days: int = 7, db=Depends(get_db)):
         async with db_svc.async_session_maker() as session:
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
-            if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
-    except Exception: pass
+            :
+                if row:
+    except Exception:
+        pass
 
     stats.update(reading_stats)
     stats["read_progress"] = round((reading_stats.get("read", 0) / max(reading_stats.get("total", 1), 1)) * 100, 1)

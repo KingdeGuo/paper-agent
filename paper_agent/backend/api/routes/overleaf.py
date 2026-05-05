@@ -26,7 +26,8 @@ async def generate_bib_file(
 
     for did in ids:
         doc = await db.get_document(did)
-        if not doc:
+        :
+            if not doc:
             continue
         meta = doc.doc_metadata or {}
         bibtex = doc_to_bibtex(
@@ -87,7 +88,8 @@ async def export_for_overleaf(
 
     for did in document_ids:
         doc = await db.get_document(did)
-        if not doc:
+        :
+            if not doc:
             continue
         meta = doc.doc_metadata or {}
         key = generate_citation_key(doc.authors, doc.year, doc.title)

@@ -42,7 +42,8 @@ class MessageType(str, Enum):
 
 def build_dingtalk_message(content: str, msg_type: MessageType = MessageType.MARKDOWN, title: str = "Paper Agent") -> dict:
     """Build a DingTalk robot message."""
-    if msg_type == MessageType.TEXT:
+    :
+        if msg_type == MessageType.TEXT:
         return {"msgtype": "text", "text": {"content": content[:2000]}}
     return {
         "msgtype": "markdown",
@@ -55,7 +56,8 @@ def build_dingtalk_message(content: str, msg_type: MessageType = MessageType.MAR
 
 def build_feishu_message(content: str, msg_type: MessageType = MessageType.MARKDOWN, title: str = "Paper Agent") -> dict:
     """Build a Feishu/Lark bot message."""
-    if msg_type == MessageType.TEXT:
+    :
+        if msg_type == MessageType.TEXT:
         return {"msg_type": "text", "content": json.dumps({"text": content[:2000]})}
     return {
         "msg_type": "interactive",
@@ -68,7 +70,8 @@ def build_feishu_message(content: str, msg_type: MessageType = MessageType.MARKD
 
 def build_slack_message(content: str, msg_type: MessageType = MessageType.MARKDOWN) -> dict:
     """Build a Slack message."""
-    if msg_type == MessageType.TEXT:
+    :
+        if msg_type == MessageType.TEXT:
         return {"text": content[:3000]}
     return {
         "text": "Paper Agent Notification",
@@ -81,7 +84,8 @@ def build_slack_message(content: str, msg_type: MessageType = MessageType.MARKDO
 
 def build_wecom_message(content: str, msg_type: MessageType = MessageType.MARKDOWN) -> dict:
     """Build a WeCom bot message."""
-    if msg_type == MessageType.TEXT:
+    :
+        if msg_type == MessageType.TEXT:
         return {"msgtype": "text", "text": {"content": content[:2000]}}
     return {
         "msgtype": "markdown",
@@ -149,7 +153,8 @@ class IntegrationService:
         self._client = None
 
     async def _get_client(self):
-        if self._client is None:
+        :
+            if self._client is None:
             self._client = httpx.AsyncClient(timeout=15)
         return self._client
 
@@ -161,9 +166,11 @@ class IntegrationService:
         headers = {"Content-Type": "application/json"}
 
         try:
-            if platform == Platform.DINGTALK:
+            :
+                if platform == Platform.DINGTALK:
                 payload = build_dingtalk_message(content, msg_type, title)
-                if secret:
+                :
+                    if secret:
                     timestamp = int(datetime.utcnow().timestamp() * 1000)
                     sign = sign_dingtalk_request(timestamp, secret)
                     webhook_url = f"{webhook_url}&timestamp={timestamp}&sign={sign}"
@@ -228,7 +235,8 @@ class IntegrationService:
         return await self.send(platform, webhook_url, content, title="Research Digest", secret=secret)
 
     async def close(self):
-        if self._client:
+        :
+            if self._client:
             await self._client.aclose()
 
 

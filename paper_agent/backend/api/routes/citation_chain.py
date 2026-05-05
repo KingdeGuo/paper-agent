@@ -15,7 +15,8 @@ async def explore_citation_chain(document_id: str, direction: str = "both",
                                   depth: int = 1, db=Depends(get_db)):
     """Explore citation chains: find papers that cite or are cited by this paper."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     result = {
@@ -37,23 +38,28 @@ async def explore_citation_chain(document_id: str, direction: str = "both",
         async with httpx.AsyncClient(timeout=15) as client:
             # Get paper details from Semantic Scholar by title search
             title_query = doc.title or doc.filename
-            if title_query:
+            :
+                if title_query:
                 resp = await client.get(
                     "https://api.semanticscholar.org/graph/v1/paper/search",
                     params={"query": title_query, "limit": 3},
                 )
-                if resp.status_code == 200:
+                :
+                    if resp.status_code == 200:
                     data = resp.json()
                     papers = data.get("data", [])
-                    if papers:
+                    :
+                        if papers:
                         paper_id = papers[0].get("paperId")
-                        if paper_id:
+                        :
+                            if paper_id:
                             # Get citations
                             cit_resp = await client.get(
                                 f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}/citations",
                                 params={"limit": 20},
                             )
-                            if cit_resp.status_code == 200:
+                            :
+                                if cit_resp.status_code == 200:
                                 cit_data = cit_resp.json()
                                 for c in cit_data.get("data", [])[:10]:
                                     cp = c.get("citingPaper", {})
@@ -70,7 +76,8 @@ async def explore_citation_chain(document_id: str, direction: str = "both",
                                 f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}/references",
                                 params={"limit": 20},
                             )
-                            if ref_resp.status_code == 200:
+                            :
+                                if ref_resp.status_code == 200:
                                 ref_data = ref_resp.json()
                                 for r in ref_data.get("data", [])[:10]:
                                     rp = r.get("citedPaper", {})
@@ -89,14 +96,16 @@ async def explore_citation_chain(document_id: str, direction: str = "both",
     # 2. Check which of these papers are already in the user's library
     all_titles = set()
     for p in result["citations"] + result["cited_by"]:
-        if p.get("title"):
+        :
+            if p.get("title"):
             all_titles.add(p["title"].lower())
 
     library_docs = await db.get_documents(limit=100) if db else []
     in_library = set()
     for ld in library_docs:
         lt = (ld.title or "").lower()
-        if lt in all_titles:
+        :
+            if lt in all_titles:
             in_library.add(lt)
 
     for p in result["citations"] + result["cited_by"]:
@@ -111,7 +120,8 @@ async def suggest_papers_from_chain(document_id: str, db=Depends(get_db)):
     chain = await explore_citation_chain(document_id, depth=1, db=db)
     suggestions = []
     for p in chain.get("citations", []) + chain.get("cited_by", []):
-        if not p.get("in_library") and p.get("title") and p.get("title") != "Unknown":
+        :
+            if not p.get("in_library") and p.get("title") and p.get("title") != "Unknown":
             # Check if we can get more info
             suggestions.append({
                 "title": p["title"],

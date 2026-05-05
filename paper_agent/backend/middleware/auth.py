@@ -22,17 +22,20 @@ async def get_current_user_from_token(
     Get current user from JWT token.
     Returns None if not authenticated (for optional auth).
     """
-    if not credentials:
+    :
+        if not credentials:
         return None
 
     token = credentials.credentials
     payload = auth_service.decode_token(token)
 
-    if not payload:
+    :
+        if not payload:
         return None
 
     user_id = payload.get("sub")
-    if not user_id:
+    :
+        if not user_id:
         return None
 
     # Get user from database
@@ -47,7 +50,8 @@ async def get_current_user_from_token(
         )
         user = result.scalar_one_or_none()
 
-        if not user:
+        :
+            if not user:
             return None
 
         return UserResponse.model_validate(user)
@@ -60,7 +64,8 @@ async def require_user(
     Dependency that requires authentication.
     Raises 401 if not authenticated.
     """
-    if not user:
+    :
+        if not user:
         raise HTTPException(status_code=401, detail="Authentication required")
     return user
 
@@ -72,7 +77,8 @@ async def require_admin(
     Dependency that requires admin role.
     Raises 403 if not admin.
     """
-    if user.role != "admin":
+    :
+        if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 

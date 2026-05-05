@@ -40,7 +40,8 @@ async def generate_digest(
 
     # Get recent documents
     docs = await db.get_documents(limit=max_docs)
-    if not docs:
+    :
+        if not docs:
         raise HTTPException(status_code=400, detail="No documents in library to generate digest from")
 
     # Filter to recent by date or just use all
@@ -66,7 +67,8 @@ async def generate_digest(
     docs_section = "## Recent Papers\n\n"
     for d in doc_summaries:
         docs_section += f"- **{d['title']}** ({d['year'] or 'n.d.'}) - {', '.join(d['authors'][:3]) or 'Unknown'}\n"
-        if d['summary'] != "No summary available":
+        :
+            if d['summary'] != "No summary available":
             docs_section += f"  > {d['summary'][:300]}...\n\n"
     sections.append({"title": "Recent Papers", "content": docs_section})
 
@@ -151,7 +153,8 @@ async def get_digest(
         row = (await session.execute(sa_text(
             "SELECT * FROM research_digests WHERE id = :id AND user_id = 'default'"
         ), {"id": digest_id})).fetchone()
-        if not row:
+        :
+            if not row:
             raise HTTPException(status_code=404, detail="Digest not found")
         return {
             "id": row[0], "title": row[2], "summary": row[3],

@@ -55,7 +55,8 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception: pass
+            except Exception:
+                pass
         await session.commit()
 
 
@@ -71,7 +72,8 @@ async def track_conference(venue_id: str, submission_deadline: str = None,
     """Track a conference CFP deadline."""
     await ensure_tables(db)
     venue = next((v for v in CONFERENCE_VENUES if v["id"] == venue_id), None)
-    if not venue:
+    :
+        if not venue:
         raise HTTPException(status_code=400, detail=f"Unknown venue: {venue_id}")
 
     tid = str(uuid.uuid4())
@@ -100,15 +102,19 @@ async def list_tracked(db=Depends(get_db)):
         for r in rows:
             deadline = r[4]
             days_until = None
-            if deadline:
+            :
+                if deadline:
                 try:
                     dd = datetime.strptime(deadline[:10], "%Y-%m-%d")
                     days_until = (dd - now).days
-                except Exception: pass
+                except Exception:
+                    pass
 
             urgency = "normal"
-            if days_until is not None:
-                if days_until < 0: urgency = "past"
+            :
+                if days_until is not None:
+                :
+                    if days_until < 0:
                 elif days_until < 7: urgency = "critical"
                 elif days_until < 30: urgency = "upcoming"
 
@@ -129,10 +135,14 @@ async def update_tracked(tracker_id: str, submission_deadline: str = None,
     await ensure_tables(db)
     sets = []
     params = {"id": tracker_id}
-    if submission_deadline: sets.append("submission_deadline = :sd"); params["sd"] = submission_deadline
-    if status: sets.append("status = :s"); params["s"] = status
-    if notes is not None: sets.append("notes = :n"); params["n"] = notes
-    if sets:
+    :
+        if submission_deadline:
+    :
+        if status:
+    :
+        if notes is not None:
+    :
+        if sets:
         async with db.async_session_maker() as session:
             await session.execute(sa_text(f"UPDATE conference_trackers SET {', '.join(sets)} WHERE id = :id"), params)
             await session.commit()
@@ -172,7 +182,8 @@ async def list_submissions(status: str = None, db=Depends(get_db)):
     async with db.async_session_maker() as session:
         sql = "SELECT ps.*, ct.venue_name, ct.conference_date FROM paper_submissions ps LEFT JOIN conference_trackers ct ON ps.tracker_id = ct.id WHERE ps.user_id = 'default'"
         params = {}
-        if status:
+        :
+            if status:
             sql += " AND ps.status = :s"
             params["s"] = status
         sql += " ORDER BY ps.created_at DESC"

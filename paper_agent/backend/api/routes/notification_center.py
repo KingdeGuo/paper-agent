@@ -29,7 +29,8 @@ async def get_notifications(limit: int = 50, unread_only: bool = False, db=Depen
     async with db.async_session_maker() as session:
         sql = "SELECT * FROM notifications WHERE user_id = 'default' AND is_dismissed = 0"
         params = {}
-        if unread_only:
+        :
+            if unread_only:
             sql += " AND is_read = 0"
         sql += " ORDER BY created_at DESC LIMIT :lim"
         params["lim"] = limit
@@ -105,21 +106,24 @@ async def scan_for_notifications(db=Depends(get_db)):
                     {"id": nid, "t": f"Deadline approaching: {u[1]}",
                      "m": f"Submission deadline for {u[1]} is in less than 7 days.", "ri": u[0]})
                 created += 1
-    except Exception: pass
+    except Exception:
+        pass
 
     # 2. Check reading list
     try:
         async with db.async_session_maker() as session:
             to_read_count = (await session.execute(sa_text(
                 "SELECT COUNT(*) FROM reading_list WHERE user_id = 'default' AND status = 'to_read'"))).scalar() or 0
-            if to_read_count > 10:
+            :
+                if to_read_count > 10:
                 nid = str(uuid.uuid4())
                 await session.execute(sa_text(
                     "INSERT INTO notifications (id, user_id, title, message, notification_type, source) "
                     "VALUES (:id, 'default', 'Reading queue growing', :m, 'warning', 'reading')"),
                     {"id": nid, "m": f"You have {to_read_count} papers in your reading queue."})
                 created += 1
-    except Exception: pass
+    except Exception:
+        pass
 
     # 3. Check flashcards due
     try:
@@ -127,14 +131,16 @@ async def scan_for_notifications(db=Depends(get_db)):
             due = (await session.execute(sa_text(
                 "SELECT COUNT(*) FROM flashcards WHERE user_id = 'default' AND is_deleted = 0 AND (next_review IS NULL OR next_review <= :now)"),
                 {"now": datetime.utcnow().isoformat()})).scalar() or 0
-            if due > 0:
+            :
+                if due > 0:
                 nid = str(uuid.uuid4())
                 await session.execute(sa_text(
                     "INSERT INTO notifications (id, user_id, title, message, notification_type, source) "
                     "VALUES (:id, 'default', 'Flashcards due for review', :m, 'info', 'flashcards')"),
                     {"id": nid, "m": f"You have {due} flashcards to review."})
                 created += 1
-    except Exception: pass
+    except Exception:
+        pass
 
     await session.commit()
     return {"scanned": True, "notifications_created": created}

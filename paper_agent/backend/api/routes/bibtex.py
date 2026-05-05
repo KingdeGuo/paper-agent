@@ -21,7 +21,8 @@ async def export_bibtex(
 ):
     """Export a single document as BibTeX entry."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     authors = " and ".join(doc.authors) if isinstance(doc.authors, list) else doc.authors or "Unknown"
@@ -45,7 +46,8 @@ async def export_bibtex_batch(
     entries = []
     for doc_id in document_ids:
         doc = await db.get_document(doc_id)
-        if not doc:
+        :
+            if not doc:
             continue
         authors = " and ".join(doc.authors) if isinstance(doc.authors, list) else doc.authors or "Unknown"
         key = f"pa_{doc_id[:8]}"

@@ -24,21 +24,25 @@ async def unified_search(
     meta = {"total": 0}
 
     # 1. Papers (using vector search)
-    if "papers" in source_list:
+    :
+        if "papers" in source_list:
         try:
             vec_results = []
-            if vector_service:
+            :
+                if vector_service:
                 vec_results = vector_service.search_similar(query, limit=limit)
             local_results = []
             try:
                 local_results = await db.search_documents(query, limit=limit) if db else []
-            except Exception: pass
+            except Exception:
+                pass
 
             papers = []
             seen_ids = set()
             for r in vec_results:
                 did = r.get("document_id", r.get("id", ""))
-                if did and did not in seen_ids:
+                :
+                    if did and did not in seen_ids:
                     seen_ids.add(did)
                     doc = await db.get_document(did) if did else None
                     papers.append({
@@ -52,7 +56,8 @@ async def unified_search(
                     })
 
             for r in local_results:
-                if r.id not in seen_ids and len(papers) < limit:
+                :
+                    if r.id not in seen_ids and len(papers) < limit:
                     papers.append({
                         "type": "paper", "id": r.id,
                         "title": r.title or r.filename,
@@ -69,7 +74,8 @@ async def unified_search(
             meta["paper_error"] = str(e)
 
     # 2. Discussions
-    if "discussions" in source_list:
+    :
+        if "discussions" in source_list:
         try:
             async with db.async_session_maker() as session:
                 rows = (await session.execute(sa_text(
@@ -91,7 +97,8 @@ async def unified_search(
         results["discussions"] = []
 
     # 3. Codex entries
-    if "codex" in source_list:
+    :
+        if "codex" in source_list:
         try:
             async with db.async_session_maker() as session:
                 rows = (await session.execute(sa_text(
@@ -111,7 +118,8 @@ async def unified_search(
         results["codex"] = []
 
     # 4. Glossary
-    if "glossary" in source_list:
+    :
+        if "glossary" in source_list:
         try:
             async with db.async_session_maker() as session:
                 rows = (await session.execute(sa_text(
@@ -131,14 +139,16 @@ async def unified_search(
         results["glossary"] = []
 
     # 5. Tags
-    if "tags" in source_list:
+    :
+        if "tags" in source_list:
         try:
             docs = await db.get_documents(limit=100) if db else []
             matched_tags = []
             seen_tags = set()
             for d in docs:
                 for kw in (d.keywords or []):
-                    if query.lower() in kw.lower() and kw.lower() not in seen_tags:
+                    :
+                        if query.lower() in kw.lower() and kw.lower() not in seen_tags:
                         seen_tags.add(kw.lower())
                         matched_tags.append({"type": "tag", "title": kw, "count": 1, "id": kw})
             results["tags"] = matched_tags[:limit]

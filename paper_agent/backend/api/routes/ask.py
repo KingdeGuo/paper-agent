@@ -48,7 +48,8 @@ async def ask_library(
             filters=filters,
         )
 
-        if not search_results:
+        :
+            if not search_results:
             return AskResponse(
                 question=query.question,
                 answer="I couldn't find relevant information in your library to answer this question. Try rephrasing or uploading more documents on this topic.",
@@ -60,7 +61,8 @@ async def ask_library(
         doc_map = {}
         for did in doc_ids:
             doc = await db.get_document(did)
-            if doc:
+            :
+                if doc:
                 doc_map[did] = {"title": doc.title or doc.filename, "authors": doc.authors}
 
         # Build context from chunks
@@ -75,7 +77,8 @@ async def ask_library(
 
             context_parts.append(f"[Source: {doc_info['title']}]\n{chunk_text}")
 
-            if did not in seen_docs:
+            :
+                if did not in seen_docs:
                 seen_docs.add(did)
                 sources.append({
                     "document_id": did,
@@ -136,7 +139,8 @@ async def ask_library_stream(
             query=query.question, limit=query.limit, threshold=query.threshold, filters=filters,
         )
 
-        if not search_results:
+        :
+            if not search_results:
             async def empty_gen():
                 yield "data: " + '{"answer": "No relevant documents found.", "sources": []}' + "\n\n"
             return StreamingResponse(empty_gen(), media_type="text/event-stream")
@@ -145,7 +149,8 @@ async def ask_library_stream(
         doc_map = {}
         for did in doc_ids:
             doc = await db.get_document(did)
-            if doc:
+            :
+                if doc:
                 doc_map[did] = {"title": doc.title or doc.filename}
 
         context_parts = []
@@ -155,7 +160,8 @@ async def ask_library_stream(
             did = r["document_id"]
             info = doc_map.get(did, {"title": "Unknown"})
             context_parts.append(f"[Source: {info['title']}]\n{r.get('text', '')[:800]}")
-            if did not in seen:
+            :
+                if did not in seen:
                 seen.add(did)
                 sources.append({"document_id": did, "title": info["title"], "relevance_score": round(r["score"], 3)})
 
@@ -169,7 +175,8 @@ async def ask_library_stream(
         async def generate():
             yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
             async for chunk in llm_service.generate_streaming_response(prompt_text, max_tokens=1000):
-                if chunk:
+                :
+                    if chunk:
                     yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
 

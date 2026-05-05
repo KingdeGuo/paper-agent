@@ -39,7 +39,8 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception: pass
+            except Exception:
+                pass
         await session.commit()
 
 
@@ -73,7 +74,8 @@ async def get_directory_tree(root_id: str = None, db=Depends(get_db)):
         # Get all nodes
         sql = "SELECT * FROM directory_nodes WHERE user_id = 'default' AND is_deleted = 0 ORDER BY sort_order ASC"
         params = {}
-        if root_id:
+        :
+            if root_id:
             sql += " AND (id = :rid OR parent_id = :rid2)"
             params["rid"] = root_id
             params["rid2"] = root_id
@@ -99,7 +101,8 @@ async def get_directory_tree(root_id: str = None, db=Depends(get_db)):
 
         tree = []
         for nid, nd in node_map.items():
-            if nd["parent_id"] and nd["parent_id"] in node_map:
+            :
+                if nd["parent_id"] and nd["parent_id"] in node_map:
                 node_map[nd["parent_id"]]["children"].append(nd)
             else:
                 tree.append(nd)
@@ -122,7 +125,8 @@ async def _ensure_paper_in_node(node_id: str, document_id: str, db):
         existing = (await session.execute(sa_text(
             "SELECT id FROM directory_papers WHERE node_id = :nid AND document_id = :did"),
             {"nid": node_id, "did": document_id})).fetchone()
-        if not existing:
+        :
+            if not existing:
             await session.execute(sa_text(
                 "INSERT INTO directory_papers (id, node_id, document_id) VALUES (:id, :nid, :did)"),
                 {"id": str(uuid.uuid4()), "nid": node_id, "did": document_id})
@@ -136,7 +140,8 @@ async def get_node_papers(node_id: str, db=Depends(get_db)):
     async with db.async_session_maker() as session:
         node = (await session.execute(sa_text(
             "SELECT * FROM directory_nodes WHERE id = :id"), {"id": node_id})).fetchone()
-        if not node:
+        :
+            if not node:
             return {"error": "Node not found"}
 
         papers = (await session.execute(sa_text(
@@ -162,7 +167,8 @@ async def auto_classify(document_id: str, db=Depends(get_db), llm_service=Depend
     """Use AI to automatically suggest where a paper belongs in the directory tree."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
 
     # Get available nodes
@@ -170,7 +176,8 @@ async def auto_classify(document_id: str, db=Depends(get_db), llm_service=Depend
         nodes = (await session.execute(sa_text(
             "SELECT id, name, description FROM directory_nodes WHERE user_id = 'default' AND is_deleted = 0 AND node_type = 'folder'"))).fetchall()
 
-    if not nodes:
+    :
+        if not nodes:
         return {"suggestion": None, "message": "No directory nodes created yet. Create a taxonomy first."}
 
     text = f"Title: {doc.title}\nAbstract: {(doc.abstract or '')[:500]}"
@@ -187,11 +194,13 @@ async def auto_classify(document_id: str, db=Depends(get_db), llm_service=Depend
 
     matched_node = None
     for n in nodes:
-        if n[1].lower() in suggestion.lower() or suggestion.lower() in n[1].lower():
+        :
+            if n[1].lower() in suggestion.lower() or suggestion.lower() in n[1].lower():
             matched_node = {"id": n[0], "name": n[1]}
             break
 
-    if matched_node:
+    :
+        if matched_node:
         await _ensure_paper_in_node(matched_node["id"], document_id, db)
 
     return {
@@ -209,7 +218,8 @@ async def create_view(name: str, root_node_id: str = None, is_default: bool = Fa
     await ensure_tables(db)
     vid = str(uuid.uuid4())
     async with db.async_session_maker() as session:
-        if is_default:
+        :
+            if is_default:
             await session.execute(sa_text(
                 "UPDATE directory_views SET is_default = 0 WHERE user_id = 'default'"))
         await session.execute(sa_text(
@@ -234,7 +244,8 @@ async def list_views(db=Depends(get_db)):
 async def suggest_taxonomy(db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Use AI to analyze your library and suggest a directory taxonomy."""
     docs = await db.get_documents(limit=50) if db else []
-    if not docs:
+    :
+        if not docs:
         return {"error": "Not enough papers to suggest taxonomy"}
 
     # Extract keywords

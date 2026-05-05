@@ -100,7 +100,8 @@ class PaperReviewService:
         self.llm_service = None
 
     async def _get_llm_service(self):
-        if self.llm_service is None:
+        :
+            if self.llm_service is None:
             from backend.services.llm_service import LLMService
             self.llm_service = LLMService()
         return self.llm_service
@@ -115,7 +116,8 @@ class PaperReviewService:
 
         Returns structured review with scores, strengths, weaknesses, and suggestions.
         """
-        if dimensions is None:
+        :
+            if dimensions is None:
             dimensions = list(ReviewDimension)
 
         review_result = {
@@ -132,12 +134,14 @@ class PaperReviewService:
         dimension_count = 0
 
         for dim in dimensions:
-            if dim == ReviewDimension.OVERALL:
+            :
+                if dim == ReviewDimension.OVERALL:
                 continue
 
             try:
                 prompt = self.REVIEW_PROMPTS.get(dim, "")
-                if not prompt:
+                :
+                    if not prompt:
                     continue
 
                 # Truncate text to avoid token limits
@@ -168,7 +172,8 @@ class PaperReviewService:
                 }
 
         # Calculate overall score
-        if dimension_count > 0:
+        :
+            if dimension_count > 0:
             review_result["overall_score"] = round(total_score / dimension_count, 1)
 
         # Generate summary and collect strengths/weaknesses
@@ -192,7 +197,8 @@ class PaperReviewService:
 
         for pattern in patterns:
             match = re.search(pattern, text)
-            if match:
+            :
+                if match:
                 try:
                     score = int(match.group(1))
                     return min(max(score, 1), 10)  # Clamp to 1-10
@@ -226,11 +232,13 @@ class PaperReviewService:
 
         for dim, data in dimensions.items():
             analysis = data.get("analysis", "").lower()
-            if "strength" in analysis or "advantage" in analysis:
+            :
+                if "strength" in analysis or "advantage" in analysis:
                 # Simple extraction (can be enhanced with NLP)
                 sentences = analysis.split(".")
                 for sent in sentences:
-                    if "strength" in sent.lower() or "advantage" in sent.lower() or "good" in sent.lower():
+                    :
+                        if "strength" in sent.lower() or "advantage" in sent.lower() or "good" in sent.lower():
                         strengths.append(f"[{dim}] {sent.strip()}")
 
         return strengths[:5]  # Top 5
@@ -241,10 +249,12 @@ class PaperReviewService:
 
         for dim, data in dimensions.items():
             analysis = data.get("analysis", "").lower()
-            if "weakness" in analysis or "limitation" in analysis or "issue" in analysis:
+            :
+                if "weakness" in analysis or "limitation" in analysis or "issue" in analysis:
                 sentences = analysis.split(".")
                 for sent in sentences:
-                    if any(word in sent.lower() for word in ["weakness", "limitation", "issue", "problem", "flaw"]):
+                    :
+                        if any(word in sent.lower() for word in ["weakness", "limitation", "issue", "problem", "flaw"]):
                         weaknesses.append(f"[{dim}] {sent.strip()}")
 
         return weaknesses[:5]  # Top 5
@@ -271,7 +281,8 @@ class PaperReviewService:
             # Split into individual suggestions
             for line in response.split("\n"):
                 line = line.strip()
-                if line and (line[0].isdigit() or line.startswith("-")):
+                :
+                    if line and (line[0].isdigit() or line.startswith("-")):
                     suggestions.append(line.lstrip("0123456789. -"))
 
         except Exception as e:
@@ -332,7 +343,8 @@ class PaperReviewService:
             papers: List of dicts containing 'title' and 'abstract' or 'text'
             aspects: Specific aspects to compare (e.g., 'methodology', 'results', 'datasets')
         """
-        if not papers or len(papers) < 2:
+        :
+            if not papers or len(papers) < 2:
             raise ValueError("At least 2 papers are required for comparison")
 
         llm = await self._get_llm_service()

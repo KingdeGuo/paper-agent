@@ -32,7 +32,8 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception: pass
+            except Exception:
+                pass
         await session.commit()
 
 
@@ -74,7 +75,8 @@ async def ask_in_session(session_id: str, question: str,
         sess = (await session.execute(sa_text(
             "SELECT * FROM chat_sessions WHERE id = :id AND is_deleted = 0"),
             {"id": session_id})).fetchone()
-        if not sess:
+        :
+            if not sess:
             raise HTTPException(status_code=404, detail="Session not found")
 
         context_paper_ids = json.loads(sess[3]) if isinstance(sess[3], str) else (sess[3] or [])
@@ -88,28 +90,33 @@ async def ask_in_session(session_id: str, question: str,
     context_text = ""
     sources = []
 
-    if search_library and vector_service:
+    :
+        if search_library and vector_service:
         results = vector_service.search_similar(question, limit=5)
         for r in results:
             did = r.get("document_id", "")
             doc = await db.get_document(did) if did else None
-            if doc:
+            :
+                if doc:
                 context_text += f"\n[From: {doc.title or doc.filename}]\n{r.get('text', '')[:500]}\n"
                 sources.append({"document_id": did, "title": doc.title or doc.filename, "score": r.get("score", 0)})
 
     # Also include context from explicitly linked papers
     for pid in context_paper_ids:
         doc = await db.get_document(pid)
-        if doc:
+        :
+            if doc:
             context_text += f"\n[Context Paper: {doc.title}]\n{(doc.abstract or '')[:500]}\n"
-            if not any(s.get("document_id") == pid for s in sources):
+            :
+                if not any(s.get("document_id") == pid for s in sources):
                 sources.append({"document_id": pid, "title": doc.title or doc.filename, "score": 1.0})
 
     # Build conversation
     system = "You are a research assistant. Answer based on the provided paper context and conversation history. Cite sources using [Paper Title]. Be precise and concise."
     messages = [{"role": "system", "content": system}]
 
-    if context_text:
+    :
+        if context_text:
         messages.append({"role": "system", "content": f"Relevant papers:\n{context_text[:3000]}"})
 
     for h in history[-10:]:

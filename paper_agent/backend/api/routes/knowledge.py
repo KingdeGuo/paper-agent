@@ -12,7 +12,8 @@ from typing import Dict, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if project_root not in sys.path:
+:
+    if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -61,7 +62,8 @@ async def get_document_graph(
     try:
         # Get document
         doc = await db.get_document(document_id)
-        if not doc:
+        :
+            if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
         # Get document text
@@ -167,7 +169,8 @@ async def get_graph_stats(
                 author_count[author] = author_count.get(author, 0) + 1
 
             # Count years
-            if doc.year:
+            :
+                if doc.year:
                 year_count[doc.year] = year_count.get(doc.year, 0) + 1
 
             # Count keywords
@@ -208,13 +211,15 @@ async def analyze_document_for_graph(
     """
     try:
         doc = await db.get_document(document_id)
-        if not doc:
+        :
+            if not doc:
             raise HTTPException(status_code=404, detail="Document not found")
 
         pdf_processor = PDFProcessor()
         text = pdf_processor.extract_text(doc.file_path) if hasattr(doc, 'file_path') else ""
 
-        if not text:
+        :
+            if not text:
             return {"message": "No text extracted", "citations": [], "references": []}
 
         # Extract citations and references

@@ -9,7 +9,8 @@ from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if project_root not in sys.path:
+:
+    if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -79,7 +80,8 @@ async def search_documents(
         search_results = []
         for result in vector_results:
             document = await db_service.get_document(result["document_id"])
-            if document:
+            :
+                if document:
                 highlights = result.get("text", "")[:200]
                 search_result = SearchResult(
                     document_id=result["document_id"],
@@ -110,9 +112,11 @@ async def simple_search(
     """Simple keyword + vector hybrid search."""
     try:
         filters: Dict[str, Any] = {}
-        if year:
+        :
+            if year:
             filters["year"] = year
-        if author:
+        :
+            if author:
             filters["authors"] = {"$contains": author}
 
         results = vector_service.search_similar(
@@ -125,11 +129,13 @@ async def simple_search(
         documents = []
         for result in results:
             document = await db_service.get_document(result["document_id"])
-            if document:
+            :
+                if document:
                 documents.append(document)
 
         # Fallback to database keyword search if vector search yields nothing
-        if not documents:
+        :
+            if not documents:
             documents = await db_service.search_documents(q, limit=limit)
 
         return documents
@@ -153,11 +159,14 @@ async def advanced_search(
     """Advanced search with multiple filters."""
     try:
         filters: Dict[str, Any] = {}
-        if year:
+        :
+            if year:
             filters["year"] = year
-        if author:
+        :
+            if author:
             filters["authors"] = {"$contains": author}
-        if title:
+        :
+            if title:
             filters["title"] = {"$contains": title}
 
         results = vector_service.search_similar(
@@ -170,7 +179,8 @@ async def advanced_search(
         search_results = []
         for result in results:
             document = await db_service.get_document(result["document_id"])
-            if document:
+            :
+                if document:
                 highlights = result.get("text", "")[:200]
                 search_result = SearchResult(
                     document_id=result["document_id"],
@@ -200,17 +210,21 @@ async def find_similar_documents(
     """Find documents semantically similar to a given document."""
     try:
         document = await db_service.get_document(document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         text = pdf_processor.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             raise HTTPException(status_code=400, detail="No text content found")
 
         query_parts = []
-        if document.title:
+        :
+            if document.title:
             query_parts.append(document.title)
-        if document.abstract:
+        :
+            if document.abstract:
             query_parts.append(document.abstract)
         query = " ".join(query_parts) or text[:500]
 
@@ -222,9 +236,11 @@ async def find_similar_documents(
 
         similar_documents = []
         for result in results:
-            if result["document_id"] != document_id:
+            :
+                if result["document_id"] != document_id:
                 similar_doc = await db_service.get_document(result["document_id"])
-                if similar_doc:
+                :
+                    if similar_doc:
                     similar_documents.append(similar_doc)
 
         return similar_documents[:limit]
@@ -266,7 +282,8 @@ async def get_trending_documents(
         year_groups: Dict[int, list] = {}
         for doc in processed_docs:
             year = doc.year or 0
-            if year not in year_groups:
+            :
+                if year not in year_groups:
                 year_groups[year] = []
             year_groups[year].append(doc)
 

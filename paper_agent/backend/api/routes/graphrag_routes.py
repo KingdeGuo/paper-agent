@@ -46,7 +46,8 @@ async def explore_neighborhood(
 ):
     """Explore the graph neighborhood of a paper — what's connected and how."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
 
     engine = GraphRAGEngine(db, vector_service, None, GraphRAGConfig(max_depth=depth))

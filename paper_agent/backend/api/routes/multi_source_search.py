@@ -26,16 +26,19 @@ async def multi_source_search(
     tasks = []
 
     # Local search
-    if "local" in source_list:
+    :
+        if "local" in source_list:
         try:
-            if vector_service:
+            :
+                if vector_service:
                 local_results = vector_service.search_similar(query, limit=limit)
             else:
                 local_results = await db.search_documents(query, limit=limit) if db else []
 
             enriched = []
             for r in local_results:
-                if isinstance(r, dict):
+                :
+                    if isinstance(r, dict):
                     did = r.get("document_id", r.get("id", ""))
                     doc = await db.get_document(did) if did else None
                     enriched.append({
@@ -63,10 +66,12 @@ async def multi_source_search(
             results["local"] = []
 
     # arXiv search
-    if "arxiv" in source_list:
+    :
+        if "arxiv" in source_list:
         try:
             from paper_agent.backend.services.arxiv_service import arxiv_service
-            if arxiv_service:
+            :
+                if arxiv_service:
                 arxiv_results = arxiv_service.search(query, max_results=limit)
                 results["arxiv"] = [{
                     "title": p.get("title", "Untitled"),
@@ -84,18 +89,21 @@ async def multi_source_search(
             results["arxiv"] = []
 
     # PubMed search
-    if "pubmed" in source_list:
+    :
+        if "pubmed" in source_list:
         try:
             async with httpx.AsyncClient(timeout=15) as client:
                 esearch = await client.get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
                                            params={"db": "pubmed", "term": query, "retmax": limit, "retmode": "json"})
-                if esearch.status_code == 200:
+                :
+                    if esearch.status_code == 200:
                     id_list = esearch.json().get("esearchresult", {}).get("idlist", [])
                     pubmed_results = []
                     for pmid in id_list[:limit]:
                         esummary = await client.get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi",
                                                      params={"db": "pubmed", "id": pmid, "retmode": "json"})
-                        if esummary.status_code == 200:
+                        :
+                            if esummary.status_code == 200:
                             data = esummary.json().get("result", {}).get(pmid, {})
                             pubmed_results.append({
                                 "title": data.get("title", "Untitled"),
@@ -114,12 +122,14 @@ async def multi_source_search(
             results["pubmed"] = []
 
     # CrossRef search
-    if "crossref" in source_list:
+    :
+        if "crossref" in source_list:
         try:
             async with httpx.AsyncClient(timeout=15) as client:
                 cr_resp = await client.get("https://api.crossref.org/works",
                                            params={"query": query, "rows": limit})
-                if cr_resp.status_code == 200:
+                :
+                    if cr_resp.status_code == 200:
                     items = cr_resp.json().get("message", {}).get("items", [])
                     results["crossref"] = [{
                         "title": item.get("title", ["Untitled"])[0] if item.get("title") else "Untitled",

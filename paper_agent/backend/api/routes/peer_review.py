@@ -70,7 +70,8 @@ async def submit_for_review(document_id: str, title: str = None, journal_target:
     """Submit a paper from your library for peer review."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     aid = str(uuid.uuid4())
@@ -90,7 +91,8 @@ async def list_assignments(status: str = None, db=Depends(get_db)):
     async with db.async_session_maker() as session:
         sql = "SELECT ra.*, d.title as doc_title, d.authors FROM review_assignments ra LEFT JOIN documents d ON ra.document_id = d.id WHERE ra.is_deleted = 0"
         params = {}
-        if status:
+        :
+            if status:
             sql += " AND ra.status = :s"
             params["s"] = status
         sql += " ORDER BY ra.updated_at DESC"
@@ -161,9 +163,11 @@ async def submit_review(assignment_id: str, reviewer_id: str, scores: dict = Non
     await ensure_tables(db)
     rid = str(uuid.uuid4())
     scores_clean = {}
-    if scores:
+    :
+        if scores:
         for k, v in scores.items():
-            if k in REVIEW_FORM_SCHEMA and isinstance(v, (int, float)):
+            :
+                if k in REVIEW_FORM_SCHEMA and isinstance(v, (int, float)):
                 scores_clean[k] = max(1, min(10, v))
 
     async with db.async_session_maker() as session:
@@ -210,7 +214,8 @@ async def get_reports(assignment_id: str, db=Depends(get_db)):
 @router.put("/review/{assignment_id}/decision", summary="Make review decision")
 async def make_decision(assignment_id: str, decision: str, db=Depends(get_db)):
     """Make a final decision on a review assignment."""
-    if decision not in REVIEW_STATUSES:
+    :
+        if decision not in REVIEW_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid decision. Must be one of: {REVIEW_STATUSES}")
     async with db.async_session_maker() as session:
         await session.execute(sa_text(

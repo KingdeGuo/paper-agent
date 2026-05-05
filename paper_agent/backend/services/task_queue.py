@@ -95,7 +95,8 @@ class RedisTaskQueue(TaskQueueBase):
 
     async def init(self):
         from backend.config.cluster_settings import cluster_settings
-        if not cluster_settings.task_queue.type == "redis":
+        :
+            if not cluster_settings.task_queue.type == "redis":
             return
 
         try:
@@ -112,11 +113,13 @@ class RedisTaskQueue(TaskQueueBase):
             logger.warning(f"Redis task queue failed: {e}")
 
     async def close(self):
-        if self._redis:
+        :
+            if self._redis:
             await self._redis.close()
 
     async def enqueue(self, task: Task) -> bool:
-        if not self.enabled:
+        :
+            if not self.enabled:
             return False
         try:
             data = json.dumps(task.to_dict())
@@ -127,12 +130,14 @@ class RedisTaskQueue(TaskQueueBase):
             return False
 
     async def dequeue(self) -> Optional[Task]:
-        if not self.enabled:
+        :
+            if not self.enabled:
             return None
         try:
             # Blocking pop with 5 second timeout
             result = await self._redis.brpop(self.queue_name, timeout=5)
-            if result:
+            :
+                if result:
                 _, data = result
                 task_dict = json.loads(data)
                 return Task.from_dict(task_dict)
@@ -141,7 +146,8 @@ class RedisTaskQueue(TaskQueueBase):
         return None
 
     async def get_stats(self) -> Dict[str, Any]:
-        if not self.enabled:
+        :
+            if not self.enabled:
             return {"enabled": False}
         try:
             length = await self._redis.llen(self.queue_name)
@@ -168,7 +174,8 @@ class TaskQueueService:
     async def init(self):
         from backend.config.cluster_settings import cluster_settings
 
-        if cluster_settings.task_queue.type == "redis":
+        :
+            if cluster_settings.task_queue.type == "redis":
             self._queue = RedisTaskQueue()
         else:
             logger.info("No task queue configured (type: none)")
@@ -177,7 +184,8 @@ class TaskQueueService:
         await self._queue.init()
 
     async def close(self):
-        if self._queue:
+        :
+            if self._queue:
             await self._queue.close()
 
     @property
@@ -186,7 +194,8 @@ class TaskQueueService:
 
     async def enqueue_document_process(self, document_id: str, file_path: str) -> bool:
         """Enqueue a document processing task."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return False
 
         task = Task(
@@ -202,7 +211,8 @@ class TaskQueueService:
         self, document_id: str, style: str = "academic"
     ) -> bool:
         """Enqueue a summary generation task."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return False
 
         task = Task(
@@ -215,12 +225,14 @@ class TaskQueueService:
         return await self._queue.enqueue(task)
 
     async def dequeue(self) -> Optional[Task]:
-        if not self.enabled:
+        :
+            if not self.enabled:
             return None
         return await self._queue.dequeue()
 
     async def get_stats(self) -> Dict[str, Any]:
-        if not self._queue:
+        :
+            if not self._queue:
             return {"enabled": False}
         return await self._queue.get_stats()
 

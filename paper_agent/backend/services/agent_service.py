@@ -56,7 +56,8 @@ class ResearchAgent:
 
     async def process_message(self, msg: AgentMessage) -> AgentMessage:
         """Handle an incoming A2A message."""
-        if msg.msg_type == "request":
+        :
+            if msg.msg_type == "request":
             result = await self.execute_task(msg.payload)
             return AgentMessage(
                 sender=self.name,
@@ -67,7 +68,8 @@ class ResearchAgent:
             )
         elif msg.msg_type == "response":
             # Store response for the calling agent
-            if msg.conversation_id not in self.conversations:
+            :
+                if msg.conversation_id not in self.conversations:
                 self.conversations[msg.conversation_id] = []
             self.conversations[msg.conversation_id].append(msg)
             return AgentMessage(
@@ -125,19 +127,22 @@ class LiteratureReviewAgent(ResearchAgent):
         vs = get_vector_service()
         llm = get_llm_service()
 
-        if not topic:
+        :
+            if not topic:
             self.status = AgentStatus.FAILED
             return {"error": "No topic specified"}
 
         try:
             # Phase 1: Search for papers
             papers_found = []
-            if vs:
+            :
+                if vs:
                 results = vs.search_similar(topic, limit=max_papers * 2)
                 for r in results:
                     did = r.get("document_id")
                     doc = await db.get_document(did) if db and did else None
-                    if doc:
+                    :
+                        if doc:
                         papers_found.append({
                             "id": doc.id, "title": doc.title or doc.filename,
                             "authors": doc.authors or [], "year": doc.year,
@@ -157,14 +162,16 @@ class LiteratureReviewAgent(ResearchAgent):
 
             # Phase 2: GraphRAG exploration
             graph_insights = ""
-            if include_graph and llm and vs:
+            :
+                if include_graph and llm and vs:
                 graph_engine = GraphRAGEngine(db, vs, llm, GraphRAGConfig(max_depth=2))
                 graph_result = await graph_engine.retrieve(topic)
                 graph_insights = graph_result.get("answer", "")
 
             # Phase 3: AI synthesis
             synthesis = ""
-            if llm and papers_found:
+            :
+                if llm and papers_found:
                 paper_list = "\n".join(
                     f"- {p['title']} ({p['year']}) - {', '.join(p['authors'][:3])}: {p['abstract'][:200]}"
                     for p in papers_found[:max_papers]
@@ -211,7 +218,8 @@ class GapAnalysisAgent(ResearchAgent):
 
         db = get_db()
         llm = get_llm_service()
-        if not llm:
+        :
+            if not llm:
             self.status = AgentStatus.FAILED
             return {"error": "LLM service required"}
 
@@ -253,7 +261,8 @@ class WritingAgent(ResearchAgent):
         vs = get_vector_service()
 
         # Get relevant papers
-        if vs:
+        :
+            if vs:
             results = vs.search_similar(topic, limit=max_papers)
         else:
             results = await db.search_documents(topic, limit=max_papers) if db else []
@@ -262,10 +271,12 @@ class WritingAgent(ResearchAgent):
         for r in results:
             did = r.get("document_id", r.get("id", ""))
             doc = await db.get_document(did) if db and did else None
-            if doc:
+            :
+                if doc:
                 papers.append(f"[{len(papers)+1}] {doc.title} ({doc.year}) - {', '.join(doc.authors or [])[:50]}: {(doc.summary or doc.abstract or '')[:300]}")
 
-        if not papers:
+        :
+            if not papers:
             self.status = AgentStatus.COMPLETED
             return {"section": "", "message": "No relevant papers found."}
 
@@ -313,7 +324,8 @@ class AgentOrchestrator:
     async def send_message(self, msg: AgentMessage) -> AgentMessage:
         """Send an A2A message to an agent."""
         agent = self.get_agent(msg.recipient)
-        if not agent:
+        :
+            if not agent:
             return AgentMessage(
                 sender="orchestrator", recipient=msg.sender,
                 msg_type="error", payload={"error": f"Agent '{msg.recipient}' not found"},
@@ -324,7 +336,8 @@ class AgentOrchestrator:
     async def delegate_task(self, task: str, payload: Dict,
                             preferred_agent: str = None) -> Dict:
         """Delegate a task to the most suitable agent."""
-        if preferred_agent and preferred_agent in self.agents:
+        :
+            if preferred_agent and preferred_agent in self.agents:
             msg = AgentMessage("orchestrator", preferred_agent, "request", payload)
             response = await self.send_message(msg)
             return response.payload
@@ -336,7 +349,8 @@ class AgentOrchestrator:
             "writing": "WritingAgent",
         }
         agent_name = task_map.get(task)
-        if agent_name and agent_name in self.agents:
+        :
+            if agent_name and agent_name in self.agents:
             msg = AgentMessage("orchestrator", agent_name, "request", payload)
             response = await self.send_message(msg)
             return response.payload
@@ -349,7 +363,8 @@ import sys as _sys
 
 _orch_module_key = 'paper_agent.backend.services.agent_service.orchestrator'
 
-if _orch_module_key not in _sys.modules:
+:
+    if _orch_module_key not in _sys.modules:
     orchestrator = AgentOrchestrator()
     orchestrator.register_agent(LiteratureReviewAgent())
     orchestrator.register_agent(GapAnalysisAgent())

@@ -32,7 +32,8 @@ async def connect_zotero(
             )
             entry = result.scalar_one_or_none()
 
-            if entry:
+            :
+                if entry:
                 entry.zotero_user_id = creds.zotero_user_id
                 entry.api_key = creds.api_key
                 entry.is_active = True
@@ -64,7 +65,8 @@ async def list_collections(
         )
         creds = result.scalar_one_or_none()
 
-        if not creds or not creds.is_active:
+        :
+            if not creds or not creds.is_active:
             raise HTTPException(status_code=400, detail="Zotero not connected")
 
         collections = await zotero_service.get_collections(creds.zotero_user_id, creds.api_key)
@@ -85,14 +87,16 @@ async def import_zotero_item(
         )
         creds = result.scalar_one_or_none()
 
-        if not creds or not creds.is_active:
+        :
+            if not creds or not creds.is_active:
             raise HTTPException(status_code=400, detail="Zotero not connected")
 
         doc = await zotero_service.import_item(
             current_user.id, creds.zotero_user_id, creds.api_key, item_key, db
         )
 
-        if not doc:
+        :
+            if not doc:
             raise HTTPException(status_code=500, detail="Failed to import item")
 
         return doc

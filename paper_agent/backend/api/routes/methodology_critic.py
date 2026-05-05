@@ -27,12 +27,14 @@ METHODOLOGY_DIMENSIONS = [
 async def critique_methodology(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Perform a deep, structured critique of a paper's methodology."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = f"Title: {doc.title}\nAuthors: {', '.join(doc.authors or [])}\nYear: {doc.year}\nAbstract: {(doc.abstract or '')[:2000]}"
 
-    if not text.strip():
+    :
+        if not text.strip():
         return {"error": "No text available for analysis"}
 
     try:
@@ -57,16 +59,19 @@ async def critique_methodology(document_id: str, db=Depends(get_db), llm_service
 @router.post("/critic/compare", summary="Compare methodologies across papers")
 async def compare_methodologies(document_ids: list[str], db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Compare methodologies across multiple papers side by side."""
-    if len(document_ids) < 2:
+    :
+        if len(document_ids) < 2:
         raise HTTPException(status_code=400, detail="Need at least 2 papers")
 
     docs = []
     for did in document_ids[:5]:
         doc = await db.get_document(did)
-        if doc:
+        :
+            if doc:
             docs.append(doc)
 
-    if len(docs) < 2:
+    :
+        if len(docs) < 2:
         raise HTTPException(status_code=400, detail="Not enough valid documents")
 
     prompt = "Compare the methodologies of these papers. Create a comparison table and highlight:\n- Key similarities\n- Key differences\n- Which methodology is more rigorous and why\n- Suggestions for improvement\n\n"
@@ -89,7 +94,8 @@ async def compare_methodologies(document_ids: list[str], db=Depends(get_db), llm
 async def get_methodology_checklist(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """Generate a methodology quality checklist for a paper."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     text = f"Title: {doc.title}\nAbstract: {(doc.abstract or '')[:1500]}"

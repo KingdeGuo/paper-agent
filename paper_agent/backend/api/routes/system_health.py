@@ -24,7 +24,8 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
 
     # 1. Database
     try:
-        if db:
+        :
+            if db:
             async with db.async_session_maker() as session:
                 await session.execute(sa_text("SELECT 1"))
             health["subsystems"]["database"] = {"status": "healthy", "type": "SQLite/PostgreSQL"}
@@ -38,7 +39,8 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
 
     # 2. Vector DB
     try:
-        if vector_service:
+        :
+            if vector_service:
             stats = vector_service.get_collection_stats()
             health["subsystems"]["vector_db"] = {"status": "healthy", "chunks": stats.get("total_chunks", 0), "model": stats.get("model", "N/A")}
         else:
@@ -50,7 +52,8 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
     # 3. LLM
     try:
         llm = get_llm_service()
-        if llm and hasattr(llm, 'provider') and llm.provider:
+        :
+            if llm and hasattr(llm, 'provider') and llm.provider:
             health["subsystems"]["llm"] = {"status": "available", "provider": llm.provider.__class__.__name__}
         else:
             health["subsystems"]["llm"] = {"status": "unconfigured"}
@@ -61,7 +64,8 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
     # 4. arXiv
     try:
         from paper_agent.backend.services.arxiv_service import arxiv_service
-        if arxiv_service:
+        :
+            if arxiv_service:
             health["subsystems"]["arxiv"] = {"status": "available"}
         else:
             health["subsystems"]["arxiv"] = {"status": "unavailable"}
@@ -94,7 +98,8 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
                 "flashcards": flashcard_count, "discussions": discussion_count,
                 "codex_entries": codex_count, "literature_tree_nodes": tree_nodes,
             }
-    except Exception: pass
+    except Exception:
+        pass
 
     # 7. Route count
     from backend.main import app
@@ -104,10 +109,12 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
 
     # Determine overall
     errors = [s for s in health["subsystems"].values() if isinstance(s, dict) and s.get("status") == "error"]
-    if errors:
+    :
+        if errors:
         health["overall"] = "degraded"
     unavail = [s for s in health["subsystems"].values() if isinstance(s, dict) and s.get("status") == "unavailable"]
-    if unavail and not errors:
+    :
+        if unavail and not errors:
         health["overall"] = "partial"
 
     return health

@@ -44,7 +44,8 @@ async def search_arxiv(
     - cat:cs.AI - search by category
     - all:"keyword" - search everywhere
     """
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
@@ -69,12 +70,14 @@ async def get_paper(arxiv_id: str):
     - 2103.12345 (new format)
     - quant-ph/0603068 (old format)
     """
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
         paper = arxiv_service.fetch_by_id(arxiv_id)
-        if not paper:
+        :
+            if not paper:
             raise HTTPException(status_code=404, detail="Paper not found")
         return paper
     except HTTPException:
@@ -87,7 +90,8 @@ async def get_paper(arxiv_id: str):
 @router.get("/pdf/{arxiv_id}", summary="Get arXiv paper PDF URL")
 async def get_arxiv_pdf(arxiv_id: str):
     """Get PDF URL for an arXiv paper."""
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
@@ -101,7 +105,8 @@ async def get_arxiv_pdf(arxiv_id: str):
 @router.get("/author/{author}", summary="Search by author")
 async def search_by_author(author: str, max_results: int = 10):
     """Search papers by author name."""
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
@@ -122,7 +127,8 @@ async def search_by_category(category: str, max_results: int = 20):
 
     Examples: cs.AI, cs.CV, cs.LG, physics.optics, quant-ph, etc.
     """
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
@@ -143,7 +149,8 @@ async def get_daily_papers(category: str = "cs.AI", max_results: int = 50):
 
     Note: This fetches recent papers sorted by submission date.
     """
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
@@ -168,16 +175,19 @@ async def import_arxiv_paper(
     task_queue_service = Depends(lambda: None),
 ):
     """Import an arXiv paper into Paper Agent."""
-    if arxiv_service is None:
+    :
+        if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
 
     try:
         paper = arxiv_service.fetch_by_id(arxiv_id)
-        if not paper:
+        :
+            if not paper:
             raise HTTPException(status_code=404, detail="Paper not found")
 
         existing = await db_service.get_document_by_arxiv_id(arxiv_id)
-        if existing:
+        :
+            if existing:
             return {
                 "message": "Paper already exists",
                 "document_id": existing.id,
@@ -208,12 +218,14 @@ async def import_arxiv_paper(
         })
 
         from paper_agent.backend.services.object_storage import storage
-        if storage.enabled:
+        :
+            if storage.enabled:
             await storage.upload_file(file_path, filename)
             await db_service.update_document_path(new_doc.id, filename)
 
         from paper_agent.backend.services.task_queue import task_queue
-        if task_queue.enabled:
+        :
+            if task_queue.enabled:
             await task_queue.enqueue_document_process(new_doc.id, file_path)
             message = "Paper imported and queued for processing"
         else:

@@ -20,8 +20,10 @@ async def generate_email_digest(days: int = 7, db=Depends(get_db), llm_service=D
         async with db.async_session_maker() as session:
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
-            if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
-    except Exception: pass
+            :
+                if row:
+    except Exception:
+        pass
 
     # Get recent activity
     activity_text = ""
@@ -30,21 +32,25 @@ async def generate_email_digest(days: int = 7, db=Depends(get_db), llm_service=D
             recent = (await session.execute(sa_text(
                 "SELECT description, created_at FROM activity_feed ORDER BY created_at DESC LIMIT 5"))).fetchall()
             activity_text = "\n".join([f"  - {r[0]} ({str(r[1])[:10]})" for r in recent])
-    except Exception: pass
+    except Exception:
+        pass
 
     # AI-generated research highlight
     highlight = ""
-    if llm_service:
+    :
+        if llm_service:
         try:
             docs = await db.get_documents(limit=5) if db else []
-            if docs:
+            :
+                if docs:
                 titles = "\n".join(f"- {d.title} ({d.year})" for d in docs)
                 resp = await llm_service.chat_completion(
                     messages=[{"role": "user", "content": f"Given these papers in a research library, write one paragraph highlighting the most interesting research trend or connection:\n\n{titles}"}],
                     system_prompt="You write concise, insightful research highlights.",
                 )
                 highlight = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except Exception: pass
+        except Exception:
+            pass
 
     digest = f"""# Paper Agent Research Digest
 **{datetime.utcnow().strftime('%B %d, %Y')}**

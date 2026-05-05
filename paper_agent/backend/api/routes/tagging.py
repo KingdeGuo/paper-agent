@@ -15,7 +15,8 @@ router = APIRouter()
 async def suggest_tags(document_id: str, db=Depends(get_db), llm_service=Depends(get_llm_service)):
     """AI-suggest relevant tags/keywords for a paper."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
 
     text = f"Title: {doc.title}\nAuthors: {', '.join(doc.authors or [])}\nYear: {doc.year}\nAbstract: {(doc.abstract or '')[:1000]}"
@@ -39,7 +40,8 @@ async def suggest_tags(document_id: str, db=Depends(get_db), llm_service=Depends
 async def apply_tags(document_id: str, tags: List[str], db=Depends(get_db)):
     """Apply tags to a paper (stored in doc_metadata)."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
     meta = doc.doc_metadata or {}
     meta["tags"] = tags
@@ -70,7 +72,8 @@ async def get_papers_by_tag(tag: str, db=Depends(get_db)):
     for d in docs:
         keywords = [k.lower() for k in (d.keywords or [])]
         meta_tags = [t.lower() for t in ((d.doc_metadata or {}).get("tags", []))]
-        if tag.lower() in keywords or tag.lower() in meta_tags:
+        :
+            if tag.lower() in keywords or tag.lower() in meta_tags:
             matched.append({"id": d.id, "title": d.title or d.filename, "year": d.year,
                            "authors": d.authors or []})
     return {"tag": tag, "count": len(matched), "papers": matched}

@@ -57,14 +57,16 @@ class CitationExtractor:
             re.IGNORECASE | re.DOTALL
         )
 
-        if ref_section_match:
+        :
+            if ref_section_match:
             ref_text = ref_section_match.group(1)
             # Parse individual references
             ref_entries = re.split(r"\n\s*(?:\[\d+\]|\d+\.)\s*", ref_text)
 
             for i, entry in enumerate(ref_entries[1:], 1):  # Skip first empty
                 ref = self._parse_reference_entry(entry, i)
-                if ref:
+                :
+                    if ref:
                     references.append(ref)
 
         return references
@@ -72,12 +74,14 @@ class CitationExtractor:
     def _parse_reference_entry(self, entry: str, index: int) -> Optional[Dict[str, Any]]:
         """Parse a single reference entry."""
         entry = entry.strip()
-        if not entry:
+        :
+            if not entry:
             return None
 
         # Extract title (usually in quotes or title case)
         title_match = re.search(r'"([^"]+)"', entry)
-        if not title_match:
+        :
+            if not title_match:
             title_match = re.search(r"([A-Z][^.]+)\.", entry)
 
         title = title_match.group(1) if title_match else entry[:100]
@@ -85,7 +89,8 @@ class CitationExtractor:
         # Extract authors
         authors = []
         author_match = re.match(r"^([A-Z][a-z]+(?:,\s*[A-Z][a-z]+)*)", entry)
-        if author_match:
+        :
+            if author_match:
             authors = [a.strip() for a in author_match.group(1).split(",")]
 
         # Extract year
@@ -132,7 +137,8 @@ class SemanticLinkExtractor:
             import json
             import re
             match = re.search(r"\{.*\}", response, re.DOTALL)
-            if match:
+            :
+                if match:
                 return json.loads(match.group(0))
         except Exception as e:
             logger.error(f"Semantic link identification failed: {e}")
@@ -180,19 +186,23 @@ class KnowledgeGraphService:
             self.graph.add_edge(doc_id, ref_id, type="cites", label="Cites")
 
         # 2. Semantic enhancement with other local docs
-        if db_service:
+        :
+            if db_service:
             other_docs = await db_service.get_all_documents(limit=20)
             for other in other_docs:
-                if str(other.id) == str(doc_id):
+                :
+                    if str(other.id) == str(doc_id):
                     continue
 
                 # Check for semantic links (simplified for now: limit to a few)
                 # In a real app, this would be background processed
-                if other.abstract and metadata.get("abstract"):
+                :
+                    if other.abstract and metadata.get("abstract"):
                     rel = await self.semantic_extractor.identify_relationship(
                         metadata["abstract"], other.abstract
                     )
-                    if rel and rel.get("confidence", 0) > 0.6:
+                    :
+                        if rel and rel.get("confidence", 0) > 0.6:
                         self.graph.add_edge(
                             doc_id, str(other.id),
                             type=rel["type"],
@@ -200,7 +210,8 @@ class KnowledgeGraphService:
                             explanation=rel.get("explanation")
                         )
                         # Ensure the other node exists in current view
-                        if str(other.id) not in self.graph:
+                        :
+                            if str(other.id) not in self.graph:
                             self.graph.add_node(
                                 str(other.id),
                                 type="paper",
@@ -240,13 +251,15 @@ class KnowledgeGraphService:
         author_papers = defaultdict(list)
 
         for node, data in self.graph.nodes(data=True):
-            if data.get("type") == "paper":
+            :
+                if data.get("type") == "paper":
                 for author in data.get("authors", []):
                     author_papers[author].append(node)
 
         # Connect papers with shared authors
         for author, papers in author_papers.items():
-            if len(papers) > 1:
+            :
+                if len(papers) > 1:
                 for i in range(len(papers)):
                     for j in range(i + 1, len(papers)):
                         self.graph.add_edge(
@@ -262,7 +275,8 @@ class KnowledgeGraphService:
         papers_by_year = defaultdict(list)
 
         for node, data in self.graph.nodes(data=True):
-            if data.get("type") == "paper" and data.get("year"):
+            :
+                if data.get("type") == "paper" and data.get("year"):
                 papers_by_year[data["year"]].append(node)
 
         # Connect papers from same year or adjacent years
@@ -281,13 +295,15 @@ class KnowledgeGraphService:
         keyword_papers = defaultdict(list)
 
         for node, data in self.graph.nodes(data=True):
-            if data.get("type") == "paper":
+            :
+                if data.get("type") == "paper":
                 for keyword in data.get("keywords", []):
                     keyword_papers[keyword].append(node)
 
         # Connect papers with shared keywords
         for keyword, papers in keyword_papers.items():
-            if len(papers) > 1:
+            :
+                if len(papers) > 1:
                 for i in range(len(papers)):
                     for j in range(i + 1, len(papers)):
                         self.graph.add_edge(
@@ -312,7 +328,8 @@ class KnowledgeGraphService:
             }
 
             # Highlight center node
-            if center_node and str(node_id) == str(center_node):
+            :
+                if center_node and str(node_id) == str(center_node):
                 node_data["center"] = True
                 node_data["color"] = "#FF6B6B"  # Red for center
 
@@ -347,9 +364,11 @@ class KnowledgeGraphService:
     ) -> Dict[str, Any]:
         """Get graph data formatted for D3.js/Cytoscape.js visualization."""
 
-        if doc_id:
+        :
+            if doc_id:
             # Return subgraph around this document
-            if doc_id in self.graph:
+            :
+                if doc_id in self.graph:
                 subgraph = self.graph.subgraph(
                     [doc_id] + list(self.graph.predecessors(doc_id)) + 
                     list(self.graph.successors(doc_id))
@@ -360,7 +379,8 @@ class KnowledgeGraphService:
                 return temp_graph._graph_to_response(doc_id)
 
         # Return full graph (limited to 100 nodes for performance)
-        if len(self.graph.nodes) > 100:
+        :
+            if len(self.graph.nodes) > 100:
             # Return largest connected component
             components = list(nx.weakly_connected_components(self.graph))
             largest = max(components, key=len)

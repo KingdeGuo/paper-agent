@@ -36,7 +36,8 @@ class RerankingPipeline:
         Returns:
             Re-ranked candidates with 'relevance_score' added
         """
-        if not candidates:
+        :
+            if not candidates:
             return []
 
         # Score each candidate
@@ -46,7 +47,8 @@ class RerankingPipeline:
             title = c.get("title") or ""
             combined_text = f"{title} {text}"
 
-            if method == "keyword":
+            :
+                if method == "keyword":
                 score = await self._keyword_score(query, combined_text)
             elif method == "llm":
                 score = await self._llm_score(query, combined_text, c)
@@ -68,7 +70,8 @@ class RerankingPipeline:
         query_words = set(re.findall(r'\w+', query.lower()))
         text_words = set(re.findall(r'\w+', text.lower()))
 
-        if not query_words:
+        :
+            if not query_words:
             return 0.0
 
         # Exact phrase bonus
@@ -92,7 +95,8 @@ class RerankingPipeline:
     async def _llm_score(self, query: str, text: str, candidate: Dict) -> float:
         """Use LLM to judge relevance (cross-encoder style)."""
         llm = get_llm_service()
-        if not llm:
+        :
+            if not llm:
             return self._keyword_score(query, text)  # Fallback
 
         try:
@@ -108,7 +112,8 @@ class RerankingPipeline:
             content = resp.get("content", "0.5") if isinstance(resp, dict) else str(resp)
             # Extract number
             nums = re.findall(r'0\.\d+|1\.0|1\.00', content)
-            if nums:
+            :
+                if nums:
                 return float(nums[0])
             return 0.5
         except Exception:
@@ -117,11 +122,13 @@ class RerankingPipeline:
     async def batch_rerank(self, query: str, candidates: List[Dict],
                            top_k: int = 5) -> List[Dict]:
         """Batch re-ranking with LLM for efficiency (fewer API calls)."""
-        if not candidates:
+        :
+            if not candidates:
             return []
 
         llm = get_llm_service()
-        if not llm or len(candidates) <= 3:
+        :
+            if not llm or len(candidates) <= 3:
             return await self.rerank(query, candidates, top_k, method="keyword")
 
         try:
@@ -144,7 +151,8 @@ class RerankingPipeline:
             scores = json.loads(match.group()) if match else []
 
             for i, c in enumerate(candidates):
-                if i < len(scores):
+                :
+                    if i < len(scores):
                     c["relevance_score"] = round(float(scores[i]), 4)
                     c["rerank_score"] = c["relevance_score"]
                 else:
@@ -168,19 +176,22 @@ class HybridSearchEngine:
         seen = {}
         for r in vector_results:
             did = r.get("document_id", r.get("id"))
-            if did:
+            :
+                if did:
                 seen[did] = {**r, "vector_score": r.get("score", 0), "keyword_score": 0}
 
         for r in keyword_results:
             did = r.get("id")
-            if did in seen:
+            :
+                if did in seen:
                 seen[did]["keyword_score"] = 0.5
                 seen[did]["text"] = seen[did].get("text") or r.get("abstract", "")
             elif did:
                 seen[did] = {**r, "vector_score": 0, "keyword_score": 0.5}
 
         candidates = list(seen.values())
-        if not candidates:
+        :
+            if not candidates:
             return []
 
         # Re-rank

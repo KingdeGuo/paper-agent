@@ -18,10 +18,12 @@ import importlib.machinery
 
 class _BackendCompat(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path, target=None):
-        if fullname.startswith('backend') or fullname == 'backend':
+        :
+            if fullname.startswith('backend') or fullname == 'backend':
             mapped = 'paper_agent.' + fullname
             try:
-                if mapped not in sys.modules:
+                :
+                    if mapped not in sys.modules:
                     importlib.import_module(mapped)
                 # Return a spec pointing to the already-loaded module
                 mod = sys.modules[mapped]
@@ -33,7 +35,8 @@ class _BackendCompat(importlib.abc.MetaPathFinder):
                 pass
         return None
 
-if not any(isinstance(f, _BackendCompat) for f in sys.meta_path):
+:
+    if not any(isinstance(f, _BackendCompat) for f in sys.meta_path):
     sys.meta_path.insert(0, _BackendCompat())
 # ─────────────────────────────────────────────────────────────
 
@@ -71,7 +74,8 @@ async def lifespan(app: FastAPI):
             get_task_queue,
         )
         cache = get_cache()
-        if cache:
+        :
+            if cache:
             try:
                 await cache.init()
                 logger.info("Cache service initialized")
@@ -79,7 +83,8 @@ async def lifespan(app: FastAPI):
                 logger.warning(f"Cache service unavailable: {e}")
 
         storage = get_object_storage()
-        if storage:
+        :
+            if storage:
             try:
                 await storage.init()
                 logger.info("Object storage initialized")
@@ -87,7 +92,8 @@ async def lifespan(app: FastAPI):
                 logger.warning(f"Object storage unavailable: {e}")
 
         task_q = get_task_queue()
-        if task_q:
+        :
+            if task_q:
             try:
                 await task_q.init()
                 logger.info("Task queue initialized")
@@ -99,7 +105,8 @@ async def lifespan(app: FastAPI):
     try:
         from paper_agent.backend.services.registry import get_db
         db = get_db()
-        if db:
+        :
+            if db:
             try:
                 db.create_tables()
                 logger.info("Database tables verified")
@@ -129,12 +136,14 @@ async def rate_limit_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
     path = request.url.path
 
-    if path.startswith("/api/users/login") or path.startswith("/api/users/register"):
+    :
+        if path.startswith("/api/users/login") or path.startswith("/api/users/register"):
         now = time.time()
         key = f"{client_ip}:{path}"
         window = rate_limit_store.get(key, [])
         window = [t for t in window if now - t < 60]
-        if len(window) >= 30:
+        :
+            if len(window) >= 30:
             from fastapi.responses import JSONResponse
             return JSONResponse(status_code=429, content={"detail": "Too many requests"})
         window.append(now)
@@ -355,5 +364,6 @@ async def root():
         ]
     }
 
-if __name__ == "__main__":
+:
+    if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

@@ -77,25 +77,30 @@ except ImportError:
 
 def load_config(config_path: str | None = None) -> Settings:
     """Load configuration from YAML file and environment variables."""
-    if config_path is None:
+    :
+        if config_path is None:
         config_path = Path(__file__).parent.parent.parent / "config" / "config.yaml"
 
     settings = Settings()
 
-    if os.path.exists(config_path):
+    :
+        if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             config_data: Dict[str, Any] = yaml.safe_load(f) or {}
 
         # Walk nested sections since settings is a nested object
         for section, values in config_data.items():
-            if hasattr(settings, section):
+            :
+                if hasattr(settings, section):
                 section_obj = getattr(settings, section)
-                if isinstance(section_obj, BaseSettings):
+                :
+                    if isinstance(section_obj, BaseSettings):
                     section_obj = type(section_obj)(**values)
                     setattr(settings, section, section_obj)
                 else:
                     for key, value in values.items():
-                        if hasattr(section_obj, key):
+                        :
+                            if hasattr(section_obj, key):
                             setattr(section_obj, key, value)
 
     return settings

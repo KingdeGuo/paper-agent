@@ -44,7 +44,8 @@ async def write_journal(date: str = None, content: str = "",
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(duration_minutes) FROM reading_sessions WHERE user_id = 'default' AND date = :d"),
                 {"d": date})).fetchone()
-            if row:
+            :
+                if row:
                 papers_read = row[0] or 0
                 minutes_spent = row[1] or 0
 
@@ -52,22 +53,29 @@ async def write_journal(date: str = None, content: str = "",
             read_today = (await session.execute(sa_text(
                 "SELECT COUNT(*) FROM reading_list WHERE user_id = 'default' AND status = 'read' AND date(date_updated) = :d"),
                 {"d": date})).scalar()
-            if read_today:
+            :
+                if read_today:
                 papers_read += read_today
-    except Exception: pass
+    except Exception:
+        pass
 
     # Upsert
     async with db.async_session_maker() as session:
         existing = (await session.execute(sa_text(
             "SELECT id FROM journal_entries WHERE user_id = 'default' AND date = :d"), {"d": date})).fetchone()
 
-        if existing:
+        :
+            if existing:
             sets = ["content = :c", "papers_read = :pr", "minutes_spent = :ms", "updated_at = :n"]
             params = {"id": existing[0], "c": content, "pr": papers_read, "ms": minutes_spent, "n": datetime.utcnow().isoformat()}
-            if mood: sets.append("mood = :m"); params["m"] = mood
-            if goals_today is not None: sets.append("goals_today = :gt"); params["gt"] = goals_today
-            if goals_tomorrow is not None: sets.append("goals_tomorrow = :gtr"); params["gtr"] = goals_tomorrow
-            if tags is not None: sets.append("tags = :tg"); params["tg"] = json.dumps(tags)
+            :
+                if mood:
+            :
+                if goals_today is not None:
+            :
+                if goals_tomorrow is not None:
+            :
+                if tags is not None:
             await session.execute(sa_text(f"UPDATE journal_entries SET {', '.join(sets)} WHERE id = :id"), params)
         else:
             await session.execute(sa_text(
@@ -92,7 +100,8 @@ async def get_journal(days: int = 30, date: str = None, db=Depends(get_db)):
     """Get journal entries for a date range or specific date."""
     await ensure_tables(db)
     async with db.async_session_maker() as session:
-        if date:
+        :
+            if date:
             rows = (await session.execute(sa_text(
                 "SELECT * FROM journal_entries WHERE user_id = 'default' AND date = :d ORDER BY created_at"),
                 {"d": date})).fetchall()
@@ -124,7 +133,8 @@ async def weekly_review(db=Depends(get_db)):
             "WHERE user_id = 'default' AND date >= :since ORDER BY date"),
             {"since": week_ago})).fetchall()
 
-    if not rows:
+    :
+        if not rows:
         return {"message": "No journal entries this week", "entries": 0}
 
     total_papers = sum(r[2] or 0 for r in rows)

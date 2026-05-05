@@ -40,7 +40,8 @@ async def export_bibtex(
 ):
     """Export a document as BibTeX with optional formatted citation."""
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
     meta = doc.doc_metadata or {}
@@ -64,7 +65,8 @@ async def export_bibtex(
         "citation_key": generate_citation_key(doc.authors, doc.year, doc.title),
     }
 
-    if style and style in CITATION_STYLES:
+    :
+        if style and style in CITATION_STYLES:
         formatted = generate_bibliography([
             {
                 "authors": doc.authors or ["Unknown"],
@@ -94,7 +96,8 @@ async def export_bibtex_batch(
 
     for doc_id in document_ids:
         doc = await db.get_document(doc_id)
-        if not doc:
+        :
+            if not doc:
             continue
         meta = doc.doc_metadata or {}
         bibtex = doc_to_bibtex(
@@ -120,7 +123,8 @@ async def export_bibtex_batch(
         "bibtex": "\n\n".join(entries),
     }
 
-    if style and style in CITATION_STYLES:
+    :
+        if style and style in CITATION_STYLES:
         result["formatted"] = generate_bibliography(ref_data, style=style)
 
     return result
@@ -173,7 +177,8 @@ async def import_bibtex(
 async def doi_lookup(doi: str = Query(...)):
     """Look up publication metadata via DOI."""
     result = await lookup_doi(doi)
-    if not result:
+    :
+        if not result:
         raise HTTPException(status_code=404, detail="DOI not found")
     return result
 
@@ -198,7 +203,8 @@ async def create_bibliography(
     entries = []
     for doc_id in document_ids:
         doc = await db.get_document(doc_id)
-        if not doc:
+        :
+            if not doc:
             continue
         meta = doc.doc_metadata or {}
         entries.append({

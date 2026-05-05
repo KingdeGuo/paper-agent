@@ -82,7 +82,8 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if document:
+            :
+                if document:
                 return DocumentResponse.model_validate(document)
             return None
 
@@ -94,7 +95,8 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if not document:
+            :
+                if not document:
                 return False
 
             document.file_path = file_path
@@ -109,7 +111,8 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if document:
+            :
+                if document:
                 return DocumentResponse.model_validate(document)
             return None
 
@@ -138,7 +141,8 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if not document:
+            :
+                if not document:
                 return None
 
             # Update fields
@@ -164,13 +168,16 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if not document:
+            :
+                if not document:
                 return False
 
             document.processed = status
-            if summary is not None:
+            :
+                if summary is not None:
                 document.summary = summary
-            if vector_id is not None:
+            :
+                if vector_id is not None:
                 document.vector_id = vector_id
 
             await session.commit()
@@ -184,12 +191,14 @@ class DatabaseService:
             )
             document = result.scalar_one_or_none()
 
-            if not document:
+            :
+                if not document:
                 return False
 
             # Delete file
             try:
-                if os.path.exists(document.file_path):
+                :
+                    if os.path.exists(document.file_path):
                     os.remove(document.file_path)
             except Exception as e:
                 logger.error(f"Error deleting file {document.file_path}: {str(e)}")

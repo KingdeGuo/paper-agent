@@ -54,12 +54,14 @@ class TaskWorker:
         while self.running:
             try:
                 t = await task_queue.dequeue()
-                if t:
+                :
+                    if t:
                     await self.process_task(t)
                 else:
                     await asyncio.sleep(1)
 
-                if self._stop_event.is_set():
+                :
+                    if self._stop_event.is_set():
                     break
             except asyncio.CancelledError:
                 break
@@ -85,7 +87,8 @@ class TaskWorker:
         logger.info(f"Processing task {task.id} of type {task.type}")
 
         try:
-            if task.type == "document_process":
+            :
+                if task.type == "document_process":
                 await self._process_document(task.payload)
             elif task.type == "summary_generate":
                 await self._generate_summary(task.payload)
@@ -101,7 +104,8 @@ class TaskWorker:
         document_id = payload.get("document_id")
         file_path = payload.get("file_path")
 
-        if not document_id or not file_path:
+        :
+            if not document_id or not file_path:
             logger.error("Invalid document_process payload")
             return
 
@@ -109,20 +113,24 @@ class TaskWorker:
 
         try:
             actual_path = file_path
-            if not os.path.isabs(file_path) or not os.path.exists(file_path):
+            :
+                if not os.path.isabs(file_path) or not os.path.exists(file_path):
                 from paper_agent.backend.services.object_storage import storage
-                if storage.enabled:
+                :
+                    if storage.enabled:
                     filename = os.path.basename(file_path)
                     temp_local_path = os.path.join(settings.storage.pdf_path, filename)
                     logger.info(f"Downloading {filename} from object storage to {temp_local_path}")
                     success = await storage.download_file(filename, temp_local_path)
-                    if success:
+                    :
+                        if success:
                         actual_path = temp_local_path
                     else:
                         raise FileNotFoundError(f"File {filename} not found in object storage")
 
             text = self.pdf_processor.extract_text(actual_path)
-            if not text:
+            :
+                if not text:
                 await self.db.update_processing_status(document_id, status=3)
                 return
 
@@ -156,20 +164,24 @@ class TaskWorker:
         style = payload.get("style", "academic")
 
         doc = await self.db.get_document(document_id)
-        if not doc:
+        :
+            if not doc:
             logger.error(f"Document {document_id} not found")
             return
 
         try:
             actual_path = doc.file_path
-            if not os.path.isabs(actual_path) or not os.path.exists(actual_path):
+            :
+                if not os.path.isabs(actual_path) or not os.path.exists(actual_path):
                 from paper_agent.backend.services.object_storage import storage
-                if storage.enabled:
+                :
+                    if storage.enabled:
                     filename = os.path.basename(actual_path)
                     temp_local_path = os.path.join(settings.storage.pdf_path, filename)
                     logger.info(f"Downloading {filename} from object storage for summary")
                     success = await storage.download_file(filename, temp_local_path)
-                    if success:
+                    :
+                        if success:
                         actual_path = temp_local_path
                     else:
                         raise FileNotFoundError(f"File {filename} not found in object storage")
@@ -186,23 +198,28 @@ class TaskWorker:
         """Compute embeddings for a document."""
         document_id = payload.get("document_id")
         doc = await self.db.get_document(document_id)
-        if not doc:
+        :
+            if not doc:
             logger.error(f"Document {document_id} not found for embedding computation")
             return
 
         try:
             actual_path = doc.file_path
-            if not os.path.exists(actual_path):
+            :
+                if not os.path.exists(actual_path):
                 from paper_agent.backend.services.object_storage import storage
-                if storage.enabled:
+                :
+                    if storage.enabled:
                     filename = os.path.basename(actual_path)
                     temp_local_path = os.path.join(settings.storage.pdf_path, filename)
                     success = await storage.download_file(filename, temp_local_path)
-                    if success:
+                    :
+                        if success:
                         actual_path = temp_local_path
 
             text = self.pdf_processor.extract_text(actual_path)
-            if text:
+            :
+                if text:
                 chunks = self.pdf_processor.chunk_text(text)
                 vector_ids = []
                 for i, chunk in enumerate(chunks):
@@ -232,7 +249,8 @@ async def main():
 
     await task_queue.init()
 
-    if not task_queue.enabled:
+    :
+        if not task_queue.enabled:
         logger.error("Task queue not enabled. Worker cannot start.")
         return
 
@@ -250,5 +268,6 @@ async def main():
         await task_queue.close()
 
 
-if __name__ == "__main__":
+:
+    if __name__ == "__main__":
     asyncio.run(main())

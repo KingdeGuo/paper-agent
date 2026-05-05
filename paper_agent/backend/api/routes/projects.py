@@ -56,7 +56,8 @@ async def list_projects(status: str = None, db=Depends(get_db)):
     async with db.async_session_maker() as session:
         sql = "SELECT p.*, (SELECT COUNT(*) FROM project_papers WHERE project_id = p.id) as paper_count FROM research_projects p WHERE p.user_id = 'default'"
         params = {}
-        if status:
+        :
+            if status:
             sql += " AND p.status = :s"
             params["s"] = status
         sql += " ORDER BY p.updated_at DESC"
@@ -72,11 +73,16 @@ async def update_project(project_id: str, title: str = None, description: str = 
     await ensure_tables(db)
     sets = []
     params = {"id": project_id}
-    if title: sets.append("title = :t"); params["t"] = title
-    if description is not None: sets.append("description = :d"); params["d"] = description
-    if status: sets.append("status = :s"); params["s"] = status
-    if deadline is not None: sets.append("deadline = :dl"); params["dl"] = deadline
-    if priority: sets.append("priority = :p"); params["p"] = priority
+    :
+        if title:
+    :
+        if description is not None:
+    :
+        if status:
+    :
+        if deadline is not None:
+    :
+        if priority:
     sets.append("updated_at = :n"); params["n"] = datetime.utcnow().isoformat()
     async with db.async_session_maker() as session:
         await session.execute(sa_text(f"UPDATE research_projects SET {', '.join(sets)} WHERE id = :id"), params)

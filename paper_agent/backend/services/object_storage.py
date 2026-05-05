@@ -23,7 +23,8 @@ class ObjectStorageService:
     async def init(self):
         """Initialize object storage client."""
         from backend.config.cluster_settings import cluster_settings
-        if not cluster_settings.storage.enabled:
+        :
+            if not cluster_settings.storage.enabled:
             logger.info("Object storage disabled, using local filesystem")
             return
 
@@ -31,7 +32,8 @@ class ObjectStorageService:
         self.bucket_name = cluster_settings.storage.bucket_name
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 import boto3
                 from botocore.config import Config
 
@@ -87,14 +89,16 @@ class ObjectStorageService:
         content_type: str = "application/pdf",
     ) -> Optional[str]:
         """Upload a file to object storage."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return None
 
         remote_path = remote_path or Path(local_path).name
         key = self._get_key(remote_path)
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 self._client.upload_file(
                     local_path,
                     self.bucket_name,
@@ -117,12 +121,14 @@ class ObjectStorageService:
         content_type: str = "application/pdf",
     ) -> Optional[str]:
         """Upload bytes data."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return None
 
         full_key = self._get_key(key)
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 from io import BytesIO
                 self._client.upload_fileobj(
                     BytesIO(data),
@@ -140,11 +146,13 @@ class ObjectStorageService:
 
     async def download_file(self, key: str, local_path: str) -> bool:
         """Download a file from object storage."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return False
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 self._client.download_file(self.bucket_name, key, local_path)
             elif self.provider == "oss":
                 self._client.get_object_to_file(key, local_path)
@@ -155,11 +163,13 @@ class ObjectStorageService:
 
     async def delete_file(self, key: str) -> bool:
         """Delete a file from object storage."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return False
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 self._client.delete_object(Bucket=self.bucket_name, Key=key)
             elif self.provider == "oss":
                 self._client.delete_object(key)
@@ -170,11 +180,13 @@ class ObjectStorageService:
 
     async def get_presigned_url(self, key: str, expires_in: int = 3600) -> Optional[str]:
         """Generate a presigned URL for direct access."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return None
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 url = self._client.generate_presigned_url(
                     "get_object",
                     Params={"Bucket": self.bucket_name, "Key": key},
@@ -187,11 +199,13 @@ class ObjectStorageService:
 
     async def list_files(self, prefix: str = "pdfs/") -> list:
         """List files with prefix."""
-        if not self.enabled:
+        :
+            if not self.enabled:
             return []
 
         try:
-            if self.provider in ("minio", "s3"):
+            :
+                if self.provider in ("minio", "s3"):
                 paginator = self._client.get_paginator("list_objects_v2")
                 pages = paginator.paginate(Bucket=self.bucket_name, Prefix=prefix)
                 files = []

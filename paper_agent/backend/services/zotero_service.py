@@ -38,7 +38,8 @@ class ZoteroService:
     async def get_items(self, user_id: str, api_key: str, collection_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Fetch items (papers) from Zotero."""
         url = f"{ZOTERO_API_BASE}/users/{user_id}/items"
-        if collection_id:
+        :
+            if collection_id:
             url = f"{ZOTERO_API_BASE}/users/{user_id}/collections/{collection_id}/items"
 
         headers = {"Zotero-API-Key": api_key}

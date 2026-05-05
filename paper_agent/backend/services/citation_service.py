@@ -24,13 +24,15 @@ def generate_citation_key(
 ) -> str:
     """Generate a unique citation key like 'Smith2024' or 'SmithJohnson2024'."""
     key = "Unknown"
-    if authors and len(authors) > 0:
+    :
+        if authors and len(authors) > 0:
         parts = []
         for a in authors[:2]:
             surname = a.strip().split(",")[0].split()[-1] if " " in a.strip() else a.strip()
             parts.append(surname)
         key = "".join(parts)
-    if year:
+    :
+        if year:
         key += str(year)
     elif title:
         key += str(hash(title) % 10000)
@@ -42,11 +44,13 @@ def format_authors_for_bibtex(authors: List[str]) -> str:
     formatted = []
     for a in authors:
         a = a.strip()
-        if "," in a:
+        :
+            if "," in a:
             formatted.append(a)
         else:
             parts = a.rsplit(" ", 1)
-            if len(parts) == 2:
+            :
+                if len(parts) == 2:
                 formatted.append(f"{parts[1]}, {parts[0]}")
             else:
                 formatted.append(a)
@@ -68,32 +72,44 @@ def doc_to_bibtex(
     key: Optional[str] = None,
 ) -> str:
     """Convert document metadata to BibTeX entry."""
-    if not key:
+    :
+        if not key:
         key = generate_citation_key(authors, year, title)
-    if title:
+    :
+        if title:
         title = title.strip().rstrip(".")
     author_str = format_authors_for_bibtex(authors) if authors else "Unknown"
 
     fields = []
-    if title:
+    :
+        if title:
         fields.append(f"  title = {{{{{title}}}}}")
-    if author_str:
+    :
+        if author_str:
         fields.append(f"  author = {{{{{author_str}}}}}")
-    if year:
+    :
+        if year:
         fields.append(f"  year = {{{year}}}")
-    if journal:
+    :
+        if journal:
         fields.append(f"  journal = {{{{{journal}}}}}")
-    if volume:
+    :
+        if volume:
         fields.append(f"  volume = {{{volume}}}")
-    if number:
+    :
+        if number:
         fields.append(f"  number = {{{number}}}")
-    if pages:
+    :
+        if pages:
         fields.append(f"  pages = {{{pages}}}")
-    if doi:
+    :
+        if doi:
         fields.append(f"  doi = {{{doi}}}")
-    if url:
+    :
+        if url:
         fields.append(f"  url = {{{url}}}")
-    if abstract:
+    :
+        if abstract:
         abstract_clean = abstract.replace("}", "\\}").replace("{", "\\{")
         fields.append(f"  abstract = {{{abstract_clean[:500]}}}")
 
@@ -159,7 +175,8 @@ def format_inline_citation(
     """Generate an inline citation like (Smith, 2024) or Smith (2024)."""
     surname = authors[0].strip().split(",")[0].split()[-1] if authors else "Unknown"
 
-    if style == "apa":
+    :
+        if style == "apa":
         return f"({surname}, {year})" if year else f"({surname})"
     elif style == "mla":
         return f"({surname} {year})" if year else f"({surname})"
@@ -185,7 +202,8 @@ async def lookup_doi(doi: str) -> Optional[Dict[str, Any]]:
             for a in msg.get("author", []):
                 given = a.get("given", "")
                 family = a.get("family", "")
-                if family:
+                :
+                    if family:
                     authors.append(f"{family}, {given}" if given else family)
 
             return {
@@ -202,7 +220,8 @@ async def lookup_doi(doi: str) -> Optional[Dict[str, Any]]:
                 "type": msg.get("type"),
             }
     except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:
+        :
+            if e.response.status_code == 404:
             return None
         logger.warning(f"DOI lookup failed for {doi}: {e}")
         return None
@@ -217,7 +236,8 @@ def generate_bibliography(
     sort: str = "author",
 ) -> str:
     """Generate a formatted bibliography from citation entries."""
-    if sort == "author":
+    :
+        if sort == "author":
         entries.sort(key=lambda e: (e.get("authors") or ["Unknown"])[0] if e.get("authors") else "Unknown")
 
     style_config = CITATION_STYLES.get(style, CITATION_STYLES["apa"])
@@ -234,16 +254,20 @@ def generate_bibliography(
         doi = entry.get("doi", "")
 
         # Format authors
-        if authors:
-            if style == "apa":
+        :
+            if authors:
+            :
+                if style == "apa":
                 formatted_authors = []
                 for j, a in enumerate(authors):
                     parts = a.split(", ")
-                    if len(parts) == 2:
+                    :
+                        if len(parts) == 2:
                         formatted_authors.append(f"{parts[0]}, {parts[1][0]}.")
                     else:
                         formatted_authors.append(parts[0])
-                if len(formatted_authors) > 7:
+                :
+                    if len(formatted_authors) > 7:
                     formatted_authors = formatted_authors[:7] + ["..."]
                 author_str = ", ".join(formatted_authors[:-1]) + " & " + formatted_authors[-1] if len(formatted_authors) > 1 else formatted_authors[0]
             elif style == "ieee":
@@ -254,17 +278,23 @@ def generate_bibliography(
             author_str = "Unknown"
 
         ref = f"{author_str} ({year}). {title}."
-        if journal:
+        :
+            if journal:
             ref += f" {journal}"
-            if volume:
+            :
+                if volume:
                 ref += f", {volume}"
-            if number:
+            :
+                if number:
                 ref += f"({number})"
-            if pages:
+            :
+                if pages:
                 ref += f", {pages}"
         ref += "."
-        if doi:
-            if style == "apa":
+        :
+            if doi:
+            :
+                if style == "apa":
                 ref += f" https://doi.org/{doi}"
             elif style == "mla":
                 ref += f" doi:{doi}"
@@ -291,7 +321,8 @@ async def search_crossref(query: str, limit: int = 10) -> List[Dict[str, Any]]:
                 for a in item.get("author", []):
                     given = a.get("given", "")
                     family = a.get("family", "")
-                    if family:
+                    :
+                        if family:
                         authors.append(f"{family}, {given}" if given else family)
 
                 results.append({

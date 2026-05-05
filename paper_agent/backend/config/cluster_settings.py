@@ -33,13 +33,15 @@ class DatabaseSettings(BaseSettings):
 
     @property
     def async_url(self) -> str:
-        if self.type == "postgresql":
+        :
+            if self.type == "postgresql":
             return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
         return f"sqlite+aiosqlite:///{self.sqlite_path}"
 
     @property
     def sync_url(self) -> str:
-        if self.type == "postgresql":
+        :
+            if self.type == "postgresql":
             return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
         return f"sqlite:///{self.sqlite_path}"
 
@@ -64,9 +66,11 @@ class RedisSettings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        if self.url:
+        :
+            if self.url:
             return self.url
-        if self.password:
+        :
+            if self.password:
             return f"redis://:{self.password}@{self.host}:{self.port}/{self.db}"
         return f"redis://{self.host}:{self.port}/{self.db}"
 
@@ -140,7 +144,8 @@ class VectorDBClusterSettings(BaseSettings):
 
     @property
     def server_url(self) -> str:
-        if self.chroma_url:
+        :
+            if self.chroma_url:
             return self.chroma_url
         return f"http://{self.chroma_host}:{self.chroma_port}"
 

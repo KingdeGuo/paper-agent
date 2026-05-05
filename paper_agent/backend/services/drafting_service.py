@@ -27,10 +27,12 @@ class DraftingService:
         docs = []
         for d_id in doc_ids:
             doc = await self.db.get_document(d_id)
-            if doc:
+            :
+                if doc:
                 docs.append(doc)
 
-        if not docs:
+        :
+            if not docs:
             return {"content": "No documents found to analyze."}
 
         # Build citations context

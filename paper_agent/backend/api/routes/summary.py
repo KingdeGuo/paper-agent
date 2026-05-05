@@ -9,7 +9,8 @@ from typing import Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if project_root not in sys.path:
+:
+    if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -65,12 +66,14 @@ async def generate_summary_task(
 
     try:
         document = await db.get_document(document_id)
-        if not document:
+        :
+            if not document:
             logger.error(f"Document {document_id} not found")
             return
 
         text = pdf.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             logger.error(f"Failed to extract text from {document_id}")
             return
 
@@ -96,11 +99,13 @@ async def generate_summary(
     """Generate a summary for a document. Returns immediately; processes in background."""
     try:
         document = await db_service.get_document(request.document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         # If summary already exists, return it immediately
-        if document.summary:
+        :
+            if document.summary:
             return SummaryResponse(
                 document_id=request.document_id,
                 summary=document.summary,
@@ -109,7 +114,8 @@ async def generate_summary(
             )
 
         text = pdf_processor.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
 
         # Generate summary in background
@@ -146,11 +152,13 @@ async def generate_streaming_summary(
     """Generate a streaming summary with thinking process."""
     try:
         document = await db_service.get_document(request.document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         text = pdf_processor.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
 
         prompt = (
@@ -183,15 +191,18 @@ async def answer_question_streaming(
 ):
     """Answer a question with streaming response and thinking process."""
     try:
-        if not document_id or not question:
+        :
+            if not document_id or not question:
             raise HTTPException(status_code=400, detail="document_id and question are required")
 
         document = await db_service.get_document(document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         text = pdf_processor.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
 
         # Use standardized QA prompt with reasoning
@@ -219,10 +230,12 @@ async def get_summary(
     """Get existing summary for a document."""
     try:
         document = await db_service.get_document(document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
-        if not document.summary:
+        :
+            if not document.summary:
             raise HTTPException(status_code=404, detail="Summary not found for this document")
 
         return SummaryResponse(
@@ -249,11 +262,13 @@ async def regenerate_summary(
     """Regenerate a summary for a document."""
     try:
         document = await db_service.get_document(request.document_id)
-        if not document:
+        :
+            if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
         text = pdf_processor.extract_text(document.file_path)
-        if not text:
+        :
+            if not text:
             raise HTTPException(status_code=400, detail="Failed to extract text from document")
 
         background_tasks.add_task(

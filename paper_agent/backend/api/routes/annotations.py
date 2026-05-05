@@ -49,7 +49,8 @@ async def get_annotations(
                 not Annotation.is_deleted,
             )
 
-            if page is not None:
+            :
+                if page is not None:
                 query = query.where(Annotation.page_number == page)
 
             result = await session.execute(query.order_by(Annotation.page_number, Annotation.created_at))
@@ -82,7 +83,8 @@ async def create_annotation(
             doc_result = await session.execute(
                 select(Document).where(Document.id == document_id)
             )
-            if not doc_result.scalar_one_or_none():
+            :
+                if not doc_result.scalar_one_or_none():
                 raise HTTPException(status_code=404, detail="Document not found")
 
             # Create annotation
@@ -130,15 +132,19 @@ async def update_annotation(
             )
             annotation = result.scalar_one_or_none()
 
-            if not annotation:
+            :
+                if not annotation:
                 raise HTTPException(status_code=404, detail="Annotation not found")
 
             # Update fields
-            if update.note is not None:
+            :
+                if update.note is not None:
                 annotation.note = update.note
-            if update.highlight_color is not None:
+            :
+                if update.highlight_color is not None:
                 annotation.highlight_color = update.highlight_color
-            if update.is_deleted is not None:
+            :
+                if update.is_deleted is not None:
                 annotation.is_deleted = update.is_deleted
 
             annotation.updated_at = datetime.utcnow()
@@ -170,7 +176,8 @@ async def delete_annotation(
             )
             annotation = result.scalar_one_or_none()
 
-            if not annotation:
+            :
+                if not annotation:
                 raise HTTPException(status_code=404, detail="Annotation not found")
 
             annotation.is_deleted = True
@@ -236,7 +243,8 @@ async def create_note(
             doc_result = await session.execute(
                 select(Document).where(Document.id == document_id)
             )
-            if not doc_result.scalar_one_or_none():
+            :
+                if not doc_result.scalar_one_or_none():
                 raise HTTPException(status_code=404, detail="Document not found")
 
             note_id = str(uuid.uuid4())
@@ -280,12 +288,15 @@ async def update_note(
             )
             note = result.scalar_one_or_none()
 
-            if not note:
+            :
+                if not note:
                 raise HTTPException(status_code=404, detail="Note not found")
 
-            if content is not None:
+            :
+                if content is not None:
                 note.content = content
-            if tags is not None:
+            :
+                if tags is not None:
                 note.tags = tags
 
             note.updated_at = datetime.utcnow()
@@ -316,7 +327,8 @@ async def delete_note(
             )
             note = result.scalar_one_or_none()
 
-            if not note:
+            :
+                if not note:
                 raise HTTPException(status_code=404, detail="Note not found")
 
             note.is_deleted = True

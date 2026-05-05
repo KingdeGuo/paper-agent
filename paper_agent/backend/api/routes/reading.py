@@ -23,7 +23,8 @@ async def ensure_reading_table(db: ClusterDatabaseService):
             sa_text("SELECT name FROM sqlite_master WHERE type='table' AND name='reading_list'")
         )
         exists = result.scalar()
-        if not exists:
+        :
+            if not exists:
             from sqlalchemy import MetaData
 
             metadata = MetaData()
@@ -71,7 +72,8 @@ async def get_reading_list(
         from sqlalchemy import text as sa_text
         sql = "SELECT r.*, d.title, d.authors, d.year, d.filename, d.processed, d.file_path FROM reading_list r LEFT JOIN documents d ON r.document_id = d.id WHERE r.user_id = 'default'"
         params = {}
-        if status:
+        :
+            if status:
             sql += " AND r.status = :status"
             params["status"] = status
         sql += " ORDER BY r.priority DESC, r.date_updated DESC LIMIT :limit"
@@ -101,7 +103,8 @@ async def set_reading_status(
     db: ClusterDatabaseService = Depends(get_db),
 ):
     """Set the reading status for a document."""
-    if status not in READING_STATUSES:
+    :
+        if status not in READING_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {READING_STATUSES}")
     await ensure_reading_table(db)
     async with db.async_session_maker() as session:
@@ -112,7 +115,8 @@ async def set_reading_status(
         )
         existing = result.scalar()
         now = datetime.utcnow().isoformat()
-        if existing:
+        :
+            if existing:
             completed = f", date_completed = '{now}'" if status == "read" else ""
             await session.execute(
                 sa_text(f"UPDATE reading_list SET status = :status, date_updated = '{now}'{completed} WHERE id = :id"),
@@ -148,16 +152,20 @@ async def update_reading_progress(
         )
         existing = result.scalar()
         now = datetime.utcnow().isoformat()
-        if existing:
+        :
+            if existing:
             sets = f"progress = :progress, date_updated = '{now}'"
             params = {"progress": progress, "id": existing}
-            if current_page is not None:
+            :
+                if current_page is not None:
                 sets += ", current_page = :cp"
                 params["cp"] = current_page
-            if total_pages is not None:
+            :
+                if total_pages is not None:
                 sets += ", total_pages = :tp"
                 params["tp"] = total_pages
-            if progress >= 1.0:
+            :
+                if progress >= 1.0:
                 sets += ", status = 'read', date_completed = :dc"
                 params["dc"] = now
             await session.execute(sa_text(f"UPDATE reading_list SET {sets} WHERE id = :id"), params)

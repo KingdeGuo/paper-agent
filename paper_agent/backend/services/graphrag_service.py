@@ -49,11 +49,13 @@ class GraphRAGEngine:
         """
         # Phase 1: Initial vector search
         vector_results = self.vs.search_similar(query, limit=self.config.similarity_top_k) if self.vs else []
-        if not vector_results and self.db:
+        :
+            if not vector_results and self.db:
             docs = await self.db.search_documents(query, limit=self.config.similarity_top_k) if hasattr(self.db, 'search_documents') else []
             vector_results = [{"document_id": d.id, "title": d.title, "score": 0.5, "text": d.abstract or ""} for d in docs]
 
-        if not vector_results:
+        :
+            if not vector_results:
             return {"answer": "No relevant papers found.", "sources": [], "graph_traversed": []}
 
         # Phase 2: Graph traversal — expand via citations and semantic links
@@ -87,7 +89,8 @@ class GraphRAGEngine:
 
             for doc_id in frontier:
                 doc = await self.db.get_document(doc_id) if self.db else None
-                if not doc:
+                :
+                    if not doc:
                     continue
 
                 nodes.append({
@@ -97,22 +100,27 @@ class GraphRAGEngine:
                 })
 
                 # Find semantically similar papers (acts as "citations")
-                if self.vs and doc.abstract:
+                :
+                    if self.vs and doc.abstract:
                     similar = self.vs.search_similar(doc.abstract, limit=5)
                     for s in similar:
                         sid = s.get("document_id")
-                        if sid and sid not in visited:
+                        :
+                            if sid and sid not in visited:
                             visited.add(sid)
                             next_frontier.add(sid)
 
                 # Find papers with shared keywords
-                if doc.keywords:
+                :
+                    if doc.keywords:
                     for kw in doc.keywords[:3]:
-                        if self.vs:
+                        :
+                            if self.vs:
                             kw_results = self.vs.search_similar(kw, limit=3)
                             for r in kw_results:
                                 rid = r.get("document_id")
-                                if rid and rid not in visited:
+                                :
+                                    if rid and rid not in visited:
                                     visited.add(rid)
                                     next_frontier.add(rid)
 
@@ -130,7 +138,8 @@ class GraphRAGEngine:
             depth_score = 1.0 / (n.get("depth", 2) + 0.5)
             # Papers with matching keywords get bonus
             keyword_bonus = 0
-            if n.get("keywords"):
+            :
+                if n.get("keywords"):
                 q_words = set(query.lower().split())
                 kw_words = set(k.lower() for k in n["keywords"])
                 overlap = len(q_words & kw_words)
@@ -157,7 +166,8 @@ class GraphRAGEngine:
         # Add pure graph nodes not found by vector search
         for n in graph_nodes:
             nid = n["id"]
-            if nid not in combined:
+            :
+                if nid not in combined:
                 combined[nid] = {
                     "document_id": nid,
                     "title": n["title"],
@@ -174,7 +184,8 @@ class GraphRAGEngine:
 
     async def _synthesize(self, query: str, ranked: List[Dict]) -> Tuple[str, List[Dict]]:
         """Synthesize final answer with citations from ranked results."""
-        if not ranked:
+        :
+            if not ranked:
             return "No relevant sources found.", []
 
         sources = []
@@ -183,12 +194,14 @@ class GraphRAGEngine:
         for i, r in enumerate(ranked):
             did = r["document_id"]
             doc = await self.db.get_document(did) if self.db else None
-            if not doc:
+            :
+                if not doc:
                 continue
 
             title = doc.title or doc.filename
             text = r.get("text") or doc.abstract or ""
-            if not text:
+            :
+                if not text:
                 continue
 
             tag = f"[{i+1}]"
@@ -201,7 +214,8 @@ class GraphRAGEngine:
                 "in_graph": r.get("in_graph", False),
             })
 
-        if not context_parts:
+        :
+            if not context_parts:
             return "Sources found but no extractable text.", sources
 
         context = "\n\n".join(context_parts)
@@ -233,7 +247,8 @@ class GraphRAGCommunityDetector:
     async def detect_communities(self, db) -> List[Dict]:
         """Identify research communities in the library based on citation patterns."""
         docs = await db.get_documents(limit=200) if db else []
-        if len(docs) < 5:
+        :
+            if len(docs) < 5:
             return []
 
         # Build co-author graph
@@ -250,11 +265,13 @@ class GraphRAGCommunityDetector:
 
         communities = []
         for kw, paper_ids in sorted(keyword_docs.items(), key=lambda x: -len(x[1]))[:10]:
-            if len(paper_ids) >= 2:
+            :
+                if len(paper_ids) >= 2:
                 members = []
                 for pid in paper_ids[:5]:
                     doc = await db.get_document(pid) if db else None
-                    if doc:
+                    :
+                        if doc:
                         members.append({"id": pid, "title": doc.title or doc.filename})
                 communities.append({
                     "topic": kw,
@@ -265,11 +282,13 @@ class GraphRAGCommunityDetector:
 
         # Author-based communities
         for author, paper_ids in sorted(author_papers.items(), key=lambda x: -len(x[1]))[:10]:
-            if len(paper_ids) >= 3:
+            :
+                if len(paper_ids) >= 3:
                 members = []
                 for pid in paper_ids[:5]:
                     doc = await db.get_document(pid) if db else None
-                    if doc:
+                    :
+                        if doc:
                         members.append({"id": pid, "title": doc.title or doc.filename})
                 communities.append({
                     "topic": f"{author}'s Network",

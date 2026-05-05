@@ -28,10 +28,12 @@ async def extract_terms(document_id: str, db=Depends(get_db), llm_service=Depend
     """Auto-extract key terms and definitions from a paper using AI."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
     text = (doc.abstract or "") + " " + (doc.summary or "") + " " + (doc.title or "")
-    if len(text) < 50:
+    :
+        if len(text) < 50:
         return {"terms": [], "message": "Not enough text to extract terms"}
 
     try:
@@ -69,10 +71,12 @@ async def get_glossary(search: str = "", category: str = "", db=Depends(get_db))
     async with db.async_session_maker() as session:
         sql = "SELECT * FROM concept_glossary WHERE user_id = 'default'"
         params = {}
-        if search:
+        :
+            if search:
             sql += " AND (term LIKE :s OR definition LIKE :s)"
             params["s"] = f"%{search}%"
-        if category:
+        :
+            if category:
             sql += " AND category = :c"
             params["c"] = category
         sql += " ORDER BY term ASC LIMIT 200"
@@ -86,9 +90,12 @@ async def update_term(term_id: str, definition: str = None, category: str = None
     await ensure_tables(db)
     sets = []
     params = {"id": term_id}
-    if definition: sets.append("definition = :d"); params["d"] = definition
-    if category: sets.append("category = :c"); params["c"] = category
-    if sets:
+    :
+        if definition:
+    :
+        if category:
+    :
+        if sets:
         async with db.async_session_maker() as session:
             await session.execute(sa_text(f"UPDATE concept_glossary SET {', '.join(sets)} WHERE id = :id"), params)
             await session.commit()

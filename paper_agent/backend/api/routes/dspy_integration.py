@@ -79,7 +79,8 @@ async def execute_pipeline(
     llm_service=Depends(get_llm_service),
 ):
     """Execute a DSPy-style pipeline with a defined signature."""
-    if signature not in SIGNATURES:
+    :
+        if signature not in SIGNATURES:
         return {"error": f"Unknown signature: {signature}. Available: {list(SIGNATURES.keys())}"}
 
     sig = SIGNATURES[signature]
@@ -88,7 +89,8 @@ async def execute_pipeline(
     # Fill template
     prompt = template
     for k, v in inputs.items():
-        if isinstance(v, list):
+        :
+            if isinstance(v, list):
             v = "\n".join(f"- {item}" for item in v)
         prompt = prompt.replace(f"{{{k}}}", str(v))
 
@@ -118,7 +120,8 @@ async def optimize_pipeline(
 ):
     """Execute a pipeline with optional optimization feedback."""
     result = await execute_pipeline(signature, inputs, llm_service)
-    if feedback and llm_service:
+    :
+        if feedback and llm_service:
         try:
             resp = await llm_service.chat_completion(
                 messages=[{"role": "user", "content": f"Based on this feedback, improve the output.\n\nOriginal output:\n{result['output']}\n\nFeedback:\n{feedback}\n\nImproved output:"}],
@@ -146,9 +149,11 @@ async def multi_step_pipeline(
 
         # Allow inputs to reference previous step outputs
         for k, v in step_inputs.items():
-            if isinstance(v, str) and v.startswith("$"):
+            :
+                if isinstance(v, str) and v.startswith("$"):
                 ref_key = v[1:]
-                if ref_key in context:
+                :
+                    if ref_key in context:
                     step_inputs[k] = context[ref_key]
 
         # Merge with accumulated context
@@ -156,7 +161,8 @@ async def multi_step_pipeline(
         step_result = await execute_pipeline(sig_name, combined_inputs, llm_service)
 
         # Store the output in context
-        if step.get("output_key"):
+        :
+            if step.get("output_key"):
             context[step["output_key"]] = step_result.get("output", "")
 
         results.append({

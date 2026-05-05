@@ -27,7 +27,8 @@ class ProactiveMonitor:
 
     async def start(self, interval_hours: int = 6):
         """Start the proactive monitoring loop."""
-        if self._running:
+        :
+            if self._running:
             logger.warning("Monitor already running")
             return
 
@@ -38,7 +39,8 @@ class ProactiveMonitor:
     async def stop(self):
         """Stop the monitoring loop."""
         self._running = False
-        if self._task:
+        :
+            if self._task:
             self._task.cancel()
             try:
                 await self._task
@@ -57,13 +59,15 @@ class ProactiveMonitor:
 
             try:
                 # Daily tasks (run once per day)
-                if last_daily != today:
+                :
+                    if last_daily != today:
                     await self._run_daily_tasks()
                     last_daily = today
 
                 # Weekly tasks (run on Mondays)
                 week_num = now.isocalendar()[1]
-                if last_weekly != week_num and now.weekday() == 0:
+                :
+                    if last_weekly != week_num and now.weekday() == 0:
                     await self._run_weekly_tasks()
                     last_weekly = week_num
 
@@ -83,7 +87,8 @@ class ProactiveMonitor:
         try:
             from backend.services.registry import get_db
             db = get_db()
-            if db:
+            :
+                if db:
                 async with db.async_session_maker() as session:
                     from sqlalchemy import text as sa_text
                     # Check alerts and create notifications for new matches
@@ -93,10 +98,12 @@ class ProactiveMonitor:
 
                     for alert_id, name, query in alerts:
                         vs = getattr(__import__('backend.services.registry', fromlist=['get_vector_service']), 'get_vector_service')()
-                        if vs:
+                        :
+                            if vs:
                             results = vs.search_similar(query, limit=3)
                             for r in results:
-                                if r.get("score", 0) > 0.5:
+                                :
+                                    if r.get("score", 0) > 0.5:
                                     import uuid
                                     nid = str(uuid.uuid4())
                                     await session.execute(sa_text(
@@ -116,10 +123,12 @@ class ProactiveMonitor:
             from backend.api.routes.research_assistant import daily_agenda
             from backend.services.registry import get_db
             db = get_db()
-            if db:
+            :
+                if db:
                 # Use the LLM to generate a briefing
                 briefing = await daily_agenda(db=db)
-                if briefing and briefing.get("ai_focus_suggestion"):
+                :
+                    if briefing and briefing.get("ai_focus_suggestion"):
                     # Store as notification
                     async with db.async_session_maker() as session:
                         import uuid
@@ -144,10 +153,12 @@ class ProactiveMonitor:
             from backend.services.registry import get_db, get_llm_service
             db = get_db()
             llm = get_llm_service()
-            if db and llm:
+            :
+                if db and llm:
                 from backend.api.routes.research_assistant import weekly_briefing
                 briefing = await weekly_briefing(db=db, llm_service=llm)
-                if briefing and briefing.get("ai_highlight"):
+                :
+                    if briefing and briefing.get("ai_highlight"):
                     async with db.async_session_maker() as session:
                         import uuid
 
@@ -168,7 +179,8 @@ class ProactiveMonitor:
         try:
             from backend.services.registry import get_db
             db = get_db()
-            if db:
+            :
+                if db:
                 from datetime import datetime as dt
                 from datetime import timedelta
 
@@ -188,7 +200,8 @@ class ProactiveMonitor:
                         existing = (await session.execute(sa_text(
                             "SELECT id FROM notifications WHERE reference_id = :rid AND notification_type = 'deadline' AND is_dismissed = 0"),
                             {"rid": u[0]})).fetchone()
-                        if not existing:
+                        :
+                            if not existing:
                             import uuid
                             await session.execute(sa_text(
                                 "INSERT INTO notifications (id, user_id, title, message, notification_type, source, reference_id) "
@@ -198,7 +211,8 @@ class ProactiveMonitor:
                                  "m": f"Submission deadline for {u[1]} is in less than 7 days.",
                                  "rid": u[0]})
                     await session.commit()
-                    if upcoming:
+                    :
+                        if upcoming:
                         logger.info(f"Found {len(upcoming)} upcoming deadlines")
         except Exception as e:
             logger.warning(f"Deadline check failed: {e}")

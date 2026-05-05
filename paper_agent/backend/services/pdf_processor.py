@@ -7,7 +7,8 @@ from typing import Dict, List, Optional, Tuple
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-if project_root not in sys.path:
+:
+    if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 import io
@@ -48,7 +49,8 @@ class PDFProcessor:
     def _parse_file_size(self, size_str: str) -> int:
         """Parse file size string to bytes."""
         size_str = size_str.upper()
-        if size_str.endswith("MB"):
+        :
+            if size_str.endswith("MB"):
             return int(size_str[:-2]) * 1024 * 1024
         elif size_str.endswith("KB"):
             return int(size_str[:-2]) * 1024
@@ -61,10 +63,12 @@ class PDFProcessor:
         """Validate file extension and size."""
         file_extension = Path(filename).suffix.lower()
 
-        if file_extension not in self.allowed_extensions:
+        :
+            if file_extension not in self.allowed_extensions:
             raise ValueError(f"Unsupported file type: {file_extension}")
 
-        if file_size > self.max_file_size:
+        :
+            if file_size > self.max_file_size:
             raise ValueError(f"File too large: {file_size} > {self.max_file_size}")
 
         return True
@@ -98,26 +102,32 @@ class PDFProcessor:
                 metadata['num_pages'] = len(pdf_reader.pages)
 
                 # Extract PDF metadata
-                if pdf_reader.metadata:
+                :
+                    if pdf_reader.metadata:
                     pdf_meta = pdf_reader.metadata
                     metadata['title'] = pdf_meta.get('/Title', None)
-                    if metadata['title'] and len(metadata['title'].strip()) < 5:
+                    :
+                        if metadata['title'] and len(metadata['title'].strip()) < 5:
                         metadata['title'] = None
 
             # Extract text for additional processing
             text_content = self.extract_text(file_path)
-            if text_content:
+            :
+                if text_content:
                 # Try to extract title from first page
-                if not metadata['title']:
+                :
+                    if not metadata['title']:
                     metadata['title'] = self._extract_title_from_text(text_content[:1000])
 
                 # Try to extract year from text
-                if not metadata['year']:
+                :
+                    if not metadata['year']:
                     metadata['year'] = self._extract_year_from_text(text_content)
 
                 # Try to extract abstract
                 abstract = self._extract_abstract_from_text(text_content)
-                if abstract:
+                :
+                    if abstract:
                     metadata['abstract'] = abstract
 
         except Exception as e:
@@ -133,7 +143,8 @@ class PDFProcessor:
             with pdfplumber.open(file_path) as pdf:
                 for page in pdf.pages[:settings.pdf_processing.max_pages]:
                     page_text = page.extract_text()
-                    if page_text:
+                    :
+                        if page_text:
                         text += page_text + "\n"
         except Exception as e:
             logger.error(f"Error extracting text from {file_path}: {str(e)}")
@@ -142,7 +153,8 @@ class PDFProcessor:
 
     def extract_images(self, file_path: str) -> List[Image.Image]:
         """Extract images from PDF (if enabled)."""
-        if not settings.pdf_processing.extract_images:
+        :
+            if not settings.pdf_processing.extract_images:
             return []
 
         images = []
@@ -168,7 +180,8 @@ class PDFProcessor:
         chunk_size = settings.pdf_processing.chunk_size
         chunk_overlap = settings.pdf_processing.chunk_overlap
 
-        if not text:
+        :
+            if not text:
             return []
 
         # Simple chunking by sentences
@@ -178,36 +191,45 @@ class PDFProcessor:
 
         for sentence in sentences:
             sentence = sentence.strip()
-            if not sentence:
+            :
+                if not sentence:
                 continue
 
-            if len(current_chunk) + len(sentence) + 2 <= chunk_size:
-                if current_chunk:
+            :
+                if len(current_chunk) + len(sentence) + 2 <= chunk_size:
+                :
+                    if current_chunk:
                     current_chunk += ". " + sentence
                 else:
                     current_chunk = sentence
             else:
-                if current_chunk:
+                :
+                    if current_chunk:
                     chunks.append(current_chunk + ".")
 
                 # Handle very long sentences
-                if len(sentence) > chunk_size:
+                :
+                    if len(sentence) > chunk_size:
                     # Split by words
                     words = sentence.split()
                     temp_chunk = ""
                     for word in words:
-                        if len(temp_chunk) + len(word) + 1 <= chunk_size:
+                        :
+                            if len(temp_chunk) + len(word) + 1 <= chunk_size:
                             temp_chunk += " " + word
                         else:
-                            if temp_chunk:
+                            :
+                                if temp_chunk:
                                 chunks.append(temp_chunk.strip())
                             temp_chunk = word
-                    if temp_chunk:
+                    :
+                        if temp_chunk:
                         current_chunk = temp_chunk.strip()
                 else:
                     current_chunk = sentence
 
-        if current_chunk:
+        :
+            if current_chunk:
             chunks.append(current_chunk + ".")
 
         return chunks
@@ -217,7 +239,8 @@ class PDFProcessor:
         lines = text.strip().split('\n')
         for line in lines[:5]:  # Check first 5 lines
             line = line.strip()
-            if len(line) > 10 and len(line) < 200:
+            :
+                if len(line) > 10 and len(line) < 200:
                 return line
         return None
 
@@ -229,7 +252,8 @@ class PDFProcessor:
         year_pattern = r'\b(19\d{2}|20[0-3]\d)\b'
         years = re.findall(year_pattern, text)
 
-        if years:
+        :
+            if years:
             # Return the most recent year
             return max(int(year) for year in years)
 
@@ -249,7 +273,8 @@ class PDFProcessor:
 
         for pattern in abstract_patterns:
             idx = text_lower.find(pattern)
-            if idx != -1:
+            :
+                if idx != -1:
                 # Extract text after abstract keyword
                 abstract_start = idx + len(pattern)
                 abstract_text = text[abstract_start:abstract_start+1000]
@@ -259,9 +284,11 @@ class PDFProcessor:
                 abstract = ""
                 for line in lines:
                     line = line.strip()
-                    if line and not line.lower().startswith('keywords'):
+                    :
+                        if line and not line.lower().startswith('keywords'):
                         abstract += line + " "
-                    if len(abstract) > 500:
+                    :
+                        if len(abstract) > 500:
                         break
 
                 return abstract.strip()

@@ -58,7 +58,8 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception: pass
+            except Exception:
+                pass
         await session.commit()
 
 
@@ -131,7 +132,8 @@ async def seed_builtin_skills(db):
             existing = (await session.execute(sa_text(
                 "SELECT id FROM research_skills WHERE name = :n AND user_id = '__builtin__'"),
                 {"n": skill["name"]})).fetchone()
-            if not existing:
+            :
+                if not existing:
                 sid = str(uuid.uuid4())
                 await session.execute(sa_text(
                     "INSERT INTO research_skills (id, user_id, name, description, category, author, prompt_template, required_tools, tags, is_public) "
@@ -151,10 +153,12 @@ async def list_skills(category: str = None, search: str = None, db=Depends(get_d
     async with db.async_session_maker() as session:
         sql = "SELECT s.*, COALESCE(inst.is_active, 0) as installed, COALESCE(inst.use_count, 0) as use_count FROM research_skills s LEFT JOIN installed_skills inst ON s.id = inst.skill_id AND inst.user_id = 'default' WHERE (s.user_id = '__builtin__' OR s.user_id = 'default') AND (s.is_public = 1 OR s.user_id = 'default')"
         params = {}
-        if category:
+        :
+            if category:
             sql += " AND s.category = :c"
             params["c"] = category
-        if search:
+        :
+            if search:
             sql += " AND (s.name LIKE :s OR s.description LIKE :s)"
             params["s"] = f"%{search}%"
         sql += " ORDER BY s.downloads DESC, s.rating DESC"
@@ -178,7 +182,8 @@ async def get_skill(skill_id: str, db=Depends(get_db)):
         row = (await session.execute(sa_text(
             "SELECT * FROM research_skills WHERE id = :id"),
             {"id": skill_id})).fetchone()
-        if not row:
+        :
+            if not row:
             raise HTTPException(status_code=404, detail="Skill not found")
         return {
             "id": row[0], "name": row[2], "description": row[3],
@@ -218,12 +223,14 @@ async def install_skill(skill_id: str, db=Depends(get_db)):
     await ensure_tables(db)
     async with db.async_session_maker() as session:
         skill = (await session.execute(sa_text("SELECT id FROM research_skills WHERE id = :id"), {"id": skill_id})).fetchone()
-        if not skill:
+        :
+            if not skill:
             raise HTTPException(status_code=404, detail="Skill not found")
         existing = (await session.execute(sa_text(
             "SELECT id FROM installed_skills WHERE skill_id = :sid AND user_id = 'default'"),
             {"sid": skill_id})).fetchone()
-        if not existing:
+        :
+            if not existing:
             await session.execute(sa_text(
                 "INSERT INTO installed_skills (id, user_id, skill_id) VALUES (:id, 'default', :sid)"),
                 {"id": str(uuid.uuid4()), "sid": skill_id})
@@ -238,12 +245,14 @@ async def execute_skill(skill_id: str, inputs: dict = None, db=Depends(get_db), 
     await ensure_tables(db)
     async with db.async_session_maker() as session:
         skill = (await session.execute(sa_text("SELECT * FROM research_skills WHERE id = :id"), {"id": skill_id})).fetchone()
-        if not skill:
+        :
+            if not skill:
             raise HTTPException(status_code=404, detail="Skill not found")
 
     prompt_template = skill[7]
     filled_prompt = prompt_template
-    if inputs:
+    :
+        if inputs:
         for k, v in inputs.items():
             placeholder = "{" + k + "}"
             filled_prompt = filled_prompt.replace(placeholder, str(v))

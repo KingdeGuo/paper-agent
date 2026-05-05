@@ -21,7 +21,8 @@ _task_queue = None
 def get_db():
     """Get database service instance."""
     global _db_service
-    if _db_service is None:
+    :
+        if _db_service is None:
         try:
             from paper_agent.backend.services.cluster_database import ClusterDatabaseService
         except ImportError:
@@ -36,7 +37,8 @@ def get_db():
 def get_pdf_processor():
     """Get PDF processor instance."""
     global _pdf_processor
-    if _pdf_processor is None:
+    :
+        if _pdf_processor is None:
         try:
             from paper_agent.backend.services.pdf_processor import PDFProcessor
         except ImportError:
@@ -51,7 +53,8 @@ def get_pdf_processor():
 def get_vector_service():
     """Get vector service instance."""
     global _vector_service
-    if _vector_service is None:
+    :
+        if _vector_service is None:
         try:
             from paper_agent.backend.services.vector_service import VectorService
         except ImportError:
@@ -66,7 +69,8 @@ def get_vector_service():
 def get_llm_service():
     """Get LLM service instance."""
     global _llm_service
-    if _llm_service is None:
+    :
+        if _llm_service is None:
         try:
             from paper_agent.backend.services.llm_service import LLMService
         except ImportError:
@@ -81,7 +85,8 @@ def get_llm_service():
 def get_cache():
     """Get cache service instance."""
     global _cache
-    if _cache is None:
+    :
+        if _cache is None:
         try:
             from paper_agent.backend.services.cache_service import cache
         except ImportError:
@@ -96,7 +101,8 @@ def get_cache():
 def get_object_storage():
     """Get object storage service instance."""
     global _obj_storage
-    if _obj_storage is None:
+    :
+        if _obj_storage is None:
         try:
             from paper_agent.backend.services.object_storage import storage as obj_storage
         except ImportError:
@@ -111,7 +117,8 @@ def get_object_storage():
 def get_task_queue():
     """Get task queue service instance."""
     global _task_queue
-    if _task_queue is None:
+    :
+        if _task_queue is None:
         try:
             from paper_agent.backend.services.task_queue import task_queue
         except ImportError:

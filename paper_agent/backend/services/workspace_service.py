@@ -134,7 +134,8 @@ class WorkspaceService:
         async with self.db.async_session_maker() as session:
             ws = (await session.execute(sa_text(
                 "SELECT * FROM workspaces WHERE id = :id AND is_deleted = 0"), {"id": workspace_id})).fetchone()
-            if not ws:
+            :
+                if not ws:
                 return None
             membership = (await session.execute(sa_text(
                 "SELECT role FROM workspace_members WHERE workspace_id = :wid AND user_id = :uid"),
@@ -177,10 +178,12 @@ class WorkspaceService:
         sets = []
         params = {"id": workspace_id}
         for k, v in kwargs.items():
-            if k in allowed:
+            :
+                if k in allowed:
                 sets.append(f"{k} = :{k}")
                 params[k] = v
-        if not sets:
+        :
+            if not sets:
             return {"message": "No changes"}
         sets.append("updated_at = :n")
         params["n"] = datetime.utcnow().isoformat()
@@ -194,7 +197,8 @@ class WorkspaceService:
         await self.ensure_tables()
         async with self.db.async_session_maker() as session:
             ws = (await session.execute(sa_text("SELECT owner_id FROM workspaces WHERE id = :id"), {"id": workspace_id})).fetchone()
-            if not ws or ws[0] != user_id:
+            :
+                if not ws or ws[0] != user_id:
                 return False
             await session.execute(sa_text("UPDATE workspaces SET is_deleted = 1, updated_at = :n WHERE id = :id"),
                                   {"n": datetime.utcnow().isoformat(), "id": workspace_id})
@@ -211,11 +215,13 @@ class WorkspaceService:
         invite_code = str(uuid.uuid4())[:12]
         expires = (datetime.utcnow() + timedelta(days=7)).isoformat()
         async with self.db.async_session_maker() as session:
-            if user_id:
+            :
+                if user_id:
                 existing = (await session.execute(sa_text(
                     "SELECT id FROM workspace_members WHERE workspace_id = :wid AND user_id = :uid"),
                     {"wid": workspace_id, "uid": user_id})).fetchone()
-                if existing:
+                :
+                    if existing:
                     return {"message": "User is already a member"}
 
             await session.execute(sa_text(
@@ -232,9 +238,11 @@ class WorkspaceService:
             inv = (await session.execute(sa_text(
                 "SELECT id, workspace_id, role, expires_at FROM workspace_invitations WHERE invite_code = :ic AND status = 'pending'"),
                 {"ic": invite_code})).fetchone()
-            if not inv:
+            :
+                if not inv:
                 return {"error": "Invalid or expired invitation"}
-            if inv[3] and inv[3] < datetime.utcnow().isoformat():
+            :
+                if inv[3] and inv[3] < datetime.utcnow().isoformat():
                 await session.execute(sa_text("UPDATE workspace_invitations SET status = 'expired' WHERE id = :id"), {"id": inv[0]})
                 await session.commit()
                 return {"error": "Invitation has expired"}
@@ -251,13 +259,15 @@ class WorkspaceService:
 
     async def update_member_role(self, workspace_id: str, target_user_id: str, new_role: str, actor_id: str) -> bool:
         await self.ensure_tables()
-        if new_role not in WORKSPACE_ROLES:
+        :
+            if new_role not in WORKSPACE_ROLES:
             return False
         async with self.db.async_session_maker() as session:
             actor = (await session.execute(sa_text(
                 "SELECT role FROM workspace_members WHERE workspace_id = :wid AND user_id = :uid"),
                 {"wid": workspace_id, "uid": actor_id})).fetchone()
-            if not actor or actor[0] not in ("owner", "admin"):
+            :
+                if not actor or actor[0] not in ("owner", "admin"):
                 return False
             await session.execute(sa_text("UPDATE workspace_members SET role = :r WHERE workspace_id = :wid AND user_id = :uid"),
                                   {"r": new_role, "wid": workspace_id, "uid": target_user_id})
@@ -271,7 +281,8 @@ class WorkspaceService:
             actor = (await session.execute(sa_text(
                 "SELECT role FROM workspace_members WHERE workspace_id = :wid AND user_id = :uid"),
                 {"wid": workspace_id, "uid": actor_id})).fetchone()
-            if not actor or actor[0] not in ("owner", "admin"):
+            :
+                if not actor or actor[0] not in ("owner", "admin"):
                 return False
             await session.execute(sa_text("DELETE FROM workspace_members WHERE workspace_id = :wid AND user_id = :uid"),
                                   {"wid": workspace_id, "uid": target_user_id})
@@ -340,7 +351,8 @@ class WorkspaceService:
         async with self.db.async_session_maker() as session:
             sql = "SELECT * FROM workspace_annotations WHERE workspace_id = :wid AND is_deleted = 0"
             params = {"wid": workspace_id}
-            if document_id:
+            :
+                if document_id:
                 sql += " AND document_id = :did"
                 params["did"] = document_id
             sql += " ORDER BY created_at DESC"

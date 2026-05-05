@@ -50,7 +50,8 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
                     AVG(progress) as avg_progress
                 FROM reading_list WHERE user_id = 'default'
             """))).fetchone()
-            if row:
+            :
+                if row:
                 status_data = {
                     "total": row[0] or 0,
                     "read": row[1] or 0,
@@ -73,22 +74,26 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
                 author_counts[a] += 1
         author_data = sorted([{"author": a, "count": c} for a, c in author_counts.items()],
                              key=lambda x: -x["count"])[:20]
-    except Exception: pass
+    except Exception:
+        pass
 
     # 4. Year Distribution
     year_data = []
     try:
         year_counts = defaultdict(int)
         for d in (docs or []):
-            if d.year:
+            :
+                if d.year:
                 year_counts[d.year] += 1
         year_data = [{"year": y, "count": c} for y, c in sorted(year_counts.items())]
-    except Exception: pass
+    except Exception:
+        pass
 
     # 5. Streak Calculation
     streak_data = {"current_streak": 0, "longest_streak": 0, "streak_days": []}
     try:
-        if volume_data.get("daily_breakdown"):
+        :
+            if volume_data.get("daily_breakdown"):
             sorted_days = sorted(set(r["date"] for r in volume_data["daily_breakdown"]))
             streak_data["streak_days"] = sorted_days[-30:]
             # Calculate current streak
@@ -101,18 +106,22 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
             # Check last 365 days
             for i in range(365):
                 day = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
-                if day in all_dates:
+                :
+                    if day in all_dates:
                     temp_streak += 1
-                    if temp_streak > longest:
+                    :
+                        if temp_streak > longest:
                         longest = temp_streak
                 else:
-                    if i == 0:  # Today hasn't happened yet
+                    :
+                        if i == 0:
                         temp_streak = 0
                         continue
                     break
             current = temp_streak
             streak_data = {"current_streak": current, "longest_streak": max(current, longest), "streak_days": sorted_days[-30:]}
-    except Exception: pass
+    except Exception:
+        pass
 
     # 6. Reading Pace
     pace_data = {"papers_per_week": 0, "pages_per_week": 0, "minutes_per_week": 0}
@@ -123,7 +132,8 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
             "pages_per_week": round(volume_data.get("total_pages", 0) / max(weeks, 1), 1),
             "minutes_per_week": round(volume_data.get("total_minutes", 0) / max(weeks, 1), 1),
         }
-    except Exception: pass
+    except Exception:
+        pass
 
     # 7. Active Hours (most productive reading times)
     hour_data = defaultdict(int)

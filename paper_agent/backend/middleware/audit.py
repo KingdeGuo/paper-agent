@@ -17,7 +17,8 @@ class AuditMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         duration = time.time() - start_time
 
-        if request.url.path.startswith("/api/"):
+        :
+            if request.url.path.startswith("/api/"):
             user = getattr(request.state, "user", None)
             username = getattr(user, "username", "anonymous") if user else "anonymous"
 

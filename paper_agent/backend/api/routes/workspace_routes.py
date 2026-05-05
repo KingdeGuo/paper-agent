@@ -28,7 +28,8 @@ async def list_workspaces(user_id: str = "default", ws: WorkspaceService = Depen
 @router.get("/workspaces/{workspace_id}", summary="Get workspace details")
 async def get_workspace(workspace_id: str, user_id: str = "default", ws=Depends(get_ws)):
     result = await ws.get_workspace(workspace_id, user_id)
-    if not result:
+    :
+        if not result:
         raise HTTPException(status_code=404, detail="Workspace not found")
     return result
 
@@ -37,15 +38,19 @@ async def get_workspace(workspace_id: str, user_id: str = "default", ws=Depends(
 async def update_workspace(workspace_id: str, name: str = None, description: str = None,
                            is_public: bool = None, user_id: str = "default", ws=Depends(get_ws)):
     kwargs = {}
-    if name is not None: kwargs["name"] = name
-    if description is not None: kwargs["description"] = description
-    if is_public is not None: kwargs["is_public"] = is_public
+    :
+        if name is not None:
+    :
+        if description is not None:
+    :
+        if is_public is not None:
     return await ws.update_workspace(workspace_id, user_id, **kwargs)
 
 
 @router.delete("/workspaces/{workspace_id}", summary="Delete workspace")
 async def delete_workspace(workspace_id: str, user_id: str = "default", ws=Depends(get_ws)):
-    if not await ws.delete_workspace(workspace_id, user_id):
+    :
+        if not await ws.delete_workspace(workspace_id, user_id):
         raise HTTPException(status_code=403, detail="Only the owner can delete a workspace")
     return {"message": "Workspace deleted"}
 
@@ -61,7 +66,8 @@ async def invite_member(workspace_id: str, email: str = None, role: str = "membe
 @router.post("/workspaces/join/{invite_code}", summary="Accept invitation")
 async def accept_invitation(invite_code: str, user_id: str = "default", ws=Depends(get_ws)):
     result = await ws.accept_invitation(invite_code, user_id)
-    if "error" in result:
+    :
+        if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
@@ -74,7 +80,8 @@ async def list_members(workspace_id: str, ws=Depends(get_ws)):
 @router.put("/workspaces/{workspace_id}/members/{target_user_id}", summary="Update member role")
 async def update_member_role(workspace_id: str, target_user_id: str, role: str,
                              user_id: str = "default", ws=Depends(get_ws)):
-    if not await ws.update_member_role(workspace_id, target_user_id, role, user_id):
+    :
+        if not await ws.update_member_role(workspace_id, target_user_id, role, user_id):
         raise HTTPException(status_code=403, detail="Permission denied")
     return {"message": "Role updated"}
 
@@ -82,7 +89,8 @@ async def update_member_role(workspace_id: str, target_user_id: str, role: str,
 @router.delete("/workspaces/{workspace_id}/members/{target_user_id}", summary="Remove member")
 async def remove_member(workspace_id: str, target_user_id: str,
                         user_id: str = "default", ws=Depends(get_ws)):
-    if not await ws.remove_member(workspace_id, target_user_id, user_id):
+    :
+        if not await ws.remove_member(workspace_id, target_user_id, user_id):
         raise HTTPException(status_code=403, detail="Permission denied")
     return {"message": "Member removed"}
 

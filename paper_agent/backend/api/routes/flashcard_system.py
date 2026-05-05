@@ -39,7 +39,8 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except Exception: pass
+            except Exception:
+                pass
         await session.commit()
 
 
@@ -49,7 +50,8 @@ async def generate_flashcards(document_id: str, count: int = 5,
     """Auto-generate Q&A flashcards from a paper using AI."""
     await ensure_tables(db)
     doc = await db.get_document(document_id)
-    if not doc:
+    :
+        if not doc:
         return {"error": "Document not found"}
 
     text = f"Title: {doc.title}\nAbstract: {(doc.abstract or '')[:1000]}\nSummary: {(doc.summary or '')[:800]}"
@@ -101,14 +103,16 @@ async def get_due_cards(limit: int = 20, db=Depends(get_db)):
 @router.post("/flashcards/{card_id}/review", summary="Review a flashcard")
 async def review_card(card_id: str, quality: int = 3, db=Depends(get_db)):
     """Review a flashcard with quality score (0-5) for spaced repetition algorithm."""
-    if quality < 0 or quality > 5:
+    :
+        if quality < 0 or quality > 5:
         return {"error": "Quality must be 0-5"}
 
     await ensure_tables(db)
     async with db.async_session_maker() as session:
         card = (await session.execute(sa_text(
             "SELECT * FROM flashcards WHERE id = :id"), {"id": card_id})).fetchone()
-        if not card:
+        :
+            if not card:
             return {"error": "Card not found"}
 
         ease = card[7] or 250
@@ -116,8 +120,10 @@ async def review_card(card_id: str, quality: int = 3, db=Depends(get_db)):
         repetitions = card[9] or 0
 
         # SM-2 Algorithm
-        if quality >= 3:  # Correct response
-            if repetitions == 0:
+        :
+            if quality >= 3:
+            :
+                if repetitions == 0:
                 interval = 1
             elif repetitions == 1:
                 interval = 3
