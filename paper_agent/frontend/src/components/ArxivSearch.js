@@ -84,7 +84,7 @@ const ArxivSearch = ({ onImport }) => {
   const formatAuthors = (authors) => {
     if (!authors || authors.length === 0) return 'Unknown';
     if (authors.length <= 3) return authors.join(', ');
-    return `${authors.slice(0, 3).join(', '}...`;
+    return `${authors.slice(0, 3).join(', ')}...`;
   };
 
   return (

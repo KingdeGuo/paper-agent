@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, CssBaseline } from '@mui/material';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n/i18n';
 

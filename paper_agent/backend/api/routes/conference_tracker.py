@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 
 from backend.services.registry import get_db
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)

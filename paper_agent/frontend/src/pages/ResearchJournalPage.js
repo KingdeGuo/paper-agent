@@ -106,7 +106,7 @@ const ResearchJournalPage = () => {
                     {e.mood && <Chip label={e.mood} size="small" variant="outlined" />}
                   </Stack>
                 </Box>
-                <Typography variant="body2" color="text.secondary">{(e.content || '')[:200]}</Typography>
+                <Typography variant="body2" color="text.secondary">{(e.content || '').slice(0, 200)}</Typography>
               </CardContent>
             </Card>
           ))}

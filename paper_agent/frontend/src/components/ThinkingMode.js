@@ -9,7 +9,8 @@ import {
   Chip,
   Divider,
   Button,
-  TextField
+  TextField,
+  Paper
 } from '@mui/material';
 import { summaryAPI } from '../services/api';
 import ThinkingProgress from './ThinkingProgress';

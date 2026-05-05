@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Paper, Card, CardContent, 
   Button, IconButton, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, List, ListItem, ListItemText,
+  DialogContent, DialogActions, List, ListItem, ListItemText, ListItemIcon,
   Divider, Chip, Tab, Tabs
 } from '@mui/material';
 import { 
@@ -72,6 +72,7 @@ const Notebooks = () => {
       console.error('AI Synthesis failed:', err);
     }
   };
+  const handleCreateNotebook = async () => {
     try {
       await api.post('/notebooks', newNotebook);
       setOpenDialog(false);

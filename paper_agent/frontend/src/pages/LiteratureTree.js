@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, TreeView, TreeItem, Chip, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert, Stack, IconButton } from '@mui/material';
+import { Box, Typography, Paper, Chip, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert, Stack, IconButton, Collapse, List, ListItemButton, ListItemText } from '@mui/material';
 import { ChevronRight, ExpandMore, CreateNewFolder, AutoAwesome as AIIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -50,17 +50,35 @@ const LiteratureTree = () => {
     setSuggestDialog(false); fetchTree();
   };
 
-  const renderTree = (nodes) => nodes.map((n) => (
-    <TreeItem key={n.id} nodeId={n.id} label={
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <span>{n.icon || '📁'}</span>
-        <Typography variant="body2">{n.name}</Typography>
-        <Chip label={n.paper_count || 0} size="small" variant="outlined" sx={{ ml: 'auto' }} />
-      </Box>
-    } onClick={() => handleNodeClick(n.id)}>
-      {n.children?.length ? renderTree(n.children) : null}
-    </TreeItem>
-  ));
+  const TreeNode = ({ node }) => {
+    const [open, setOpen] = useState(false);
+    const hasChildren = node.children?.length > 0;
+    return (
+      <>
+        <ListItemButton onClick={() => { handleNodeClick(node.id); if (hasChildren) setOpen(!open); }} sx={{ pl: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+            {hasChildren ? (open ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />) : <Box sx={{ width: 24 }} />}
+            <span>{node.icon || '📁'}</span>
+            <ListItemText primary={node.name} primaryTypographyProps={{ variant: 'body2' }} />
+            <Chip label={node.paper_count || 0} size="small" variant="outlined" />
+          </Box>
+        </ListItemButton>
+        {hasChildren && (
+          <Collapse in={open}>
+            <List disablePadding>
+              {node.children.map((child) => <TreeNode key={child.id} node={child} />)}
+            </List>
+          </Collapse>
+        )}
+      </>
+    );
+  };
+
+  const renderTree = (nodes) => (
+    <List disablePadding>
+      {nodes.map((n) => <TreeNode key={n.id} node={n} />)}
+    </List>
+  );
 
   return (
     <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 160px)' }}>
@@ -79,9 +97,7 @@ const LiteratureTree = () => {
             <Button size="small" onClick={handleSuggestTaxonomy}>AI Suggest</Button>
           </Box>
         ) : (
-          <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}>
-            {renderTree(tree)}
-          </TreeView>
+          renderTree(tree)
         )}
       </Paper>
 

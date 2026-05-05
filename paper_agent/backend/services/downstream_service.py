@@ -92,11 +92,12 @@ class DownstreamService:
         if not llm:
             return {"error": "LLM not available"}
 
+        paper_context_str = f"Paper Context:\n{context[:1500]}" if context else ""
         try:
             resp = await llm.chat_completion(
                 messages=[{"role": "user", "content":
                     f"Cross-validate these data claims for consistency and accuracy:\n\nClaims:\n{data_claims[:2000]}\n\n"
-                    f"{'Paper Context:\n' + context[:1500] if context else ''}\n\n"
+                    f"{paper_context_str}\n\n"
                     f"Check: 1) Internal consistency 2) Statistical plausibility "
                     f"3) Order-of-magnitude correctness 4) Unit consistency 5) Citation accuracy. "
                     f"Flag any numbers that seem off."}],
@@ -231,13 +232,14 @@ class DownstreamService:
             "concise": "Keep responses brief but complete",
         }
         tone_guide = tone_guides.get(tone, tone_guides["professional"])
+        paper_summary_str = f"Paper Summary:\n{paper_summary[:1000]}" if paper_summary else ""
 
         try:
             resp = await llm.chat_completion(
                 messages=[{"role": "user", "content":
                     f"Draft a point-by-point response to these reviewer comments:\n\n"
                     f"Reviewer Comments:\n{reviewer_comments[:3000]}\n\n"
-                    f"{'Paper Summary:\n' + paper_summary[:1000] if paper_summary else ''}\n\n"
+                    f"{paper_summary_str}\n\n"
                     f"Style: {tone_guide}\n\n"
                     f"For each comment, provide:\n1. The reviewer's comment (quoted)\n2. Your response\n"
                     f"3. What was changed in the manuscript\n4. Page/line references"}],

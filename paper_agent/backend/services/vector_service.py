@@ -150,8 +150,9 @@ class VectorService:
             logger.warning("Vector DB not available, skipping search")
             return []
 
+        query_embedding = self.model.encode([query], show_progress_bar=False)[0]
         results = self.collection.query(
-            query_embeddings=query_embedding.tolist(),
+            query_embeddings=[query_embedding.tolist()],
             n_results=min(limit, 100),
             where=filters,
             include=["documents", "metadatas", "distances"],
