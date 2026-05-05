@@ -1,12 +1,10 @@
 """Complete workspace team collaboration API."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
 
 from backend.services.registry import get_db
 from backend.services.workspace_service import WorkspaceService
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

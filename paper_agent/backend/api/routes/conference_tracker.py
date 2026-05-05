@@ -1,15 +1,12 @@
 """Conference Tracker — track CFP deadlines, conferences, and submissions."""
 
-import uuid
-import json
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -58,7 +55,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except: pass
+            except Exception: pass
         await session.commit()
 
 
@@ -107,7 +104,7 @@ async def list_tracked(db=Depends(get_db)):
                 try:
                     dd = datetime.strptime(deadline[:10], "%Y-%m-%d")
                     days_until = (dd - now).days
-                except: pass
+                except Exception: pass
 
             urgency = "normal"
             if days_until is not None:

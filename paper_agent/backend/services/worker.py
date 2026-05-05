@@ -7,22 +7,20 @@ Runs as a separate process/container to handle:
 - Embedding computation
 """
 
-import os
 import asyncio
 import logging
+import os
 import signal
-from typing import Optional
 
-from fastapi import FastAPI
 import uvicorn
-
-from backend.config.settings import settings
 from backend.config.cluster_settings import cluster_settings
-from backend.services.cluster_database import ClusterDatabaseService, Document
-from backend.services.task_queue import task_queue
-from backend.services.pdf_processor import PDFProcessor
-from backend.services.vector_service import VectorService
+from backend.config.settings import settings
+from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.llm_service import LLMService
+from backend.services.pdf_processor import PDFProcessor
+from backend.services.task_queue import task_queue
+from backend.services.vector_service import VectorService
+from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
 

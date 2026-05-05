@@ -3,13 +3,14 @@ API routes for Drafting and Research Mentoring.
 """
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Body
-from backend.services.cluster_database import ClusterDatabaseService
+from typing import List
+
 from backend.api.routes.users import get_current_user, get_db
 from backend.models.user import UserResponse
+from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.drafting_service import DraftingService
 from backend.services.llm_service import LLMService
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ async def grounded_chat(
                 "title": doc.title,
                 "snippets": f"Abstract: {doc.abstract}\nSummary: {doc.summary}"
             })
-    
+
     try:
         result = await llm_service.chat_with_grounding(
             messages=[{"role": "user", "content": question}],

@@ -12,15 +12,13 @@ Supports:
 - Proactive research monitoring (cron-style)
 """
 
-import json
 import logging
-import httpx
-from typing import Optional, Dict, Any, List
 from enum import Enum
-from datetime import datetime
+from typing import Any, Dict, Optional
 
+import httpx
+from backend.services.graphrag_service import GraphRAGConfig, GraphRAGEngine
 from backend.services.registry import get_db, get_llm_service, get_vector_service
-from backend.services.graphrag_service import GraphRAGEngine, GraphRAGConfig
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +52,7 @@ class ResearchBot:
                               user_id: str = "default") -> Dict[str, Any]:
         """
         Handle a natural language research query from any platform.
-        
+
         Returns:
             {"reply": "...", "actions": [...], "type": "text|markdown|action"}
         """
@@ -118,7 +116,7 @@ class ResearchBot:
                 if row:
                     reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0,
                                      "reading": row[2] or 0, "read": row[3] or 0}
-        except: pass
+        except Exception: pass
 
         reply = (
             f"📊 *Library Statistics*\n\n"
@@ -150,7 +148,7 @@ class ResearchBot:
                 rows = (await session.execute(sa_text(
                     "SELECT document_id FROM reading_list WHERE user_id = 'default' AND status IN ('read', 'reading')"))).fetchall()
                 reading_list_ids = {r[0] for r in rows}
-        except: pass
+        except Exception: pass
 
         unread = [d for d in docs if d.id not in reading_list_ids]
         if not unread:

@@ -1,15 +1,12 @@
 """Multi-Modal Support — extract and index figures, tables, and images from papers."""
 
-import logging
 import json
+import logging
 import re
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text as sa_text
+from typing import List
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.llm_service import LLMService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -2,11 +2,9 @@
 
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends
 
-from backend.services.research_bot import research_bot, BotPlatform
-from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.research_bot import BotPlatform, research_bot
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

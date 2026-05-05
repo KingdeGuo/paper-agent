@@ -1,6 +1,5 @@
 """Alembic migrations environment."""
 
-import os
 import sys
 from pathlib import Path
 
@@ -8,13 +7,10 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
 
+from alembic import context
 from backend.services.cluster_database import Base
-from backend.models.user import User
-from backend.models.notebook import Notebook, NotebookEntry, ZoteroCredential, ResearchThread
-from backend.models.annotation import Annotation, Note
+from sqlalchemy import engine_from_config, pool
 
 config = context.config
 if config.config_file_name is not None:

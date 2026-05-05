@@ -1,15 +1,13 @@
 """Literature Matrix — cross-paper comparison with AI-extracted dimensions."""
 
-import uuid
 import json
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text as sa_text
+import uuid
+from typing import List
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.llm_service import LLMService
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

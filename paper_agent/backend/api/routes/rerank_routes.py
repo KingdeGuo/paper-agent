@@ -1,11 +1,10 @@
 """Re-ranking pipeline API — two-stage search refinement."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
 
 from backend.services.registry import get_db, get_vector_service
-from backend.services.reranking_service import RerankingPipeline, HybridSearchEngine
+from backend.services.reranking_service import RerankingPipeline
+from fastapi import APIRouter, Depends, Query
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -1,15 +1,12 @@
 """Unified Notification Center — aggregate all alerts across the system."""
 
-import uuid
-import json
 import logging
+import uuid
 from datetime import datetime
-from typing import Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -92,7 +89,8 @@ async def scan_for_notifications(db=Depends(get_db)):
     # 1. Check conference deadlines
     try:
         async with db.async_session_maker() as session:
-            from datetime import datetime as dt, timedelta
+            from datetime import datetime as dt
+            from datetime import timedelta
             now = dt.utcnow().isoformat()
             upcoming = (await session.execute(sa_text(
                 "SELECT id, venue_name, submission_deadline FROM conference_trackers "
@@ -107,7 +105,7 @@ async def scan_for_notifications(db=Depends(get_db)):
                     {"id": nid, "t": f"Deadline approaching: {u[1]}",
                      "m": f"Submission deadline for {u[1]} is in less than 7 days.", "ri": u[0]})
                 created += 1
-    except: pass
+    except Exception: pass
 
     # 2. Check reading list
     try:
@@ -121,7 +119,7 @@ async def scan_for_notifications(db=Depends(get_db)):
                     "VALUES (:id, 'default', 'Reading queue growing', :m, 'warning', 'reading')"),
                     {"id": nid, "m": f"You have {to_read_count} papers in your reading queue."})
                 created += 1
-    except: pass
+    except Exception: pass
 
     # 3. Check flashcards due
     try:
@@ -136,7 +134,7 @@ async def scan_for_notifications(db=Depends(get_db)):
                     "VALUES (:id, 'default', 'Flashcards due for review', :m, 'info', 'flashcards')"),
                     {"id": nid, "m": f"You have {due} flashcards to review."})
                 created += 1
-    except: pass
+    except Exception: pass
 
     await session.commit()
     return {"scanned": True, "notifications_created": created}

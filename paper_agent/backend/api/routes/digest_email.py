@@ -1,13 +1,11 @@
 """Email digest: scheduled email summaries of library activity."""
 
-import uuid
-import json
 import logging
 from datetime import datetime
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db, get_llm_service
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,7 +21,7 @@ async def generate_email_digest(days: int = 7, db=Depends(get_db), llm_service=D
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
             if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
-    except: pass
+    except Exception: pass
 
     # Get recent activity
     activity_text = ""
@@ -32,7 +30,7 @@ async def generate_email_digest(days: int = 7, db=Depends(get_db), llm_service=D
             recent = (await session.execute(sa_text(
                 "SELECT description, created_at FROM activity_feed ORDER BY created_at DESC LIMIT 5"))).fetchall()
             activity_text = "\n".join([f"  - {r[0]} ({str(r[1])[:10]})" for r in recent])
-    except: pass
+    except Exception: pass
 
     # AI-generated research highlight
     highlight = ""
@@ -46,7 +44,7 @@ async def generate_email_digest(days: int = 7, db=Depends(get_db), llm_service=D
                     system_prompt="You write concise, insightful research highlights.",
                 )
                 highlight = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except: pass
+        except Exception: pass
 
     digest = f"""# Paper Agent Research Digest
 **{datetime.utcnow().strftime('%B %d, %Y')}**

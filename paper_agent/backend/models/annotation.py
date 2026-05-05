@@ -2,16 +2,12 @@
 Annotation and note models for PDF viewer.
 """
 
-from sqlalchemy import (
-    Column, String, Integer, DateTime, JSON, Boolean, Text, ForeignKey
-)
-from sqlalchemy.orm import relationship
 from datetime import datetime
-from typing import Optional, List
-import uuid
+from typing import List, Optional
 
 from backend.services.cluster_database import Base
-
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 # ---------------------------------------------------------------------------
 # Annotation model (text highlights)
@@ -24,25 +20,25 @@ class Annotation(Base):
     id = Column(String(36), primary_key=True)
     document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)
     page_number = Column(Integer, nullable=False)
-    
+
     # Highlight data
     text = Column(Text)  # Highlighted text
     highlight_color = Column(String(20), default="#FFEB3B")  # Yellow default
-    
+
     # Position (for rendering)
     position_x = Column(Integer)
     position_y = Column(Integer)
     width = Column(Integer)
     height = Column(Integer)
-    
+
     # Note attached to highlight
     note = Column(Text)
-    
+
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_deleted = Column(Boolean, default=False)
-    
+
     # Relationship
     document = relationship("Document", back_populates="annotations")
 
@@ -58,17 +54,17 @@ class Note(Base):
     id = Column(String(36), primary_key=True)
     document_id = Column(String(36), ForeignKey("documents.id"), nullable=False, index=True)
     page_number = Column(Integer, nullable=False)
-    
+
     # Note content
     content = Column(Text, nullable=False)
     color = Column(String(20), default="#FFF9C4")  # Light yellow
     tags = Column(JSON, default=list)  # ["important", "method", etc.]
-    
+
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_deleted = Column(Boolean, default=False)
-    
+
     # Relationship
     document = relationship("Document", back_populates="notes")
 
@@ -77,7 +73,7 @@ class Note(Base):
 # Pydantic schemas
 # ---------------------------------------------------------------------------
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class AnnotationBase(BaseModel):
@@ -106,7 +102,7 @@ class AnnotationResponse(AnnotationBase):
     document_id: str
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -134,6 +130,6 @@ class NoteResponse(NoteBase):
     document_id: str
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True

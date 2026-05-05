@@ -1,13 +1,11 @@
 """Data Quality Engine — validation, integrity checks, analytics across all data."""
 
-import json
 import logging
 from datetime import datetime
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -66,7 +64,7 @@ async def data_quality_report(db=Depends(get_db)):
             if orphaned > 0: report["issues"].append(f"[Reading List] {orphaned} orphaned entries (document no longer exists)")
             total_checks += 1
             if orphaned == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # 3. Flashcards
     try:
@@ -78,7 +76,7 @@ async def data_quality_report(db=Depends(get_db)):
             if orphaned > 0: report["issues"].append(f"[Flashcards] {orphaned} cards reference deleted documents")
             total_checks += 1
             if orphaned == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # 4. Discussions
     try:
@@ -90,7 +88,7 @@ async def data_quality_report(db=Depends(get_db)):
             if orphaned > 0: report["issues"].append(f"[Discussions] {orphaned} discussions reference deleted documents")
             total_checks += 1
             if orphaned == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # 5. Codex
     try:
@@ -101,7 +99,7 @@ async def data_quality_report(db=Depends(get_db)):
             report["sections"]["codex"] = {"total": total, "orphaned": orphaned}
             total_checks += 1
             if orphaned == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # 6. Duplicates
     try:
@@ -112,7 +110,7 @@ async def data_quality_report(db=Depends(get_db)):
         if dup_count > 0: report["issues"].append(f"[Duplicates] {dup_count} potential duplicate pairs detected")
         total_checks += 1
         if dup_count == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # 7. Missing metadata
     try:
@@ -122,7 +120,7 @@ async def data_quality_report(db=Depends(get_db)):
             report["sections"]["metadata"] = {"missing_doi": no_doi}
             total_checks += 1
             if no_doi == 0: passed_checks += 1
-    except: pass
+    except Exception: pass
 
     # Compute overall score
     report["overall_score"] = round((passed_checks / max(total_checks, 1)) * 100, 1)
@@ -153,7 +151,7 @@ async def auto_clean(db=Depends(get_db)):
                 "DELETE FROM reading_list WHERE document_id IN (SELECT r.document_id FROM reading_list r LEFT JOIN documents d ON r.document_id = d.id WHERE d.id IS NULL)"))
             fixed["orphaned_reading_list"] = result.rowcount
             await session.commit()
-    except: pass
+    except Exception: pass
 
     # 2. Remove orphaned flashcards
     try:
@@ -162,7 +160,7 @@ async def auto_clean(db=Depends(get_db)):
                 "DELETE FROM flashcards WHERE document_id IN (SELECT f.document_id FROM flashcards f LEFT JOIN documents d ON f.document_id = d.id WHERE d.id IS NULL)"))
             fixed["orphaned_flashcards"] = result.rowcount
             await session.commit()
-    except: pass
+    except Exception: pass
 
     # 3. Remove orphaned discussions
     try:
@@ -171,7 +169,7 @@ async def auto_clean(db=Depends(get_db)):
                 "DELETE FROM paper_discussions WHERE document_id IN (SELECT pd.document_id FROM paper_discussions pd LEFT JOIN documents d ON pd.document_id = d.id WHERE d.id IS NULL)"))
             fixed["orphaned_discussions"] = result.rowcount
             await session.commit()
-    except: pass
+    except Exception: pass
 
     # 4. Remove orphaned codex entries
     try:
@@ -180,7 +178,7 @@ async def auto_clean(db=Depends(get_db)):
                 "DELETE FROM codex_entries WHERE source_document_id IN (SELECT ce.source_document_id FROM codex_entries ce LEFT JOIN documents d ON ce.source_document_id = d.id WHERE d.id IS NULL AND ce.source_document_id IS NOT NULL)"))
             fixed["orphaned_codex"] = result.rowcount
             await session.commit()
-    except: pass
+    except Exception: pass
 
     # 5. Auto-enhance metadata for papers missing key fields
     try:
@@ -191,7 +189,7 @@ async def auto_clean(db=Depends(get_db)):
                 try:
                     await enhance_metadata(doc.id, db=db)
                     fixed["metadata_enhanced"] += 1
-                except: pass
-    except: pass
+                except Exception: pass
+    except Exception: pass
 
     return {"fixed": fixed, "total_fixed": sum(fixed.values())}

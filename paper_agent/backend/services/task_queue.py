@@ -4,11 +4,11 @@ Distributed task queue for cluster deployment.
 Supports Redis and RabbitMQ backends for document processing tasks.
 """
 
-import logging
 import json
+import logging
 import uuid
-from typing import Optional, Dict, Any, Callable
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

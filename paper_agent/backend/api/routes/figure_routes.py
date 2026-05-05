@@ -1,16 +1,15 @@
 """Figure & Table API — extract, browse, search, and compare visual elements."""
 
-import os
 import json
 import logging
-from typing import List, Optional
+import os
+from typing import List
+
+from backend.services.figure_service import figure_extractor
+from backend.services.registry import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy import text as sa_text
-
-from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.figure_service import figure_extractor, FIGURES_DIR
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

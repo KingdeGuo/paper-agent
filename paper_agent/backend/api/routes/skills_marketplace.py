@@ -5,16 +5,15 @@ Inspired by OpenClaw's ClawHub (clawhub.ai) and skills system.
 Skills are reusable AI-powered research workflows that users can share.
 """
 
-import uuid
 import json
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text as sa_text
+from typing import List
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -59,7 +58,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except: pass
+            except Exception: pass
         await session.commit()
 
 

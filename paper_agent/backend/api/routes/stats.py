@@ -1,16 +1,13 @@
 """Consolidated dashboard stats and insights API."""
 
-import json
 import logging
-from datetime import datetime, timedelta
-from typing import Optional
+
+from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.llm_service import LLMService
+from backend.services.registry import get_db, get_llm_service, get_vector_service
+from backend.services.vector_service import VectorService
 from fastapi import APIRouter, Depends
 from sqlalchemy import text as sa_text
-
-from backend.services.registry import get_db, get_vector_service, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
-from backend.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -116,7 +113,6 @@ async def _get_recent_activity(db):
 
 async def _get_recent_docs(db):
     docs = await db.get_documents(limit=5, user_id="default") if hasattr(db, 'get_documents') else await db.get_all_documents(limit=5)
-    from datetime import datetime as dt
     return [{
         "id": d.id, "title": d.title or d.filename, "authors": d.authors or [],
         "year": d.year, "processed": d.processed,

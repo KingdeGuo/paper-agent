@@ -8,17 +8,10 @@ citation links, author connections, and semantic relationships.
 Reference: Microsoft GraphRAG (github.com/microsoft/graphrag)
 """
 
-import json
 import logging
-import asyncio
 from collections import defaultdict
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
-
-from backend.services.registry import get_db, get_vector_service, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
-from backend.services.llm_service import LLMService
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +38,7 @@ class GraphRAGEngine:
     async def retrieve(self, query: str, doc_ids: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Retrieve context using GraphRAG: vector search + graph traversal + LLM synthesis.
-        
+
         Returns:
             {
                 "answer": "...",

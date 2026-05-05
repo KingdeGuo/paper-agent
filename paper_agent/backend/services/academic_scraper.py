@@ -6,13 +6,12 @@ Uses LLM to extract structured paper metadata from any academic website.
 Falls back to regex + heuristics for common sites (arXiv, PubMed, etc.).
 """
 
-import re
 import json
 import logging
-import httpx
-from typing import Dict, Optional, List, Any
-from datetime import datetime
+import re
+from typing import Any, Dict, List, Optional
 
+import httpx
 from backend.services.registry import get_llm_service
 
 logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class AcademicScraper:
     async def extract(self, url: str, use_llm: bool = True) -> Dict[str, Any]:
         """
         Extract paper metadata from a URL.
-        
+
         Returns:
             {
                 "title": "...",

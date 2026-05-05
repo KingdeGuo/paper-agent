@@ -6,13 +6,10 @@ Enables DSPy-style programming of LLM pipelines within Paper Agent.
 """
 
 import logging
-import json
-import re
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends
+from typing import Any, Dict, List
 
-from backend.services.registry import get_db, get_llm_service, get_vector_service
-from backend.services.llm_service import LLMService
+from backend.services.registry import get_llm_service
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

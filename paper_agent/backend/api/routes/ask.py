@@ -2,14 +2,14 @@
 
 import logging
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
 
-from backend.services.registry import get_db, get_vector_service, get_llm_service
 from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
 from backend.services.llm_service import LLMService
 from backend.services.memory_service import research_memory
+from backend.services.registry import get_db, get_llm_service, get_vector_service
+from backend.services.vector_service import VectorService
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

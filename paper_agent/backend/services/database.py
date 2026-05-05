@@ -1,14 +1,13 @@
-import uuid
 import logging
 import os
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, select, func
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import sessionmaker, Session
+import uuid
+from typing import Dict, List, Optional
 
 from backend.config.settings import settings
 from backend.models.document import Document, DocumentCreate, DocumentResponse, DocumentUpdate
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
 

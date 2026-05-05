@@ -2,11 +2,10 @@
 
 import logging
 from typing import List
-from fastapi import APIRouter, HTTPException, Depends, Query
 
-from backend.services.academic_scraper import scraper, AcademicScraper
+from backend.services.academic_scraper import scraper
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

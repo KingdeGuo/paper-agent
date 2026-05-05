@@ -1,13 +1,10 @@
 """Multi-Source Search — search arXiv, PubMed, CrossRef, and local library simultaneously."""
 
 import logging
-import httpx
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
 
+import httpx
 from backend.services.registry import get_db, get_vector_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
+from fastapi import APIRouter, Depends, Query
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

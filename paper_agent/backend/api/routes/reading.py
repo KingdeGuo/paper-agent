@@ -1,14 +1,13 @@
 """Reading list and tracking API routes."""
 
-import uuid
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Optional
 
-from backend.services.registry import get_db
 from backend.services.cluster_database import ClusterDatabaseService
-from sqlalchemy import Column, String, Integer, DateTime, Float, Boolean, Text, select
+from backend.services.registry import get_db
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -25,8 +24,7 @@ async def ensure_reading_table(db: ClusterDatabaseService):
         )
         exists = result.scalar()
         if not exists:
-            from sqlalchemy import Table, MetaData
-            from sqlalchemy import Column, String, Integer, DateTime, Float, Text
+            from sqlalchemy import MetaData
 
             metadata = MetaData()
 

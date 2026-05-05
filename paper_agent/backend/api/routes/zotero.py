@@ -3,13 +3,13 @@ Zotero integration API routes.
 """
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Body
-from backend.services.cluster_database import ClusterDatabaseService
+
 from backend.api.routes.users import get_current_user, get_db
-from backend.models.user import UserResponse
-from backend.services.zotero_service import zotero_service
 from backend.models.notebook import ZoteroConnectRequest
+from backend.models.user import UserResponse
+from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.zotero_service import zotero_service
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ async def connect_zotero(
                 select(ZoteroCredential).where(ZoteroCredential.user_id == current_user.id)
             )
             entry = result.scalar_one_or_none()
-            
+
             if entry:
                 entry.zotero_user_id = creds.zotero_user_id
                 entry.api_key = creds.api_key
@@ -43,7 +43,7 @@ async def connect_zotero(
                     api_key=creds.api_key
                 )
                 session.add(entry)
-            
+
             await session.commit()
             return {"message": "Zotero connected successfully"}
     except Exception as e:
@@ -63,10 +63,10 @@ async def list_collections(
             select(ZoteroCredential).where(ZoteroCredential.user_id == current_user.id)
         )
         creds = result.scalar_one_or_none()
-        
+
         if not creds or not creds.is_active:
             raise HTTPException(status_code=400, detail="Zotero not connected")
-        
+
         collections = await zotero_service.get_collections(creds.zotero_user_id, creds.api_key)
         return collections
 
@@ -84,15 +84,15 @@ async def import_zotero_item(
             select(ZoteroCredential).where(ZoteroCredential.user_id == current_user.id)
         )
         creds = result.scalar_one_or_none()
-        
+
         if not creds or not creds.is_active:
             raise HTTPException(status_code=400, detail="Zotero not connected")
-        
+
         doc = await zotero_service.import_item(
             current_user.id, creds.zotero_user_id, creds.api_key, item_key, db
         )
-        
+
         if not doc:
             raise HTTPException(status_code=500, detail="Failed to import item")
-            
+
         return doc

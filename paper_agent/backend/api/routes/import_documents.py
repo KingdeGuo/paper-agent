@@ -1,17 +1,16 @@
 """Batch import API - import from URLs, arXiv IDs, DOIs."""
 
-import os
-import uuid
 import logging
-import httpx
+import os
 from typing import List
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 
-from backend.services.registry import get_db, get_pdf_processor
+import httpx
+from backend.services.arxiv_service import arxiv_service
+from backend.services.citation_service import lookup_doi
 from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.pdf_processor import PDFProcessor
-from backend.services.citation_service import lookup_doi
-from backend.services.arxiv_service import arxiv_service
+from backend.services.registry import get_db, get_pdf_processor
+from fastapi import APIRouter, Depends, File, UploadFile
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

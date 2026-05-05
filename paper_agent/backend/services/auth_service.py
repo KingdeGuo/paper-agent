@@ -4,13 +4,13 @@ Authentication service - enterprise-grade security.
 Uses JWT for tokens and PBKDF2-SHA256 with salt for password hashing.
 """
 
-import os
-import logging
 import hashlib
+import logging
+import os
 import secrets
-import uuid
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from jose import JWTError, jwt
 
 logger = logging.getLogger(__name__)
@@ -55,12 +55,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token."""
     to_encode = data.copy()
-    
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -106,22 +106,22 @@ def verify_api_key(api_key: str, stored_hash: str) -> bool:
 
 class AuthService:
     """Legacy class wrapper - use functions directly."""
-    
+
     def create_access_token(self, data, expires_delta=None):
         return create_access_token(data, expires_delta)
-    
+
     def decode_token(self, token):
         return decode_token(token)
-    
+
     def hash_password(self, password):
         return hash_password(password)
-    
+
     def verify_password(self, plain_password, hashed_password):
         return verify_password(plain_password, hashed_password)
-    
+
     def generate_api_key(self):
         return generate_api_key()
-    
+
     def verify_api_key(self, api_key, stored_hash):
         return verify_api_key(api_key, stored_hash)
 

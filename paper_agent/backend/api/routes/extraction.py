@@ -3,10 +3,9 @@
 import json
 import logging
 import re as regex
-from fastapi import APIRouter, Depends
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -1,15 +1,10 @@
 """AI Research Assistant — agenda, writing feedback, research direction suggestions."""
 
-import json
 import logging
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends
 
 from backend.services.registry import get_db, get_llm_service, get_vector_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.llm_service import LLMService
-from backend.services.vector_service import VectorService
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -49,7 +44,7 @@ async def daily_agenda(db=Depends(get_db), llm_service=Depends(get_llm_service))
                 system_prompt="You are a research productivity assistant. Give concise, actionable advice.",
             )
             ai_suggestion = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except: pass
+        except Exception: pass
 
     agenda = {
         "date": date_str,
@@ -135,7 +130,7 @@ async def research_directions(db=Depends(get_db), llm_service=Depends(get_llm_se
                 system_prompt="You are a research strategist. Be specific about how each direction connects to existing papers in the library.",
             )
             analysis = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except: pass
+        except Exception: pass
 
     return {
         "total_papers_analyzed": len(docs),
@@ -161,7 +156,7 @@ async def weekly_briefing(db=Depends(get_db), llm_service=Depends(get_llm_servic
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
             if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
-    except: pass
+    except Exception: pass
 
     recent_papers = []
     for d in docs[:5]:
@@ -175,7 +170,7 @@ async def weekly_briefing(db=Depends(get_db), llm_service=Depends(get_llm_servic
                 system_prompt="You are a research director writing an executive briefing. Be insightful, not just descriptive.",
             )
             ai_highlight = resp.get("content", "") if isinstance(resp, dict) else str(resp)
-        except: pass
+        except Exception: pass
 
     return {
         "week_ending": datetime.utcnow().strftime("%B %d, %Y"),

@@ -3,12 +3,14 @@
 import logging
 from typing import Optional
 
-from fastapi import APIRouter
-
 from backend.services.agent_service import (
-    orchestrator, AgentMessage, LiteratureReviewAgent,
-    GapAnalysisAgent, WritingAgent,
+    AgentMessage,
+    GapAnalysisAgent,
+    LiteratureReviewAgent,
+    WritingAgent,
+    orchestrator,
 )
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

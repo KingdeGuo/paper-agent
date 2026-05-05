@@ -1,13 +1,10 @@
 """Citation Chain Explorer — follow citations forward and backward."""
 
-import json
 import logging
-import httpx
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
 
+import httpx
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

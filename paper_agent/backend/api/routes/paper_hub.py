@@ -2,11 +2,10 @@
 
 import json
 import logging
+
+from backend.services.registry import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text as sa_text
-
-from backend.services.registry import get_db, get_vector_service, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -39,7 +38,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 {"did": document_id})).fetchone()
             if row:
                 hub["reading"] = {"status": row[0], "progress": row[1], "current_page": row[2], "total_pages": row[3]}
-    except: pass
+    except Exception: pass
 
     # 2. Discussion count
     try:
@@ -47,7 +46,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
             hub["discussion_count"] = (await session.execute(sa_text(
                 "SELECT COUNT(*) FROM paper_discussions WHERE document_id = :did AND is_deleted = 0"),
                 {"did": document_id})).scalar() or 0
-    except: pass
+    except Exception: pass
 
     # 3. Flashcard count
     try:
@@ -59,7 +58,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 "SELECT COUNT(*) FROM flashcards WHERE document_id = :did AND is_deleted = 0 AND (next_review IS NULL OR next_review <= :now)"),
                 {"did": document_id, "now": __import__('datetime').datetime.utcnow().isoformat()})).scalar() or 0
             hub["flashcard_due"] = due
-    except: pass
+    except Exception: pass
 
     # 4. Codex entries
     try:
@@ -68,7 +67,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 "SELECT id, title, entry_type, importance FROM codex_entries WHERE source_document_id = :did AND is_deleted = 0 ORDER BY importance DESC"),
                 {"did": document_id})).fetchall()
             hub["codex_entries"] = [{"id": c[0], "title": c[1], "type": c[2], "importance": c[3]} for c in codex]
-    except: pass
+    except Exception: pass
 
     # 5. Literature Tree location
     try:
@@ -78,7 +77,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 "JOIN directory_nodes dn ON dp.node_id = dn.id WHERE dp.document_id = :did"),
                 {"did": document_id})).fetchall()
             hub["tree_locations"] = [{"id": t[0], "name": t[1], "icon": t[2], "type": t[3]} for t in tree_nodes]
-    except: pass
+    except Exception: pass
 
     # 6. Annotations count
     try:
@@ -86,7 +85,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
             hub["annotation_count"] = (await session.execute(sa_text(
                 "SELECT COUNT(*) FROM annotations WHERE document_id = :did AND is_deleted = 0"),
                 {"did": document_id})).scalar() or 0
-    except: pass
+    except Exception: pass
 
     # 7. Impact metrics
     meta = doc.doc_metadata or {}
@@ -104,7 +103,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 "SELECT description, created_at FROM workspace_activity WHERE document_id = :did ORDER BY created_at DESC LIMIT 5"),
                 {"did": document_id})).fetchall()
             hub["recent_activity"] = [{"description": a[0], "date": str(a[1])[:10] if a[1] else None} for a in activity]
-    except: pass
+    except Exception: pass
 
     # 9. Library matrix data
     try:
@@ -113,7 +112,7 @@ async def get_paper_hub(document_id: str, db=Depends(get_db)):
                 "SELECT dimensions FROM literature_matrix WHERE document_id = :did AND user_id = 'default'"),
                 {"did": document_id})).fetchone()
             hub["matrix_dimensions"] = json.loads(matrix[0]) if matrix and matrix[0] else {}
-    except: pass
+    except Exception: pass
 
     return hub
 
@@ -138,7 +137,7 @@ async def batch_paper_hub(document_ids: str, db=Depends(get_db)):
                 entry["discussions"] = (await session.execute(sa_text(
                     "SELECT COUNT(*) FROM paper_discussions WHERE document_id = :did AND is_deleted = 0"),
                     {"did": did})).scalar() or 0
-        except: pass
+        except Exception: pass
         results.append(entry)
 
     return {"papers": results, "count": len(results)}

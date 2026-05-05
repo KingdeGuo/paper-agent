@@ -11,15 +11,14 @@ Complete workspace management with:
 - Automated team digests
 """
 
-import uuid
 import json
 import logging
+import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
 
-from sqlalchemy import text as sa_text
 from backend.services.cluster_database import ClusterDatabaseService
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 
@@ -298,7 +297,7 @@ class WorkspaceService:
             await session.execute(sa_text(
                 "INSERT INTO workspace_documents (id, workspace_id, document_id, added_by, permission) VALUES (:id, :wid, :did, :ab, :perm)"),
                 {"id": did, "wid": workspace_id, "did": document_id, "ab": added_by, "perm": permission})
-            await self._log_activity(session, workspace_id, added_by, "document_added", f"Added document to workspace",
+            await self._log_activity(session, workspace_id, added_by, "document_added", "Added document to workspace",
                                      document_id=document_id)
             await session.commit()
         return {"id": did, "document_id": document_id, "permission": permission}

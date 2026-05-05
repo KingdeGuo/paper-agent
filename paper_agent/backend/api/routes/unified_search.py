@@ -1,14 +1,10 @@
 """Unified Smart Search — one search bar for everything (papers, discussions, codex, glossary, tags)."""
 
-import json
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db, get_vector_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -36,7 +32,7 @@ async def unified_search(
             local_results = []
             try:
                 local_results = await db.search_documents(query, limit=limit) if db else []
-            except: pass
+            except Exception: pass
 
             papers = []
             seen_ids = set()

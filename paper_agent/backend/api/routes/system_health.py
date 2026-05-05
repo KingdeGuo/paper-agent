@@ -1,12 +1,12 @@
 """System Health Dashboard — status of all subsystems at a glance."""
 
 import logging
-import httpx
 from datetime import datetime
+
+import httpx
+from backend.services.registry import get_db, get_llm_service, get_vector_service
 from fastapi import APIRouter, Depends
 from sqlalchemy import text as sa_text
-
-from backend.services.registry import get_db, get_vector_service, get_llm_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -94,7 +94,7 @@ async def system_health(db=Depends(get_db), vector_service=Depends(get_vector_se
                 "flashcards": flashcard_count, "discussions": discussion_count,
                 "codex_entries": codex_count, "literature_tree_nodes": tree_nodes,
             }
-    except: pass
+    except Exception: pass
 
     # 7. Route count
     from backend.main import app

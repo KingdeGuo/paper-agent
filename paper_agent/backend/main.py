@@ -4,8 +4,8 @@ Paper Agent - 企业级文献管理系统
 """
 import os
 import sys
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root))
 # ── Import compatibility: map 'backend.xxx' → 'paper_agent.backend.xxx' ──
 import importlib.abc
 import importlib.machinery
+
 
 class _BackendCompat(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path, target=None):
@@ -36,22 +37,20 @@ if not any(isinstance(f, _BackendCompat) for f in sys.meta_path):
     sys.meta_path.insert(0, _BackendCompat())
 # ─────────────────────────────────────────────────────────────
 
-from fastapi import FastAPI, HTTPException, Depends, Request
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 import logging
 import time
 
-from backend.middleware.audit import AuditMiddleware
-
 # ── Ensure database models are loaded first ──
 import warnings
+
+import uvicorn
+from backend.middleware.audit import AuditMiddleware
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
 warnings.filterwarnings("ignore", message="This declarative base already contains a class")
 warnings.filterwarnings("ignore", message="Table .* is already defined")
 
-import backend.services.cluster_database as _cd
-import backend.models.user as _um
-import backend.models.notebook as _nm
 
 # 配置日志
 logging.basicConfig(
@@ -66,7 +65,11 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler for infrastructure initialization."""
     logger.info("Starting Paper Agent...")
     try:
-        from paper_agent.backend.services.registry import get_cache, get_object_storage, get_task_queue
+        from paper_agent.backend.services.registry import (
+            get_cache,
+            get_object_storage,
+            get_task_queue,
+        )
         cache = get_cache()
         if cache:
             try:
@@ -156,20 +159,75 @@ app.add_middleware(AuditMiddleware)
 # 导入并注册路由
 try:
     from paper_agent.backend.api.routes import (
-        documents, search, summary, users, knowledge, 
-        review, arxiv, notebooks, discovery, zotero, drafting, 
-        annotations, bibtex, citations, reading, ask, collaboration, 
-        digest, overleaf, stats, search_saved, import_documents, recommendations,
-        alerts, projects, glossary, dedup, collections, tagging, timeline,
-        extraction, digest_email, workspace_routes, integrations, peer_review, research_assistant,
-        literature_matrix, citation_chain, conference_tracker, research_codex, reading_analytics,
-        chat_session, methodology_critic, paper_presentation, research_journal, flashcard_system,
-        literature_tree, scholar_perspectives,
-        notification_center, multi_source_search, metadata_enhance, impact_tracker,
-        paper_hub, unified_search, data_quality, system_health, onboarding,
-        graphrag_routes, agent_routes, rerank_routes, multi_modal, dspy_integration,
-        scraper_routes, skills_marketplace, bot_routes, memory_routes, figure_routes,
-        downstream_routes, core_routes,
+        agent_routes,
+        alerts,
+        annotations,
+        arxiv,
+        ask,
+        bibtex,
+        bot_routes,
+        chat_session,
+        citation_chain,
+        citations,
+        collaboration,
+        collections,
+        conference_tracker,
+        core_routes,
+        data_quality,
+        dedup,
+        digest,
+        digest_email,
+        discovery,
+        documents,
+        downstream_routes,
+        drafting,
+        dspy_integration,
+        extraction,
+        figure_routes,
+        flashcard_system,
+        glossary,
+        graphrag_routes,
+        impact_tracker,
+        import_documents,
+        integrations,
+        knowledge,
+        literature_matrix,
+        literature_tree,
+        memory_routes,
+        metadata_enhance,
+        methodology_critic,
+        multi_modal,
+        multi_source_search,
+        notebooks,
+        notification_center,
+        onboarding,
+        overleaf,
+        paper_hub,
+        paper_presentation,
+        peer_review,
+        projects,
+        reading,
+        reading_analytics,
+        recommendations,
+        rerank_routes,
+        research_assistant,
+        research_codex,
+        research_journal,
+        review,
+        scholar_perspectives,
+        scraper_routes,
+        search,
+        search_saved,
+        skills_marketplace,
+        stats,
+        summary,
+        system_health,
+        tagging,
+        timeline,
+        unified_search,
+        users,
+        workspace_routes,
+        zotero,
     )
     app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
     app.include_router(search.router, prefix="/api/search", tags=["search"])

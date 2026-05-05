@@ -2,9 +2,9 @@
 
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends
 
 from backend.services.memory_service import research_memory
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

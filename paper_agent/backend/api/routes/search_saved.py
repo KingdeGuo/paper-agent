@@ -1,15 +1,13 @@
 """Saved searches and search history API."""
 
-import uuid
 import json
 import logging
-from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy import text as sa_text
+import uuid
 
-from backend.services.registry import get_db
 from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.registry import get_db
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

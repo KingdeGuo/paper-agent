@@ -2,15 +2,13 @@
 Models for Research Notebook and Zotero integration.
 """
 
-from sqlalchemy import (
-    Column, String, Integer, DateTime, JSON, Boolean, Text, ForeignKey
-)
-from datetime import datetime
-from typing import Optional, List, Dict
-import uuid
-
-import sys as _sys
 import logging as _logging
+import sys as _sys
+from datetime import datetime
+from typing import Dict, Optional
+
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
+
 _logger = _logging.getLogger(__name__)
 
 try:

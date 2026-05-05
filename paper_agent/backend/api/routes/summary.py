@@ -2,9 +2,9 @@
 Summary & Q&A routes: generate, stream, and fetch summaries and answers.
 """
 
+import logging
 import os
 import sys
-import logging
 from typing import Optional
 
 # Add project root to path
@@ -12,7 +12,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 try:
@@ -27,21 +27,21 @@ except ImportError:
         DatabaseService = None
 
 try:
-    from paper_agent.backend.services.pdf_processor import PDFProcessor
     from paper_agent.backend.services.llm_service import LLMService
+    from paper_agent.backend.services.pdf_processor import PDFProcessor
 except ImportError:
     try:
-        from backend.services.pdf_processor import PDFProcessor
         from backend.services.llm_service import LLMService
+        from backend.services.pdf_processor import PDFProcessor
     except ImportError:
         PDFProcessor = LLMService = None
 
 # Use service registry to avoid circular imports
 try:
-    from paper_agent.backend.services.registry import get_db, get_pdf_processor, get_llm_service
+    from paper_agent.backend.services.registry import get_db, get_llm_service, get_pdf_processor
 except ImportError:
     try:
-        from backend.services.registry import get_db, get_pdf_processor, get_llm_service
+        from backend.services.registry import get_db, get_llm_service, get_pdf_processor
     except ImportError:
         get_db = get_pdf_processor = get_llm_service = lambda: None
 

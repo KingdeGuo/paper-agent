@@ -3,14 +3,12 @@ Research Notebook API routes.
 """
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import JSONResponse
 
-from backend.services.cluster_database import ClusterDatabaseService
 from backend.api.routes.users import get_current_user, get_db
-from backend.models.user import UserResponse
 from backend.models.notebook import NotebookCreate, NotebookEntryCreate
+from backend.models.user import UserResponse
+from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +58,7 @@ async def add_notebook_entry(
     try:
         # Verify ownership of notebook
         # (Simplified: in production, check if current_user owns entry_data.notebook_id)
-        
+
         entry = await db.create_notebook_entry(entry_data.model_dump())
         return entry
     except Exception as e:

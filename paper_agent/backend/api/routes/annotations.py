@@ -7,19 +7,21 @@ Supports:
 - Bookmark management
 """
 
-import uuid
 import logging
+import uuid
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import JSONResponse
 
+from backend.models.annotation import (
+    AnnotationCreate,
+    AnnotationResponse,
+    AnnotationUpdate,
+    NoteCreate,
+    NoteResponse,
+)
 from backend.services.cluster_database import ClusterDatabaseService, Document
 from backend.services.registry import get_db
-from backend.models.annotation import (
-    AnnotationCreate, AnnotationResponse, AnnotationUpdate,
-    NoteCreate, NoteResponse,
-)
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -34,31 +36,31 @@ async def get_annotations(
 ):
     """
     Get all annotations/highlights for a document.
-    
+
     Optionally filter by page number.
     """
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Annotation
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             query = select(Annotation).where(
                 Annotation.document_id == document_id,
-                Annotation.is_deleted == False,
+                not Annotation.is_deleted,
             )
-            
+
             if page is not None:
                 query = query.where(Annotation.page_number == page)
-            
+
             result = await session.execute(query.order_by(Annotation.page_number, Annotation.created_at))
             annotations = result.scalars().all()
-            
+
             return {
                 "document_id": document_id,
                 "annotations": [AnnotationResponse.model_validate(a).model_dump() for a in annotations],
                 "count": len(annotations),
             }
-            
+
     except Exception as e:
         logger.error(f"Get annotations failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -72,9 +74,9 @@ async def create_annotation(
 ):
     """Create a new text highlight/annotation."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Annotation
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             # Verify document exists
             doc_result = await session.execute(
@@ -82,7 +84,7 @@ async def create_annotation(
             )
             if not doc_result.scalar_one_or_none():
                 raise HTTPException(status_code=404, detail="Document not found")
-            
+
             # Create annotation
             ann_id = str(uuid.uuid4())
             new_annotation = Annotation(
@@ -97,13 +99,13 @@ async def create_annotation(
                 width=annotation.width,
                 height=annotation.height,
             )
-            
+
             session.add(new_annotation)
             await session.commit()
             await session.refresh(new_annotation)
-            
+
             return AnnotationResponse.model_validate(new_annotation).model_dump()
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -119,18 +121,18 @@ async def update_annotation(
 ):
     """Update an annotation (add note, change color, etc.)."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Annotation
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             result = await session.execute(
                 select(Annotation).where(Annotation.id == annotation_id)
             )
             annotation = result.scalar_one_or_none()
-            
+
             if not annotation:
                 raise HTTPException(status_code=404, detail="Annotation not found")
-            
+
             # Update fields
             if update.note is not None:
                 annotation.note = update.note
@@ -138,13 +140,13 @@ async def update_annotation(
                 annotation.highlight_color = update.highlight_color
             if update.is_deleted is not None:
                 annotation.is_deleted = update.is_deleted
-            
+
             annotation.updated_at = datetime.utcnow()
             await session.commit()
             await session.refresh(annotation)
-            
+
             return AnnotationResponse.model_validate(annotation).model_dump()
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -159,24 +161,24 @@ async def delete_annotation(
 ):
     """Soft delete an annotation."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Annotation
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             result = await session.execute(
                 select(Annotation).where(Annotation.id == annotation_id)
             )
             annotation = result.scalar_one_or_none()
-            
+
             if not annotation:
                 raise HTTPException(status_code=404, detail="Annotation not found")
-            
+
             annotation.is_deleted = True
             annotation.updated_at = datetime.utcnow()
             await session.commit()
-            
+
             return {"message": "Annotation deleted"}
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -195,24 +197,24 @@ async def get_notes(
 ):
     """Get all notes for a document."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Note
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             result = await session.execute(
                 select(Note).where(
                     Note.document_id == document_id,
-                    Note.is_deleted == False,
+                    not Note.is_deleted,
                 ).order_by(Note.page_number, Note.created_at)
             )
             notes = result.scalars().all()
-            
+
             return {
                 "document_id": document_id,
                 "notes": [NoteResponse.model_validate(n).model_dump() for n in notes],
                 "count": len(notes),
             }
-            
+
     except Exception as e:
         logger.error(f"Get notes failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -226,9 +228,9 @@ async def create_note(
 ):
     """Create a new note for a document page."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Note
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             # Verify document exists
             doc_result = await session.execute(
@@ -236,7 +238,7 @@ async def create_note(
             )
             if not doc_result.scalar_one_or_none():
                 raise HTTPException(status_code=404, detail="Document not found")
-            
+
             note_id = str(uuid.uuid4())
             new_note = Note(
                 id=note_id,
@@ -246,13 +248,13 @@ async def create_note(
                 color=note.color or "#FFF9C4",
                 tags=note.tags or [],
             )
-            
+
             session.add(new_note)
             await session.commit()
             await session.refresh(new_note)
-            
+
             return NoteResponse.model_validate(new_note).model_dump()
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -269,28 +271,28 @@ async def update_note(
 ):
     """Update a note."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Note
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             result = await session.execute(
                 select(Note).where(Note.id == note_id)
             )
             note = result.scalar_one_or_none()
-            
+
             if not note:
                 raise HTTPException(status_code=404, detail="Note not found")
-            
+
             if content is not None:
                 note.content = content
             if tags is not None:
                 note.tags = tags
-            
+
             note.updated_at = datetime.utcnow()
             await session.commit()
-            
+
             return NoteResponse.model_validate(note).model_dump()
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -305,24 +307,24 @@ async def delete_note(
 ):
     """Soft delete a note."""
     try:
-        from sqlalchemy import select
         from backend.models.annotation import Note
-        
+        from sqlalchemy import select
+
         async with db.async_session_maker() as session:
             result = await session.execute(
                 select(Note).where(Note.id == note_id)
             )
             note = result.scalar_one_or_none()
-            
+
             if not note:
                 raise HTTPException(status_code=404, detail="Note not found")
-            
+
             note.is_deleted = True
             note.updated_at = datetime.utcnow()
             await session.commit()
-            
+
             return {"message": "Note deleted"}
-            
+
     except HTTPException:
         raise
     except Exception as e:

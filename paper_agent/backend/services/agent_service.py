@@ -10,16 +10,14 @@ Supports:
 Reference: Google A2A (Agent-to-Agent) protocol concept
 """
 
-import json
-import uuid
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Callable
 from enum import Enum
+from typing import Dict, List, Optional
 
-from backend.services.registry import get_db, get_vector_service, get_llm_service
-from backend.services.llm_service import LLMService
-from backend.services.graphrag_service import GraphRAGEngine, GraphRAGConfig
+from backend.services.graphrag_service import GraphRAGConfig, GraphRAGEngine
+from backend.services.registry import get_db, get_llm_service, get_vector_service
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +346,7 @@ class AgentOrchestrator:
 
 # Global orchestrator (singleton — prevents duplicate registration on reimport)
 import sys as _sys
+
 _orch_module_key = 'paper_agent.backend.services.agent_service.orchestrator'
 
 if _orch_module_key not in _sys.modules:

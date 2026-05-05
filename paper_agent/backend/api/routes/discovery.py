@@ -4,11 +4,12 @@ Research Discovery & Knowledge Distillery API routes.
 
 import logging
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Body
-from backend.services.cluster_database import ClusterDatabaseService
+
 from backend.api.routes.users import get_current_user, get_db
 from backend.models.user import UserResponse
 from backend.services.analyzer import SemanticDistillery
+from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 

@@ -1,14 +1,11 @@
 """AI-powered tag suggestions and smart tagging."""
 
-import uuid
 import json
 import logging
 from typing import List
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

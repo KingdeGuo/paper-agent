@@ -4,12 +4,11 @@ import json
 import logging
 import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
 
-from backend.services.registry import get_db, get_llm_service
 from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.llm_service import LLMService
+from backend.services.registry import get_db, get_llm_service
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)

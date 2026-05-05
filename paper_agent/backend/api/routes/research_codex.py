@@ -1,15 +1,14 @@
 """Research Codex — personal knowledge base built from paper annotations and insights."""
 
-import uuid
 import json
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
+from typing import List
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -40,7 +39,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except: pass
+            except Exception: pass
         await session.commit()
 
 

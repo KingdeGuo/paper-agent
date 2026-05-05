@@ -1,13 +1,11 @@
 """Collaboration API routes - groups, sharing, comments, activity."""
 
-import uuid
 import logging
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends
+import uuid
 
-from backend.services.registry import get_db
 from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.registry import get_db
+from fastapi import APIRouter
 from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
@@ -116,7 +114,7 @@ async def add_comment(document_id: str, content: str, parent_id: str = None, pag
         ), {"id": cid, "did": document_id, "content": content, "pid": parent_id, "page": page_number})
         await session.commit()
 
-    await log_activity("default", "comment", f"Commented on document", document_id)
+    await log_activity("default", "comment", "Commented on document", document_id)
     return {"id": cid, "message": "Comment added"}
 
 
@@ -132,7 +130,7 @@ async def share_document(document_id: str, group_id: str = None, shared_with: st
             "INSERT INTO shared_documents (id, document_id, group_id, shared_by, shared_with, permission) VALUES (:id, :did, :gid, 'default', :sw, :perm)"
         ), {"id": sid, "did": document_id, "gid": group_id, "sw": shared_with, "perm": permission})
         await session.commit()
-    await log_activity("default", "share", f"Shared document", document_id)
+    await log_activity("default", "share", "Shared document", document_id)
     return {"id": sid, "message": "Document shared"}
 
 

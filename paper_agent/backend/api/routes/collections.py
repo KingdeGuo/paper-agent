@@ -1,15 +1,12 @@
 """Paper collections: curated bundles for sharing and organization."""
 
-import uuid
 import json
 import logging
-from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text as sa_text
+import uuid
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

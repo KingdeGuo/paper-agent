@@ -1,15 +1,12 @@
 """Smart alerts: get notified when new papers match your interests."""
 
-import uuid
-import json
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db, get_vector_service
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

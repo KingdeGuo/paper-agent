@@ -2,12 +2,11 @@
 Redis-based caching service for cluster deployment.
 """
 
-import os
-import sys
-import json
 import logging
-from typing import Optional, Any, Dict, List
+import os
 import pickle
+import sys
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -45,11 +44,11 @@ class CacheService:
                         enabled = False
                     redis = Redis()
                 cluster_settings = DummyClusterSettings()
-        
+
         if not cluster_settings.redis.enabled:
             logger.info("Redis cache disabled")
             return
-        
+
         try:
             import redis.asyncio as aioredis
             self._redis = aioredis.from_url(
@@ -129,7 +128,7 @@ class CacheService:
 
     async def invalidate_document(self, doc_id: str):
         await self.delete(f"doc:{doc_id}")
-        await self.delete_pattern(f"search:*")
+        await self.delete_pattern("search:*")
 
     async def get_search_results(self, query_hash: str) -> Optional[List]:
         return await self.get(f"search:{query_hash}")

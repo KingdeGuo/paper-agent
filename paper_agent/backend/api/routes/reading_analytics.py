@@ -1,15 +1,12 @@
 """Reading Analytics — deep insights into reading habits and patterns."""
 
-import json
 import logging
-from datetime import datetime, timedelta
 from collections import defaultdict
-from typing import Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
+from datetime import datetime, timedelta
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -76,7 +73,7 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
                 author_counts[a] += 1
         author_data = sorted([{"author": a, "count": c} for a, c in author_counts.items()],
                              key=lambda x: -x["count"])[:20]
-    except: pass
+    except Exception: pass
 
     # 4. Year Distribution
     year_data = []
@@ -86,7 +83,7 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
             if d.year:
                 year_counts[d.year] += 1
         year_data = [{"year": y, "count": c} for y, c in sorted(year_counts.items())]
-    except: pass
+    except Exception: pass
 
     # 5. Streak Calculation
     streak_data = {"current_streak": 0, "longest_streak": 0, "streak_days": []}
@@ -115,7 +112,7 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
                     break
             current = temp_streak
             streak_data = {"current_streak": current, "longest_streak": max(current, longest), "streak_days": sorted_days[-30:]}
-    except: pass
+    except Exception: pass
 
     # 6. Reading Pace
     pace_data = {"papers_per_week": 0, "pages_per_week": 0, "minutes_per_week": 0}
@@ -126,7 +123,7 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
             "pages_per_week": round(volume_data.get("total_pages", 0) / max(weeks, 1), 1),
             "minutes_per_week": round(volume_data.get("total_minutes", 0) / max(weeks, 1), 1),
         }
-    except: pass
+    except Exception: pass
 
     # 7. Active Hours (most productive reading times)
     hour_data = defaultdict(int)
@@ -136,7 +133,7 @@ async def get_reading_analytics(days: int = 90, db=Depends(get_db)):
             hour = hash(day_data.get("date", "")) % 12 + 8  # Distribute across 8am-8pm
             hour_data[hour] += day_data.get("sessions", 0)
         reading_hours = sorted([{"hour": h, "sessions": c} for h, c in hour_data.items()], key=lambda x: -x["sessions"])[:5]
-    except:
+    except Exception:
         reading_hours = []
 
     return {

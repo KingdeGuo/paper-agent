@@ -1,12 +1,10 @@
 """Metadata Auto-Enhancement — fix incomplete paper metadata using external APIs."""
 
 import logging
-import httpx
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
 
+import httpx
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -5,13 +5,10 @@ Covers: code generation, expression validation, data checking, experiment design
 manuscript formatting, figure generation, review responses, patent/grant writing.
 """
 
-import re
-import json
 import logging
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List
 
 from backend.services.registry import get_llm_service
-from backend.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 

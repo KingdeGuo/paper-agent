@@ -1,10 +1,10 @@
 """Downstream Research API — code gen, validation, formatting, writing support."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends
-from backend.services.registry import get_db
+
 from backend.services.downstream_service import downstream
+from backend.services.registry import get_db
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

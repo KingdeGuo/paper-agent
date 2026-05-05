@@ -1,15 +1,14 @@
 """Research Journal — daily research diary with auto-populated reading data."""
 
-import uuid
 import json
 import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
+from typing import List
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -55,7 +54,7 @@ async def write_journal(date: str = None, content: str = "",
                 {"d": date})).scalar()
             if read_today:
                 papers_read += read_today
-    except: pass
+    except Exception: pass
 
     # Upsert
     async with db.async_session_maker() as session:

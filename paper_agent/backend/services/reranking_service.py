@@ -12,11 +12,9 @@ Supports:
 
 import logging
 import re
-from typing import List, Dict, Any, Optional
-from collections import defaultdict
+from typing import Dict, List
 
 from backend.services.registry import get_llm_service
-from backend.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 
@@ -28,13 +26,13 @@ class RerankingPipeline:
                      method: str = "hybrid") -> List[Dict]:
         """
         Re-rank candidate documents by relevance to the query.
-        
+
         Args:
             query: User's search query
             candidates: List of candidate documents with 'text' or 'title' fields
             top_k: Number of results to return
             method: 'llm', 'keyword', or 'hybrid'
-        
+
         Returns:
             Re-ranked candidates with 'relevance_score' added
         """

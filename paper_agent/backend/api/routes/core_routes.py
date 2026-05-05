@@ -1,10 +1,9 @@
 """Core Research Intelligence API — essential discovery and organization."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends
 
 from backend.services.core_research import core_intelligence
+from fastapi import APIRouter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

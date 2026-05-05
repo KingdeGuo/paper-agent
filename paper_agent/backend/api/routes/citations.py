@@ -2,15 +2,19 @@
 
 import logging
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
 
-from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.citation_service import (
-    doc_to_bibtex, parse_bibtex, generate_citation_key,
-    lookup_doi, search_crossref, generate_bibliography,
-    CITATION_STYLES, format_inline_citation,
+    CITATION_STYLES,
+    doc_to_bibtex,
+    generate_bibliography,
+    generate_citation_key,
+    lookup_doi,
+    parse_bibtex,
+    search_crossref,
 )
+from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.registry import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

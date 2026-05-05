@@ -1,8 +1,8 @@
 """BibTeX export API routes."""
 
-from fastapi import APIRouter, HTTPException, Query, Depends
 from backend.services.cluster_database import ClusterDatabaseService
 from backend.services.registry import get_db
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 

@@ -7,13 +7,12 @@ base class that handles prompt templating and fallback logic, so each provider
 only implements its API-specific call.
 """
 
+import asyncio
+import logging
 import os
 import sys
-import logging
-from typing import Optional, Dict, Any, List, AsyncGenerator, Type
-import asyncio
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from typing import Any, AsyncGenerator, Dict, List, Optional, Type
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -45,16 +44,16 @@ logger = logging.getLogger(__name__)
 
 class ReasoningStreamParser:
     """Parses streaming LLM output to extract <thought> tags."""
-    
+
     def __init__(self):
         self.in_thought = False
         self.buffer = ""
-    
+
     def parse_chunk(self, chunk: str) -> List[Dict[str, str]]:
         """Parse a chunk of text and return identified parts."""
         results = []
         self.buffer += chunk
-        
+
         while self.buffer:
             if not self.in_thought:
                 if "<thought>" in self.buffer:
@@ -78,7 +77,7 @@ class ReasoningStreamParser:
                     # Everything so far is thought
                     results.append({"type": "thought", "content": self.buffer})
                     self.buffer = ""
-        
+
         return results
 
 

@@ -2,9 +2,9 @@
 Document routes: upload, list, update, delete, download + text chunks.
 """
 
+import logging
 import os
 import sys
-import logging
 from typing import List, Optional
 
 # Add project root to path
@@ -12,7 +12,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 
 try:
     from paper_agent.backend.models.document import DocumentCreate, DocumentResponse, DocumentUpdate
@@ -26,28 +26,38 @@ except ImportError:
         DatabaseService = None
 
 try:
+    from paper_agent.backend.services.llm_service import LLMService
     from paper_agent.backend.services.pdf_processor import PDFProcessor
     from paper_agent.backend.services.vector_service import VectorService
-    from paper_agent.backend.services.llm_service import LLMService
 except ImportError:
     try:
+        from backend.services.llm_service import LLMService
         from backend.services.pdf_processor import PDFProcessor
         from backend.services.vector_service import VectorService
-        from backend.services.llm_service import LLMService
     except ImportError:
         PDFProcessor = VectorService = LLMService = None
 
 # Use service registry to avoid circular imports
 try:
-    from paper_agent.backend.services.registry import get_db, get_pdf_processor, get_vector_service, get_llm_service
+    from paper_agent.backend.services.registry import (
+        get_db,
+        get_llm_service,
+        get_pdf_processor,
+        get_vector_service,
+    )
 except ImportError:
     try:
-        from backend.services.registry import get_db, get_pdf_processor, get_vector_service, get_llm_service
+        from backend.services.registry import (
+            get_db,
+            get_llm_service,
+            get_pdf_processor,
+            get_vector_service,
+        )
     except ImportError:
         get_db = get_pdf_processor = get_vector_service = get_llm_service = lambda: None
 
 try:
-    from backend.middleware.auth import get_optional_user, get_current_user_from_token
+    from backend.middleware.auth import get_current_user_from_token, get_optional_user
 except ImportError:
     get_optional_user = get_current_user_from_token = lambda: None
 

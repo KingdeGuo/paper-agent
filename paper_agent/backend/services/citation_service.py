@@ -8,12 +8,11 @@ Handles:
 - Citation formatting (APA, MLA, Chicago, IEEE, etc.)
 """
 
-import re
-import json
 import logging
+import re
+from typing import Any, Dict, List, Optional
+
 import httpx
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

@@ -9,13 +9,11 @@ Provides endpoints for:
 """
 
 import logging
-import httpx
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query, Depends
-from fastapi.responses import JSONResponse
 
-from backend.services.registry import get_db
+import httpx
 from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.registry import get_db
+from fastapi import APIRouter, Depends, HTTPException
 
 try:
     from paper_agent.backend.services.arxiv_service import arxiv_service
@@ -39,7 +37,7 @@ async def search_arxiv(
 ):
     """
     Search arXiv papers by keyword, author, title, etc.
-    
+
     Supports arXiv query syntax:
     - ti:"keyword" - search in title
     - au:"author" - search by author
@@ -48,7 +46,7 @@ async def search_arxiv(
     """
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         results = arxiv_service.search(
             query=query,
@@ -66,14 +64,14 @@ async def search_arxiv(
 async def get_paper(arxiv_id: str):
     """
     Get paper metadata by arXiv ID.
-    
+
     Example arXiv IDs:
     - 2103.12345 (new format)
     - quant-ph/0603068 (old format)
     """
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         paper = arxiv_service.fetch_by_id(arxiv_id)
         if not paper:
@@ -91,7 +89,7 @@ async def get_arxiv_pdf(arxiv_id: str):
     """Get PDF URL for an arXiv paper."""
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         pdf_url = arxiv_service.fetch_pdf_url(arxiv_id)
         return {"arxiv_id": arxiv_id, "pdf_url": pdf_url}
@@ -105,7 +103,7 @@ async def search_by_author(author: str, max_results: int = 10):
     """Search papers by author name."""
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         results = arxiv_service.search_by_author(
             author=author,
@@ -121,12 +119,12 @@ async def search_by_author(author: str, max_results: int = 10):
 async def search_by_category(category: str, max_results: int = 20):
     """
     Search papers by arXiv category.
-    
+
     Examples: cs.AI, cs.CV, cs.LG, physics.optics, quant-ph, etc.
     """
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         results = arxiv_service.search_by_category(
             category=category,
@@ -142,12 +140,12 @@ async def search_by_category(category: str, max_results: int = 20):
 async def get_daily_papers(category: str = "cs.AI", max_results: int = 50):
     """
     Get daily new papers for a category.
-    
+
     Note: This fetches recent papers sorted by submission date.
     """
     if arxiv_service is None:
         raise HTTPException(status_code=503, detail="arXiv service not available")
-    
+
     try:
         results = arxiv_service.get_daily_papers(
             category=category,

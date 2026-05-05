@@ -5,10 +5,9 @@ Inspired by OpenClaw's cron/heartbeat system.
 Runs scheduled tasks to discover new papers, check deadlines, and send digests.
 """
 
-import logging
 import asyncio
+import logging
 from datetime import datetime
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -118,14 +117,14 @@ class ProactiveMonitor:
             from backend.services.registry import get_db
             db = get_db()
             if db:
-                from backend.api.routes.research_assistant import router as assistant_router
                 # Use the LLM to generate a briefing
                 briefing = await daily_agenda(db=db)
                 if briefing and briefing.get("ai_focus_suggestion"):
                     # Store as notification
                     async with db.async_session_maker() as session:
-                        from sqlalchemy import text as sa_text
                         import uuid
+
+                        from sqlalchemy import text as sa_text
                         await session.execute(sa_text(
                             "INSERT INTO notifications (id, user_id, title, message, notification_type, source) "
                             "VALUES (:id, 'default', :t, :m, 'daily_briefing', 'monitor')"),
@@ -150,8 +149,9 @@ class ProactiveMonitor:
                 briefing = await weekly_briefing(db=db, llm_service=llm)
                 if briefing and briefing.get("ai_highlight"):
                     async with db.async_session_maker() as session:
-                        from sqlalchemy import text as sa_text
                         import uuid
+
+                        from sqlalchemy import text as sa_text
                         await session.execute(sa_text(
                             "INSERT INTO notifications (id, user_id, title, message, notification_type, source) "
                             "VALUES (:id, 'default', :t, :m, 'weekly_digest', 'monitor')"),
@@ -169,7 +169,9 @@ class ProactiveMonitor:
             from backend.services.registry import get_db
             db = get_db()
             if db:
-                from datetime import datetime as dt, timedelta
+                from datetime import datetime as dt
+                from datetime import timedelta
+
                 from sqlalchemy import text as sa_text
                 async with db.async_session_maker() as session:
                     now = dt.utcnow().isoformat()

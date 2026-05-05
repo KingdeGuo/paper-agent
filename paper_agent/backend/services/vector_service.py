@@ -4,11 +4,10 @@ Vector database service for document embedding and semantic search.
 Uses ChromaDB (synchronous) for persistence and SentenceTransformers for embeddings.
 """
 
+import logging
 import os
 import sys
-import logging
-import uuid
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

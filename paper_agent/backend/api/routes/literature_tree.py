@@ -1,16 +1,12 @@
 """Literature Directory Tree — hierarchical taxonomy organizing papers by topic, methodology, field."""
 
-import uuid
 import json
 import logging
-from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
+import uuid
 
 from backend.services.registry import get_db, get_llm_service
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.llm_service import LLMService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -43,7 +39,7 @@ async def ensure_tables(db):
             )""",
         ]:
             try: await session.execute(sa_text(ddl))
-            except: pass
+            except Exception: pass
         await session.commit()
 
 
@@ -186,7 +182,7 @@ async def auto_classify(document_id: str, db=Depends(get_db), llm_service=Depend
             system_prompt="You classify academic papers into topic folders. Output only the folder name.",
         )
         suggestion = resp.get("content", "NONE").strip() if isinstance(resp, dict) else str(resp).strip()
-    except:
+    except Exception:
         suggestion = "NONE"
 
     matched_node = None
@@ -252,14 +248,14 @@ async def suggest_taxonomy(db=Depends(get_db), llm_service=Depends(get_llm_servi
 
     try:
         resp = await llm_service.chat_completion(
-            messages=[{"role": "user", "content": f"Suggest a hierarchical folder taxonomy (max 3 levels deep) to organize these research topics. Output as JSON: {{\"taxonomy\": [{{\"name\": \"...\", \"children\": [{{\"name\": \"...\"}}]}}]}}\n\nResearch topics found in library:\n" + "\n".join(f"- {kw} ({cnt} papers)" for kw, cnt in top_keywords)}],
+            messages=[{"role": "user", "content": "Suggest a hierarchical folder taxonomy (max 3 levels deep) to organize these research topics. Output as JSON: {\"taxonomy\": [{\"name\": \"...\", \"children\": [{\"name\": \"...\"}]}]}\n\nResearch topics found in library:\n" + "\n".join(f"- {kw} ({cnt} papers)" for kw, cnt in top_keywords)}],
             system_prompt="You design research paper taxonomies. Output valid JSON only. Each folder should represent a distinct research area.",
         )
         content = resp.get("content", "{}") if isinstance(resp, dict) else str(resp)
         import re
         match = re.search(r'\{.*\}', content, re.DOTALL)
         taxonomy = json.loads(match.group()) if match else {"taxonomy": []}
-    except:
+    except Exception:
         taxonomy = {"taxonomy": [{"name": kw, "children": []} for kw, _ in top_keywords[:5]]}
 
     return {

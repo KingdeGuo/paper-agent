@@ -11,15 +11,13 @@ Provides:
 - Auto-learning: Extract facts from conversations
 """
 
-import os
-import re
-import json
 import logging
+import re
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from backend.services.registry import get_llm_service, get_vector_service
+from backend.services.registry import get_llm_service
 
 logger = logging.getLogger(__name__)
 

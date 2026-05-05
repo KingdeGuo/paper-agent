@@ -1,14 +1,12 @@
 """First-Run Wizard — onboarding experience for new users."""
 
-import json
 import logging
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, Depends
-from sqlalchemy import text as sa_text
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
+from sqlalchemy import text as sa_text
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -38,35 +36,35 @@ async def get_onboarding_status(db=Depends(get_db)):
     try:
         docs = await db.get_documents(limit=1) if db else []
         has_docs = len(docs) > 0
-    except: pass
+    except Exception: pass
 
     # Check if LLM is configured
     try:
         from backend.services.registry import get_llm_service
         llm = get_llm_service()
         has_llm = llm is not None and hasattr(llm, 'provider') and llm.provider is not None
-    except: pass
+    except Exception: pass
 
     # Check if literature tree has nodes
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM directory_nodes WHERE is_deleted = 0"))).scalar() or 0
             has_folders = cnt > 0
-    except: pass
+    except Exception: pass
 
     # Check if reading goals exist
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM reading_goals WHERE is_active = 1"))).scalar() or 0
             has_goals = cnt > 0
-    except: pass
+    except Exception: pass
 
     # Check Zotero connected
     try:
         async with db.async_session_maker() as session:
             cnt = (await session.execute(sa_text("SELECT COUNT(*) FROM zotero_credentials"))).scalar() or 0
             has_zotero = cnt > 0
-    except: pass
+    except Exception: pass
 
     # Determine completed steps
     completed_steps = ["welcome"]

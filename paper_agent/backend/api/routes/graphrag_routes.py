@@ -1,14 +1,14 @@
 """GraphRAG API — graph-based retrieval for deeper research insights."""
 
 import logging
-from typing import List, Optional
-from fastapi import APIRouter, Depends
 
-from backend.services.registry import get_db, get_vector_service, get_llm_service
-from backend.services.graphrag_service import GraphRAGEngine, GraphRAGCommunityDetector, GraphRAGConfig
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.vector_service import VectorService
-from backend.services.llm_service import LLMService
+from backend.services.graphrag_service import (
+    GraphRAGCommunityDetector,
+    GraphRAGConfig,
+    GraphRAGEngine,
+)
+from backend.services.registry import get_db, get_llm_service, get_vector_service
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

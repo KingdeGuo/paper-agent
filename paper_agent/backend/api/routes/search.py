@@ -2,47 +2,57 @@
 Search routes: semantic search, keyword search, similar documents, recommendations.
 """
 
+import logging
 import os
 import sys
-import logging
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 try:
-    from paper_agent.backend.models.document import SearchQuery, SearchResult, DocumentResponse
+    from paper_agent.backend.models.document import DocumentResponse, SearchQuery, SearchResult
     from paper_agent.backend.services.database import DatabaseService
 except ImportError:
     try:
-        from backend.models.document import SearchQuery, SearchResult, DocumentResponse
+        from backend.models.document import DocumentResponse, SearchQuery, SearchResult
         from backend.services.database import DatabaseService
     except ImportError:
         SearchQuery = SearchResult = DocumentResponse = None
         DatabaseService = None
 
 try:
-    from paper_agent.backend.services.vector_service import VectorService
     from paper_agent.backend.services.llm_service import LLMService
     from paper_agent.backend.services.pdf_processor import PDFProcessor
+    from paper_agent.backend.services.vector_service import VectorService
 except ImportError:
     try:
-        from backend.services.vector_service import VectorService
         from backend.services.llm_service import LLMService
         from backend.services.pdf_processor import PDFProcessor
+        from backend.services.vector_service import VectorService
     except ImportError:
         VectorService = LLMService = PDFProcessor = None
 
 # Use service registry to avoid circular imports
 try:
-    from paper_agent.backend.services.registry import get_db, get_vector_service, get_llm_service, get_pdf_processor
+    from paper_agent.backend.services.registry import (
+        get_db,
+        get_llm_service,
+        get_pdf_processor,
+        get_vector_service,
+    )
 except ImportError:
     try:
-        from backend.services.registry import get_db, get_vector_service, get_llm_service, get_pdf_processor
+        from backend.services.registry import (
+            get_db,
+            get_llm_service,
+            get_pdf_processor,
+            get_vector_service,
+        )
     except ImportError:
         get_db = get_vector_service = get_llm_service = get_pdf_processor = lambda: None
 

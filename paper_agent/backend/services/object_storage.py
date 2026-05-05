@@ -5,8 +5,8 @@ Supports S3, MinIO, and Aliyun OSS for storing PDFs and other files.
 """
 
 import logging
-from typing import Optional, BinaryIO, Dict, Any
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,20 +26,20 @@ class ObjectStorageService:
         if not cluster_settings.storage.enabled:
             logger.info("Object storage disabled, using local filesystem")
             return
-        
+
         self.provider = cluster_settings.storage.provider
         self.bucket_name = cluster_settings.storage.bucket_name
-        
+
         try:
             if self.provider in ("minio", "s3"):
                 import boto3
                 from botocore.config import Config
-                
+
                 config = Config(
                     s3={"addressing_style": "path"},
                     retries={"max_attempts": 3, "mode": "standard"},
                 )
-                
+
                 self._client = boto3.client(
                     "s3",
                     endpoint_url=cluster_settings.storage.endpoint if self.provider == "minio" else None,
@@ -48,17 +48,17 @@ class ObjectStorageService:
                     region_name=cluster_settings.storage.region,
                     config=config,
                 )
-                
+
                 # Ensure bucket exists
                 try:
                     self._client.head_bucket(Bucket=self.bucket_name)
                 except Exception:
                     self._client.create_bucket(Bucket=self.bucket_name)
                     logger.info(f"Created bucket: {self.bucket_name}")
-                
+
                 self.enabled = True
                 logger.info(f"Object storage connected: {self.provider}")
-                
+
             elif self.provider == "oss":
                 # Aliyun OSS
                 try:
@@ -73,12 +73,11 @@ class ObjectStorageService:
                     logger.info(f"OSS connected: {self.bucket_name}")
                 except ImportError:
                     logger.warning("oss2 not installed. OSS storage unavailable.")
-                    
+
         except Exception as e:
             logger.warning(f"Object storage connection failed: {e}. Using local storage.")
 
     def _get_key(self, path: str, prefix: str = "pdfs/") -> str:
-        from backend.config.cluster_settings import cluster_settings
         return f"{prefix}{path}"
 
     async def upload_file(
@@ -90,10 +89,10 @@ class ObjectStorageService:
         """Upload a file to object storage."""
         if not self.enabled:
             return None
-        
+
         remote_path = remote_path or Path(local_path).name
         key = self._get_key(remote_path)
-        
+
         try:
             if self.provider in ("minio", "s3"):
                 self._client.upload_file(
@@ -104,7 +103,7 @@ class ObjectStorageService:
                 )
             elif self.provider == "oss":
                 self._client.put_object_from_file(key, local_path)
-            
+
             logger.info(f"Uploaded to object storage: {key}")
             return key
         except Exception as e:
@@ -120,7 +119,7 @@ class ObjectStorageService:
         """Upload bytes data."""
         if not self.enabled:
             return None
-        
+
         full_key = self._get_key(key)
         try:
             if self.provider in ("minio", "s3"):
@@ -133,7 +132,7 @@ class ObjectStorageService:
                 )
             elif self.provider == "oss":
                 self._client.put_object(full_key, data)
-            
+
             return full_key
         except Exception as e:
             logger.error(f"Upload bytes failed: {e}")
@@ -143,7 +142,7 @@ class ObjectStorageService:
         """Download a file from object storage."""
         if not self.enabled:
             return False
-        
+
         try:
             if self.provider in ("minio", "s3"):
                 self._client.download_file(self.bucket_name, key, local_path)
@@ -158,7 +157,7 @@ class ObjectStorageService:
         """Delete a file from object storage."""
         if not self.enabled:
             return False
-        
+
         try:
             if self.provider in ("minio", "s3"):
                 self._client.delete_object(Bucket=self.bucket_name, Key=key)
@@ -173,10 +172,9 @@ class ObjectStorageService:
         """Generate a presigned URL for direct access."""
         if not self.enabled:
             return None
-        
+
         try:
             if self.provider in ("minio", "s3"):
-                from botocore.exceptions import ClientError
                 url = self._client.generate_presigned_url(
                     "get_object",
                     Params={"Bucket": self.bucket_name, "Key": key},
@@ -191,7 +189,7 @@ class ObjectStorageService:
         """List files with prefix."""
         if not self.enabled:
             return []
-        
+
         try:
             if self.provider in ("minio", "s3"):
                 paginator = self._client.get_paginator("list_objects_v2")

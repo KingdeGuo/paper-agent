@@ -9,15 +9,16 @@ Supports:
 - Generic webhook with customizable templates
 """
 
-import json
-import hmac
-import hashlib
 import base64
+import hashlib
+import hmac
+import json
 import logging
-import httpx
 from datetime import datetime
-from typing import Optional, List, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List
+
+import httpx
 
 logger = logging.getLogger(__name__)
 

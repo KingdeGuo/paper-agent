@@ -8,9 +8,10 @@ Specialized in generating structured academic content:
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-from backend.services.llm_service import LLMService
+from typing import Any, Dict, List
+
 from backend.services.cluster_database import ClusterDatabaseService
+from backend.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class DraftingService:
             doc = await self.db.get_document(d_id)
             if doc:
                 docs.append(doc)
-        
+
         if not docs:
             return {"content": "No documents found to analyze."}
 
@@ -52,7 +53,7 @@ class DraftingService:
             messages=[{"role": "user", "content": prompt}],
             system_prompt="You are a senior academic writer specialized in high-impact journal submissions. Your tone is formal, precise, and analytical."
         )
-        
+
         return {
             "content": response.get("content", ""),
             "citations_used": [doc.id for doc in docs]

@@ -6,11 +6,10 @@ reading history, topic recommendations, citation context, concept extraction.
 """
 
 import json
-import re
 import logging
-from collections import defaultdict
+import re
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List
 
 from backend.services.registry import get_db, get_llm_service, get_vector_service
 
@@ -177,8 +176,7 @@ class CoreResearchIntelligence:
                 try:
                     result = await self.auto_tag_paper(doc.id)
                     results.append({"id": doc.id, "tags": result.get("tags", [])})
-                except:
-                    pass
+                except Exception: pass
         return {"tagged": len(results), "results": results}
 
     # ─── 4. Paper Summary Cards ───────────────────────────────
@@ -208,7 +206,7 @@ class CoreResearchIntelligence:
                     system_prompt="You create concise, structured paper summaries. Output valid JSON.",
                 )
                 card = json.loads(re.search(r'\{.*\}', resp.get("content", "{}"), re.DOTALL).group())
-            except:
+            except Exception:
                 card = {}
         else:
             card = {}
@@ -290,8 +288,7 @@ class CoreResearchIntelligence:
                 weekly[week]["papers"] += s["papers"]
                 weekly[week]["minutes"] += s["minutes"]
                 weekly[week]["pages"] += s["pages"]
-            except:
-                pass
+            except Exception: pass
 
         history["weekly_stats"] = [{"week": w, **s} for w, s in sorted(weekly.items())]
 
@@ -451,7 +448,7 @@ class CoreResearchIntelligence:
                     content = resp.get("content", "[]") if isinstance(resp, dict) else str(resp)
                     match = re.search(r'\[.*\]', content, re.DOTALL)
                     concepts = json.loads(match.group()) if match else []
-                except:
+                except Exception:
                     concepts = [{"concept": doc.title or "Untitled", "type": "paper", "relevance": 0.5}]
             else:
                 # Keyword-based fallback

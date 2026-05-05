@@ -2,15 +2,13 @@
 User and authentication models for multi-tenant support.
 """
 
-from sqlalchemy import (
-    Column, String, Integer, DateTime, JSON, Boolean, Text
-)
-from datetime import datetime
-from typing import Optional, List, Dict
-import uuid
-
-import sys as _sys
 import logging as _logging
+import sys as _sys
+from datetime import datetime
+from typing import Dict, Optional
+
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
+
 _logger = _logging.getLogger(__name__)
 
 # Import Base from cluster_database - MUST succeed or we can't proceed
@@ -46,26 +44,26 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255))
-    
+
     # Role and status
     role = Column(String(20), default="user")  # admin, user, viewer
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
-    
+
     # Tenant info
     tenant_id = Column(String(36), index=True)
     max_documents = Column(Integer, default=1000)
     max_storage_mb = Column(Integer, default=10240)  # 10GB
-    
+
     # Preferences
     preferences = Column(JSON, default=dict)
     language = Column(String(10), default="en")
-    
+
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = Column(DateTime)
-    
+
     # API keys (stored as JSON array)
     api_keys = Column(JSON, default=list)
 
@@ -74,8 +72,9 @@ class User(Base):
 # Pydantic schemas
 # ---------------------------------------------------------------------------
 
+from typing import Dict, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
 
 
 class UserBase(BaseModel):
@@ -115,7 +114,7 @@ class UserResponse(BaseModel):
     language: str = "en"
     created_at: datetime
     last_login: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 

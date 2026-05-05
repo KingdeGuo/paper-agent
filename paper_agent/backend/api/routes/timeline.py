@@ -2,10 +2,9 @@
 
 import logging
 from collections import defaultdict
-from fastapi import APIRouter, Depends
 
 from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
+from fastapi import APIRouter, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

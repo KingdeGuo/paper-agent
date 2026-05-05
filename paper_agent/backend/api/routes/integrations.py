@@ -1,17 +1,16 @@
 """Platform integration API — DingTalk, Feishu, Slack, WeCom webhooks."""
 
-import uuid
-import json
 import logging
-from typing import Optional
+import uuid
+
+from backend.services.integration_service import (
+    MessageType,
+    Platform,
+    integration_service,
+)
+from backend.services.registry import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text as sa_text
-
-from backend.services.registry import get_db
-from backend.services.cluster_database import ClusterDatabaseService
-from backend.services.integration_service import (
-    IntegrationService, Platform, MessageType, integration_service,
-)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -77,7 +76,6 @@ async def test_webhook(platform: str, webhook_url: str, secret: str = None):
         "- 📋 Weekly digests\n\n"
         f"*Connected: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}*"
     )
-    from datetime import datetime
     result = await integration_service.send(
         Platform(platform), webhook_url, content,
         msg_type=MessageType.MARKDOWN, title="Paper Agent Connected", secret=secret,
@@ -107,7 +105,7 @@ async def send_digest_to_all(days: int = 7, db=Depends(get_db)):
             row = (await session.execute(sa_text(
                 "SELECT COUNT(*), SUM(CASE WHEN status='to_read' THEN 1 ELSE 0 END), SUM(CASE WHEN status='reading' THEN 1 ELSE 0 END), SUM(CASE WHEN status='read' THEN 1 ELSE 0 END) FROM reading_list"))).fetchone()
             if row: reading_stats = {"total": row[0] or 0, "to_read": row[1] or 0, "reading": row[2] or 0, "read": row[3] or 0}
-    except: pass
+    except Exception: pass
 
     stats.update(reading_stats)
     stats["read_progress"] = round((reading_stats.get("read", 0) / max(reading_stats.get("total", 1), 1)) * 100, 1)

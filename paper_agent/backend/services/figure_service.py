@@ -7,15 +7,13 @@ Uses:
 - LLM: AI-powered figure understanding and captioning
 """
 
-import os
-import io
-import json
-import uuid
-import logging
 import hashlib
-from datetime import datetime
-from typing import List, Dict, Optional, Any
+import json
+import logging
+import os
+import uuid
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from backend.services.registry import get_llm_service
 
@@ -145,8 +143,7 @@ class FigureExtractor:
             rect = image_info[-1] if len(image_info) > 7 else None
             if rect and len(rect) >= 4:
                 return {"x0": rect[0], "y0": rect[1], "x1": rect[2], "y1": rect[3]}
-        except:
-            pass
+        except Exception: pass
         return None
 
     def _find_caption(self, doc, page_num: int, bbox: Optional[Dict]) -> Optional[str]:
@@ -164,8 +161,7 @@ class FigureExtractor:
                     text = block[4].strip()
                     if text and len(text) > 10 and any(w in text.lower() for w in ["fig", "figure", "table", "fig.", "tab."]):
                         return text[:300]
-        except:
-            pass
+        except Exception: pass
         return None
 
     def _extract_tables(self, pdf_path: str, page_num: int) -> List[Dict]:
@@ -291,7 +287,7 @@ class FigureExtractor:
             import re
             match = re.search(r'\[.*?\]', content, re.DOTALL)
             keywords = json.loads(match.group()) if match else [query]
-        except:
+        except Exception:
             keywords = [query]
 
         return [{"keyword": kw} for kw in keywords[:10]]
