@@ -18,7 +18,7 @@ pypdf>=3.17.0
 pdfplumber>=0.10.0
 
 # Validation & settings
-pydantic-settings>=2.1.0
+pydantic-settings>=2.14.1
 
 # HTTP client
 httpx>=0.26.0
