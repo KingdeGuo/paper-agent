@@ -14,7 +14,7 @@ chromadb>=0.4.22
 sentence-transformers>=2.2.2
 
 # PDF processing
-pypdf>=3.17.0
+pypdf>=6.14.2
 pdfplumber>=0.10.0
 
 # Validation & settings

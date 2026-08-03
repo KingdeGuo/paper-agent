@@ -28,7 +28,7 @@ dependencies = [
     "sentence-transformers>=2.2.2",
 
     # PDF processing
-    "pypdf>=3.17.0",
+    "pypdf>=6.14.2",
 
     # Validation & settings
     "pydantic-settings>=2.1.0",
