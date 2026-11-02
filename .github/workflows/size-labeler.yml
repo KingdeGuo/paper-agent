@@ -15,7 +15,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/labeler@v5
+      - uses: actions/labeler@v7
         continue-on-error: true
       - name: Label PR size
         uses: coverallsapp/pr-size-labeler@v1
